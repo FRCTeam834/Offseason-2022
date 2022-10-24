@@ -5,13 +5,16 @@ import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 
+/**
+ * Lightweight CANSparkMax wrapper class with caching
+ */
 public class CANMotorController {
 
   private final CANSparkMax sparkMax;
   private final SparkMaxPIDController sparkMaxPIDController;
   private final RelativeEncoder sparkMaxEncoder;
 
-  // caching
+  // caching; helps reduce load on the CAN bus
   private PIDState lastPIDState;
   private REVLibError lastError;
 
@@ -89,19 +92,19 @@ public class CANMotorController {
     return sparkMaxEncoder.getPosition();
   }
 
-  /** */
+  /** Reset cache for PID state; Shouldn't be needed */
   public void resetCache() {
     lastPIDState = null;
     lastError = null;
   }
 
-  /** */
+  /** Sets the cached desired velocity */
   private void setCachedDesiredVelocity(double velocity) {
     desiredVelocity = velocity;
     desiredPosition = Double.NaN;
   }
 
-  /** */
+  /** Sets the cached desired position */
   private void setCachedDesiredPosition(double position) {
     desiredPosition = position;
     desiredVelocity = Double.NaN;
@@ -112,7 +115,9 @@ public class CANMotorController {
     this.setVelocity(0);
   }
   
-  /** */
+  /**
+   * Set velocity of motor
+   */
   public void setVelocity(double velocity) {
     // Cache must be reset -- PID is killed on any open loop call
     lastPIDState = null;
@@ -122,10 +127,13 @@ public class CANMotorController {
   }
 
   /**
+   * Set desired velocity of motor
    * @param velocity default: rpm (change using conversion factor)
    */
   public REVLibError setDesiredVelocity(double velocity) {
     PIDState desiredState = new PIDState(velocity, CANSparkMax.ControlType.kVelocity);
+    // Checks if input state is equivalent to the last desired state
+    // If so, return as there is nothing to be done
     if (desiredState.equals(lastPIDState)) return lastError;
 
     lastPIDState = desiredState;
@@ -134,10 +142,13 @@ public class CANMotorController {
   }
 
   /**
+   * Set desired position of motor
    * @param position default: n_rot (change using conversion factor)
    */
   public REVLibError setDesiredPosition(double position) {
     PIDState desiredState = new PIDState(position, CANSparkMax.ControlType.kPosition);
+    // Checks if input state is equivalent to the last desired state
+    // If so, return as there is nothing to be done
     if (desiredState.equals(lastPIDState)) return lastError;
 
     lastPIDState = desiredState;
@@ -145,7 +156,7 @@ public class CANMotorController {
     return lastError = sparkMaxPIDController.setReference(position, CANSparkMax.ControlType.kPosition);
   }
 
-  /** */
+  /** Call every periodic update */
   public void periodic(
     double atDesiredVelocityTolerance,
     double atDesiredPositionTolerance
