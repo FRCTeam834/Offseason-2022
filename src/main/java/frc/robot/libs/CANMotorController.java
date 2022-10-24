@@ -4,6 +4,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
 /**
  * Lightweight CANSparkMax wrapper class with caching
@@ -70,6 +71,28 @@ public class CANMotorController {
   /** */
   public RelativeEncoder getEncoder() {
     return sparkMaxEncoder;
+  }
+
+  /** */
+  public void configIdleMode(CANSparkMax.IdleMode idleMode) {
+    sparkMax.setIdleMode(idleMode);
+  }
+
+  /** */
+  public void configVoltageCompensation(double voltage) {
+    sparkMax.enableVoltageCompensation(voltage);
+  }
+
+  /** */
+  public void configSmartCurrentLimit(int amps) {
+    sparkMax.setSmartCurrentLimit(amps);
+  }
+
+  /** */
+  public void configPeriodicFramePeriods(int k0, int k1, int k2) {
+    sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus0, k0);
+    sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus1, k1);
+    sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus2, k2);
   }
 
   /** Updated per periodic */

@@ -4,7 +4,9 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.SwerveModuleConstants;
 import frc.robot.libs.CANMotorController;
 
 public class SwerveModule extends SubsystemBase {
@@ -29,6 +31,17 @@ public class SwerveModule extends SubsystemBase {
   public SwerveModule(SwerveModuleConfig config) {
     steerController = new CANMotorController(config.steerID);
     driveController = new CANMotorController(config.driveID);
+    
+    // Config spark maxes
+    steerController.configIdleMode(CANSparkMax.IdleMode.kBrake);
+    steerController.configVoltageCompensation(SwerveModuleConstants.NOMINAL_VOLTAGE);
+    steerController.configSmartCurrentLimit(SwerveModuleConstants.CURRENT_LIMIT);
+    steerController.configPeriodicFramePeriods(
+      SwerveModuleConstants.PERIODIC_FRAME_k0,
+      SwerveModuleConstants.PERIODIC_FRAME_k1,
+      SwerveModuleConstants.PERIODIC_FRAME_k2
+    );
+    
   }
 
   @Override

@@ -12,4 +12,15 @@ package frc.robot;
  * <p>It is advised to statically import this class (or one of its inner classes) wherever the
  * constants are needed, to reduce verbosity.
  */
-public final class Constants {}
+public final class Constants {
+  public static final class PIDConstants {
+    
+  }
+  public static final class SwerveModuleConstants {
+    public static final double NOMINAL_VOLTAGE = 12.0;
+    public static final int CURRENT_LIMIT = 20;
+    public static final int PERIODIC_FRAME_k0 = 10;
+    public static final int PERIODIC_FRAME_k1 = 20;
+    public static final int PERIODIC_FRAME_k2 = 20;
+  }
+}
