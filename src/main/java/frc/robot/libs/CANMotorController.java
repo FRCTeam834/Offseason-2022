@@ -19,12 +19,6 @@ public class CANMotorController {
   private PIDState lastPIDState;
   private REVLibError lastError;
 
-  private double desiredVelocity = 0.0;
-  private boolean atDesiredVelocity = false;
-
-  private double desiredPosition = 0.0;
-  private boolean atDesiredPosition = false;
-
   /**
    * @param deviceID CAN ID
    */
@@ -74,6 +68,11 @@ public class CANMotorController {
   }
 
   /** */
+  public void configFactoryDefault() {
+    sparkMax.restoreFactoryDefaults();
+  }
+
+  /** */
   public void configIdleMode(CANSparkMax.IdleMode idleMode) {
     sparkMax.setIdleMode(idleMode);
   }
@@ -107,20 +106,20 @@ public class CANMotorController {
   public void setD(double kD) {
     sparkMaxPIDController.setD(kD);
   }
-  
+
   /** */
   public void burnFlash() {
     sparkMax.burnFlash();
   }
 
-  /** Updated per periodic */
-  public boolean isAtDesiredVelocity() {
-    return atDesiredVelocity;
+  /** */
+  public boolean isAtDesiredVelocity(double desiredVelocity, double tolerance) {
+    return MathPlus.inclusiveInRange(this.getCurrentVelocity() - desiredVelocity, tolerance);
   }
 
-  /** Updated per periodic */
-  public boolean isAtDesiredPosition() {
-    return atDesiredPosition;
+  /** */
+  public boolean isAtDesiredPosition(double desiredPosition, double tolerance) {
+    return MathPlus.inclusiveInRange(this.getCurrentPosition() - desiredPosition, tolerance);
   }
 
   /** Default rpm (change using conversion factor) */
@@ -139,18 +138,6 @@ public class CANMotorController {
     lastError = null;
   }
 
-  /** Sets the cached desired velocity */
-  private void setCachedDesiredVelocity(double velocity) {
-    desiredVelocity = velocity;
-    desiredPosition = Double.NaN;
-  }
-
-  /** Sets the cached desired position */
-  private void setCachedDesiredPosition(double position) {
-    desiredPosition = position;
-    desiredVelocity = Double.NaN;
-  }
-
   /** Stop motor */
   public void halt() {
     this.setVelocity(0);
@@ -163,7 +150,6 @@ public class CANMotorController {
     // Cache must be reset -- PID is killed on any open loop call
     lastPIDState = null;
 
-    setCachedDesiredVelocity(velocity);
     sparkMax.set(velocity);
   }
 
@@ -178,7 +164,6 @@ public class CANMotorController {
     if (desiredState.equals(lastPIDState)) return lastError;
 
     lastPIDState = desiredState;
-    setCachedDesiredVelocity(velocity);
     return lastError = sparkMaxPIDController.setReference(velocity, CANSparkMax.ControlType.kVelocity);
   }
 
@@ -193,25 +178,6 @@ public class CANMotorController {
     if (desiredState.equals(lastPIDState)) return lastError;
 
     lastPIDState = desiredState;
-    setCachedDesiredPosition(position);
     return lastError = sparkMaxPIDController.setReference(position, CANSparkMax.ControlType.kPosition);
-  }
-
-  /** Call every periodic update */
-  public void periodic(
-    double atDesiredVelocityTolerance,
-    double atDesiredPositionTolerance
-  ) {
-    // Set if motor is at desired velocity
-    this.atDesiredVelocity = MathPlus.inclusiveInRange(
-      this.getCurrentVelocity() - this.desiredVelocity,
-      atDesiredVelocityTolerance
-    );
-
-    // Set if motor is at desired position
-    this.atDesiredPosition = MathPlus.inclusiveInRange(
-      this.getCurrentPosition() - this.desiredPosition,
-      atDesiredPositionTolerance
-    );
   }
 }

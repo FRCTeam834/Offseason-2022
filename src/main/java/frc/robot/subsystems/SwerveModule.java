@@ -4,15 +4,26 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.sensors.AbsoluteSensorRange;
+import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.revrobotics.CANSparkMax;
+
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveModuleConstants;
 import frc.robot.libs.CANMotorController;
+import frc.robot.libs.MathPlus;
 
 public class SwerveModule extends SubsystemBase {
 
   private final CANMotorController steerController;
   private final CANMotorController driveController;
+  private final CANCoder canCoder;
+  private SimpleMotorFeedforward feedForward;
+
   /** Creates a new SwerveModule. */
   public SwerveModule(
     int steerID,
@@ -21,15 +32,49 @@ public class SwerveModule extends SubsystemBase {
   ) {
     steerController = new CANMotorController(steerID);
     driveController = new CANMotorController(driveID);
-    
-    // Config motor controllers
+    canCoder = new CANCoder(CANCoderID);
+
+    // Config
+    // These should not be touched (hence not in Constants)
+    steerController.configFactoryDefault();
     steerController.configIdleMode(CANSparkMax.IdleMode.kBrake);
-    steerController.configVoltageCompensation(SwerveModuleConstants.NOMINAL_VOLTAGE);
-    steerController.configSmartCurrentLimit(SwerveModuleConstants.CURRENT_LIMIT);
-    steerController.configPeriodicFramePeriods(
-      SwerveModuleConstants.PERIODIC_FRAME_k0,
-      SwerveModuleConstants.PERIODIC_FRAME_k1,
-      SwerveModuleConstants.PERIODIC_FRAME_k2
+    steerController.configVoltageCompensation(12.0);
+    steerController.configSmartCurrentLimit(20);
+    steerController.configPeriodicFramePeriods(10, 20, 20);
+
+    driveController.configFactoryDefault();
+    driveController.configIdleMode(CANSparkMax.IdleMode.kBrake);
+    driveController.configVoltageCompensation(12.0);
+    driveController.configSmartCurrentLimit(20);
+    driveController.configPeriodicFramePeriods(10, 20, 20);
+
+    canCoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
+    canCoder.configAbsoluteSensorRange(AbsoluteSensorRange.Signed_PlusMinus180);
+  }
+
+  /**
+   * 
+   * Less aggressive swerve state optimization using 120 deg threshold instead of 90
+   * @param state
+   * @param currentAngle current angle of module in deg
+   * @return
+   */
+  public static final SwerveModuleState optimizeState(
+    SwerveModuleState state,
+    double currentAngle
+  ) {
+    double angle = state.angle.getDegrees();
+    double velocity = state.speedMetersPerSecond;
+
+    // Turn distance needed less than 120 degrees, no optimization needed
+    if (MathPlus.absRealAngleDiff(angle, currentAngle) <= 120) return state;
+
+    // Optimized state
+    return new SwerveModuleState(
+      // Reverse drive direction
+      -velocity,
+      // Opposite angle
+      Rotation2d.fromDegrees((angle - 180) % 360.0)
     );
   }
 
@@ -68,16 +113,34 @@ public class SwerveModule extends SubsystemBase {
     driveController.setP(kD);
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-    steerController.periodic(
-      SwerveModuleConstants.AT_VELOCITY_TOLERANCE,
-      SwerveModuleConstants.AT_POSITION_TOLERANCE
-    );
-    driveController.periodic(
-      SwerveModuleConstants.AT_VELOCITY_TOLERANCE,
-      SwerveModuleConstants.AT_POSITION_TOLERANCE
-    );
+  /** */
+  public double getCurrentAngle() {
+    return canCoder.getAbsolutePosition();
   }
+
+  /** */
+  public void setVelocity(double velocity) {
+    driveController.setVelocity(velocity);
+  }
+
+  /** Default: rpm (change using conversion factor) */
+  public void setDesiredVelocity(double velocity) {
+    driveController.setDesiredVelocity(velocity);
+  }
+
+  /** Default: rot (change using conversion factor) */
+  public void setDesiredAngle(double angle) {
+    steerController.setDesiredPosition(angle);
+  }
+
+  /** */
+  public void setDesiredState(SwerveModuleState desiredState) {
+    desiredState = SwerveModule.optimizeState(desiredState, this.getCurrentAngle());
+
+    this.setDesiredAngle(desiredState.angle.getDegrees());
+    this.setDesiredVelocity(desiredState.speedMetersPerSecond);
+  }
+
+  @Override
+  public void periodic() {}
 }

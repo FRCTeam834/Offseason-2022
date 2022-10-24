@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation2d;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -49,11 +51,15 @@ public final class Constants {
   }
 
   public static final class SwerveModuleConstants {
-    public static final double NOMINAL_VOLTAGE = 12.0;
-    public static final int CURRENT_LIMIT = 20;
-    public static final int PERIODIC_FRAME_k0 = 10;
-    public static final int PERIODIC_FRAME_k1 = 20;
-    public static final int PERIODIC_FRAME_k2 = 20;
+    public static final Translation2d FL_POS = new Translation2d(0.0, 0.0);
+    public static final Translation2d FR_POS = new Translation2d(0.0, 0.0);
+    public static final Translation2d BL_POS = new Translation2d(0.0, 0.0);
+    public static final Translation2d BR_POS = new Translation2d(0.0, 0.0);
+    
+    // !Convert to deg/s
+    public static final double DRIVE_POS_CONVERSION_FACTOR = 0;
+    // !Convert to m/s
+    public static final double DRIVE_VEL_CONVERSION_FACTOR = 0;
 
     public static final double AT_VELOCITY_TOLERANCE = 0.0;
     public static final double AT_POSITION_TOLERANCE = 0.0;
