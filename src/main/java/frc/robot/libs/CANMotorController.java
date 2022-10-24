@@ -44,6 +44,7 @@ public class CANMotorController {
 
     /** */
     public boolean equals(PIDState expected) {
+      if (expected == null) return false;
       return (
         this.setpoint == expected.setpoint &&
         this.controlType.equals(expected.controlType)
@@ -87,6 +88,12 @@ public class CANMotorController {
   }
 
   /** */
+  public void resetCache() {
+    lastPIDState = null;
+    lastError = null;
+  }
+
+  /** */
   private void setCachedDesiredVelocity(double velocity) {
     desiredVelocity = velocity;
     desiredPosition = Double.NaN;
@@ -96,6 +103,11 @@ public class CANMotorController {
   private void setCachedDesiredPosition(double position) {
     desiredPosition = position;
     desiredVelocity = Double.NaN;
+  }
+
+  /** */
+  public void halt() {
+    this.setVelocity(0);
   }
   
   /** */
