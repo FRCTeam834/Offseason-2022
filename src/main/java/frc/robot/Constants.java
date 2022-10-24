@@ -50,12 +50,18 @@ public final class Constants {
     }
   }
 
+  public static final class DriveTrainConstants {
+    // m/s
+    public static final double MAX_SPEED = 0.0;
+    public static final double OPEN_LOOP_OMEGA_TOLERANCE = 0.0;
+  }
+
   public static final class SwerveModuleConstants {
     public static final Translation2d FL_POS = new Translation2d(0.0, 0.0);
     public static final Translation2d FR_POS = new Translation2d(0.0, 0.0);
     public static final Translation2d BL_POS = new Translation2d(0.0, 0.0);
     public static final Translation2d BR_POS = new Translation2d(0.0, 0.0);
-    
+
     // !Convert to deg/s
     public static final double DRIVE_POS_CONVERSION_FACTOR = 0;
     // !Convert to m/s

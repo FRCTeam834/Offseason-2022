@@ -4,9 +4,14 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CANIDS;
+import frc.robot.Constants.DriveTrainConstants;
+import frc.robot.Constants.SwerveModuleConstants;
 import frc.robot.Constants.PIDS.SwerveModulePIDS;
 
 public class DriveTrain extends SubsystemBase {
@@ -20,6 +25,8 @@ public class DriveTrain extends SubsystemBase {
   private final SwerveModule frontRightModule;
   private final SwerveModule backLeftModule;
   private final SwerveModule backRightModule;
+
+  private final SwerveDriveKinematics kinematics;
   /** Creates a new DriveTrain. */
   public DriveTrain() {
     frontLeftModule = new SwerveModule(
@@ -41,6 +48,13 @@ public class DriveTrain extends SubsystemBase {
       CANIDS.BR_STEER_ID,
       CANIDS.BR_DRIVE_ID,
       CANIDS.BR_CANCODER_ID
+    );
+
+    kinematics = new SwerveDriveKinematics(
+      SwerveModuleConstants.FL_POS,
+      SwerveModuleConstants.FR_POS,
+      SwerveModuleConstants.BL_POS,
+      SwerveModuleConstants.BR_POS
     );
 
     frontLeftModule.setSteerP(SwerveModulePIDS.FL_STEER_kP);
@@ -72,6 +86,34 @@ public class DriveTrain extends SubsystemBase {
       backRightModule.getSteerController().burnFlash();
       backRightModule.getDriveController().burnFlash();
     }
+  }
+
+  /**
+   * 
+   * Closed loop drive
+   * @param vx m/s
+   * @param vy m/s
+   * @param omega deg/s
+   */
+  public void drive(
+    double vx,
+    double vy,
+    double omega
+  ) {
+    ChassisSpeeds speeds = new ChassisSpeeds(vx, vy, omega);
+    SwerveModuleState[] desiredStates = kinematics.toSwerveModuleStates(speeds);
+
+    setDesiredModuleStates(desiredStates);
+  }
+
+  public void setDesiredModuleStates(SwerveModuleState[] desiredStates) {
+    // Normalization to ensure no speeds are beyond what is physically possible
+    SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, DriveTrainConstants.MAX_SPEED);
+
+    frontLeftModule.setDesiredState(desiredStates[0]);
+    frontRightModule.setDesiredState(desiredStates[1]);
+    backLeftModule.setDesiredState(desiredStates[2]);
+    backRightModule.setDesiredState(desiredStates[3]);
   }
 
   @Override

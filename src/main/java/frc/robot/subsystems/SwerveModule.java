@@ -135,12 +135,26 @@ public class SwerveModule extends SubsystemBase {
 
   /** */
   public void setDesiredState(SwerveModuleState desiredState) {
+    // RIP pure functions :P
     desiredState = SwerveModule.optimizeState(desiredState, this.getCurrentAngle());
 
     this.setDesiredAngle(desiredState.angle.getDegrees());
     this.setDesiredVelocity(desiredState.speedMetersPerSecond);
   }
 
+  /** */
+  public boolean isAtDesiredVelocity(double velocity) {
+    return driveController.isAtDesiredVelocity(velocity, SwerveModuleConstants.AT_VELOCITY_TOLERANCE);
+  }
+
+  /** */
+  public boolean isAtDesiredPosition(double position) {
+    return steerController.isAtDesiredPosition(position, SwerveModuleConstants.AT_POSITION_TOLERANCE);
+  }
+
   @Override
-  public void periodic() {}
+  public void periodic() {
+    // Update relative encoder with CANCoder angle
+    steerController.getEncoder().setPosition(this.getCurrentAngle());
+  }
 }
