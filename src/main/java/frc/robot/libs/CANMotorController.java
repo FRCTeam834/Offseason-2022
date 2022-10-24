@@ -18,6 +18,9 @@ public class CANMotorController {
   private double desiredVelocity = 0.0;
   private boolean atDesiredVelocity = false;
 
+  private double desiredPosition = 0.0;
+  private boolean atDesiredPosition = false;
+
   /** */
   public CANMotorController(
     int deviceID
@@ -68,9 +71,31 @@ public class CANMotorController {
     return atDesiredVelocity;
   }
 
+  /** Updated per periodic */
+  public boolean isAtDesiredPosition() {
+    return atDesiredPosition;
+  }
+
   /** */
   public double getCurrentVelocity() {
     return sparkMaxEncoder.getVelocity();
+  }
+
+  /** */
+  public double getCurrentPosition() {
+    return sparkMaxEncoder.getPosition();
+  }
+
+  /** */
+  private void setCachedDesiredVelocity(double velocity) {
+    desiredVelocity = velocity;
+    desiredPosition = Double.NaN;
+  }
+
+  /** */
+  private void setCachedDesiredPosition(double position) {
+    desiredPosition = position;
+    desiredVelocity = Double.NaN;
   }
   
   /** */
@@ -78,28 +103,48 @@ public class CANMotorController {
     // Cache must be reset -- PID is killed on any open loop call
     lastPIDState = null;
 
-    desiredVelocity = velocity;
+    setCachedDesiredVelocity(velocity);
     sparkMax.set(velocity);
   }
 
-  /** */
+  /**
+   * @param velocity default: rpm (change using conversion factor)
+   */
   public REVLibError setDesiredVelocity(double velocity) {
     PIDState desiredState = new PIDState(velocity, CANSparkMax.ControlType.kVelocity);
     if (desiredState.equals(lastPIDState)) return lastError;
 
     lastPIDState = desiredState;
-    desiredVelocity = velocity;
+    setCachedDesiredVelocity(velocity);
     return lastError = sparkMaxPIDController.setReference(velocity, CANSparkMax.ControlType.kVelocity);
+  }
+
+  /**
+   * @param position default: n_rot (change using conversion factor)
+   */
+  public REVLibError setDesiredPosition(double position) {
+    PIDState desiredState = new PIDState(position, CANSparkMax.ControlType.kPosition);
+    if (desiredState.equals(lastPIDState)) return lastError;
+
+    lastPIDState = desiredState;
+    setCachedDesiredPosition(position);
+    return lastError = sparkMaxPIDController.setReference(position, CANSparkMax.ControlType.kPosition);
   }
 
   /** */
   public void periodic(
-    double atDesiredVelocityTolerance
+    double atDesiredVelocityTolerance,
+    double atDesiredPositionTolerance
   ) {
     // Set if motor is at desired velocity
     this.atDesiredVelocity = MathPlus.inclusiveInRange(
       this.getCurrentVelocity() - this.desiredVelocity,
       atDesiredVelocityTolerance
+    );
+
+    this.atDesiredPosition = MathPlus.inclusiveInRange(
+      this.getCurrentPosition() - this.desiredPosition,
+      atDesiredPositionTolerance
     );
   }
 }
