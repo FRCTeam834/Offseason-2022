@@ -95,6 +95,24 @@ public class CANMotorController {
     sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus2, k2);
   }
 
+  /** */
+  public void setP(double kP) {
+    sparkMaxPIDController.setP(kP);
+  }
+  /** */
+  public void setI(double kI) {
+    sparkMaxPIDController.setI(kI);
+  }
+  /** */
+  public void setD(double kD) {
+    sparkMaxPIDController.setD(kD);
+  }
+  
+  /** */
+  public void burnFlash() {
+    sparkMax.burnFlash();
+  }
+
   /** Updated per periodic */
   public boolean isAtDesiredVelocity() {
     return atDesiredVelocity;

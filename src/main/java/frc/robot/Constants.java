@@ -13,14 +13,49 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final class PIDConstants {
-    
+  public static final class CANIDS {
+    public static final int FL_STEER_ID    = 1;
+    public static final int FL_DRIVE_ID    = 2;
+    public static final int FL_CANCODER_ID = 3;
+    public static final int FR_STEER_ID    = 4;
+    public static final int FR_DRIVE_ID    = 5;
+    public static final int FR_CANCODER_ID = 6;
+    public static final int BL_STEER_ID    = 7;
+    public static final int BL_DRIVE_ID    = 8;
+    public static final int BL_CANCODER_ID = 9;
+    public static final int BR_STEER_ID    = 10;
+    public static final int BR_DRIVE_ID    = 11;
+    public static final int BR_CANCODER_ID = 12;
   }
+
+  public static final class PIDS {
+    public static final class SwerveModulePIDS {
+      public static final double FL_STEER_kP = 0.0;
+      public static final double FL_STEER_kI = 0.0;
+      public static final double FL_STEER_kD = 0.0;
+
+      public static final double FR_STEER_kP = 0.0;
+      public static final double FR_STEER_kI = 0.0;
+      public static final double FR_STEER_kD = 0.0;
+
+      public static final double BL_STEER_kP = 0.0;
+      public static final double BL_STEER_kI = 0.0;
+      public static final double BL_STEER_kD = 0.0;
+
+      public static final double BR_STEER_kP = 0.0;
+      public static final double BR_STEER_kI = 0.0;
+      public static final double BR_STEER_kD = 0.0;
+    }
+  }
+
   public static final class SwerveModuleConstants {
     public static final double NOMINAL_VOLTAGE = 12.0;
     public static final int CURRENT_LIMIT = 20;
     public static final int PERIODIC_FRAME_k0 = 10;
     public static final int PERIODIC_FRAME_k1 = 20;
     public static final int PERIODIC_FRAME_k2 = 20;
+
+    public static final double AT_VELOCITY_TOLERANCE = 0.0;
+    public static final double AT_POSITION_TOLERANCE = 0.0;
   }
 }

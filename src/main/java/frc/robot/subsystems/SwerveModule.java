@@ -10,29 +10,19 @@ import frc.robot.Constants.SwerveModuleConstants;
 import frc.robot.libs.CANMotorController;
 
 public class SwerveModule extends SubsystemBase {
-  /** */
-  public static final class SwerveModuleConfig {
-    public int steerID, driveID, CANCoderID;
-    /** */
-    public SwerveModuleConfig(
-      int steerID,
-      int driveID,
-      int CANCoderID
-    ) {
-      this.steerID = steerID;
-      this.driveID = driveID;
-      this.CANCoderID = CANCoderID;
-    }
-  }
 
   private final CANMotorController steerController;
   private final CANMotorController driveController;
   /** Creates a new SwerveModule. */
-  public SwerveModule(SwerveModuleConfig config) {
-    steerController = new CANMotorController(config.steerID);
-    driveController = new CANMotorController(config.driveID);
+  public SwerveModule(
+    int steerID,
+    int driveID,
+    int CANCoderID
+  ) {
+    steerController = new CANMotorController(steerID);
+    driveController = new CANMotorController(driveID);
     
-    // Config spark maxes
+    // Config motor controllers
     steerController.configIdleMode(CANSparkMax.IdleMode.kBrake);
     steerController.configVoltageCompensation(SwerveModuleConstants.NOMINAL_VOLTAGE);
     steerController.configSmartCurrentLimit(SwerveModuleConstants.CURRENT_LIMIT);
@@ -41,11 +31,53 @@ public class SwerveModule extends SubsystemBase {
       SwerveModuleConstants.PERIODIC_FRAME_k1,
       SwerveModuleConstants.PERIODIC_FRAME_k2
     );
-    
+  }
+
+  /** */
+  public CANMotorController getSteerController() {
+    return steerController;
+  }
+
+  /** */
+  public CANMotorController getDriveController() {
+    return driveController;
+  }
+
+  /** */
+  public void setSteerP(double kP) {
+    steerController.setP(kP);
+  }
+  /** */
+  public void setSteerI(double kI) {
+    steerController.setI(kI);
+  }
+  /** */
+  public void setSteerD(double kD) {
+    steerController.setD(kD);
+  }
+  /** */
+  public void setDriveP(double kP) {
+    driveController.setP(kP);
+  }
+  /** */
+  public void setDriveI(double kI) {
+    driveController.setI(kI);
+  }
+  /** */
+  public void setDriveD(double kD) {
+    driveController.setP(kD);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    steerController.periodic(
+      SwerveModuleConstants.AT_VELOCITY_TOLERANCE,
+      SwerveModuleConstants.AT_POSITION_TOLERANCE
+    );
+    driveController.periodic(
+      SwerveModuleConstants.AT_VELOCITY_TOLERANCE,
+      SwerveModuleConstants.AT_POSITION_TOLERANCE
+    );
   }
 }
