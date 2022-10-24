@@ -21,7 +21,9 @@ public class CANMotorController {
   private double desiredPosition = 0.0;
   private boolean atDesiredPosition = false;
 
-  /** */
+  /**
+   * @param deviceID CAN ID
+   */
   public CANMotorController(
     int deviceID
   ) {
@@ -77,12 +79,12 @@ public class CANMotorController {
     return atDesiredPosition;
   }
 
-  /** */
+  /** Default rpm (change using conversion factor) */
   public double getCurrentVelocity() {
     return sparkMaxEncoder.getVelocity();
   }
 
-  /** */
+  /** Default n_rot (change using conversion factor) */
   public double getCurrentPosition() {
     return sparkMaxEncoder.getPosition();
   }
@@ -105,7 +107,7 @@ public class CANMotorController {
     desiredVelocity = Double.NaN;
   }
 
-  /** */
+  /** Stop motor */
   public void halt() {
     this.setVelocity(0);
   }
@@ -154,6 +156,7 @@ public class CANMotorController {
       atDesiredVelocityTolerance
     );
 
+    // Set if motor is at desired position
     this.atDesiredPosition = MathPlus.inclusiveInRange(
       this.getCurrentPosition() - this.desiredPosition,
       atDesiredPositionTolerance
