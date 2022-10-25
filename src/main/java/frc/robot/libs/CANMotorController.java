@@ -208,12 +208,12 @@ public class CANMotorController {
 
   /** */
   public double getCurrentVelocity() {
-    return this.lastVelocity;
+    return this.getCurrentVelocity(false);
   }
 
   /** */
   public double getCurrentPosition() {
-    return this.lastPosition;
+    return this.getCurrentPosition(false);
   }
 
   /**
@@ -225,7 +225,7 @@ public class CANMotorController {
     if (useEncoder) {
       return this.sparkMaxEncoder.getVelocity();
     }
-    return this.getCurrentVelocity();
+    return this.lastVelocity;
   }
 
   /**
@@ -237,7 +237,7 @@ public class CANMotorController {
     if (useEncoder) {
       return this.sparkMaxEncoder.getPosition();
     }
-    return this.getCurrentPosition();
+    return this.lastPosition;
   }
 
   /** Reset cache for PID state; Shouldn't be needed */
