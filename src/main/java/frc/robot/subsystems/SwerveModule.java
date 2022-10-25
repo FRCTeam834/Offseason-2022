@@ -24,6 +24,9 @@ public class SwerveModule extends SubsystemBase {
   private final CANCoder canCoder;
   private SimpleMotorFeedforward feedForward;
 
+  // caching
+  private SwerveModuleState lastDesiredState = new SwerveModuleState();
+
   /** Creates a new SwerveModule. */
   public SwerveModule(
     int steerID,
@@ -120,16 +123,19 @@ public class SwerveModule extends SubsystemBase {
 
   /** */
   public void setVelocity(double velocity) {
+    lastDesiredState.speedMetersPerSecond = velocity;
     driveController.setVelocity(velocity);
   }
 
   /** Default: rpm (change using conversion factor) */
   public void setDesiredVelocity(double velocity) {
+    lastDesiredState.speedMetersPerSecond = velocity;
     driveController.setDesiredVelocity(velocity);
   }
 
   /** Default: rot (change using conversion factor) */
   public void setDesiredAngle(double angle) {
+    lastDesiredState.angle = Rotation2d.fromDegrees(angle);
     steerController.setDesiredPosition(angle);
   }
 

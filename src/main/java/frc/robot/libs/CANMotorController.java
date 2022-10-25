@@ -19,6 +19,8 @@ public class CANMotorController {
   private PIDState lastPIDState;
   private REVLibError lastError;
 
+  // Velocity readings 
+
   /**
    * @param deviceID CAN ID
    */
