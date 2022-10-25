@@ -30,7 +30,7 @@ public class CANMotorController {
   // Custom velocity readings, inspired from 6328
   // https://github.com/Mechanical-Advantage/SwerveDevelopment/blob/main/src/main/java/frc/robot/util/SparkMaxDerivedVelocityController.java
   private final CAN deviceInterface;
-  private final LinearFilter velocityFilter; // Moving average
+  private final LinearFilter velocityFilter; // Rolling derivative
   private final Notifier updateNotifier;
 
   // https://docs.wpilib.org/en/stable/docs/software/can-devices/can-addressing.html
@@ -66,7 +66,7 @@ public class CANMotorController {
     sparkMaxEncoder = sparkMax.getEncoder();
 
     deviceInterface = new CAN(sparkMax.getDeviceId(), manufacturerID, deviceTypeID);
-    velocityFilter = LinearFilter.movingAverage(filterPoints);
+    velocityFilter = LinearFilter.backwardFiniteDifference(1, filterPoints, updatePeriodMs / 1000.0);
 
     updateNotifier = new Notifier(this::update);
     updateNotifier.startPeriodic(updatePeriodMs / 1000.0);
@@ -311,9 +311,7 @@ public class CANMotorController {
       // Velocity needs 2 data points to be calculated, so return
       return;
     }
-    // (avg) Velocity over time interval
-    double velocity = (position - lastPosition) / (packetTime - lastPacketTime);
-    lastVelocity = velocityFilter.calculate(velocity);
+    lastVelocity = velocityFilter.calculate(position);
     lastPosition = position;
     lastPacketTime = packetTime;
   }
