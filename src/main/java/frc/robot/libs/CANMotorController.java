@@ -176,12 +176,12 @@ public class CANMotorController {
 
   /** */
   public boolean isAtDesiredVelocity(double desiredVelocity, double tolerance) {
-    return CANMotorController.inclusiveInRange(this.getCurrentVelocity() - desiredVelocity, tolerance);
+    return this.isAtDesiredVelocity(desiredVelocity, tolerance, false);
   }
 
   /** */
   public boolean isAtDesiredPosition(double desiredPosition, double tolerance) {
-    return CANMotorController.inclusiveInRange(this.getCurrentPosition() - desiredPosition, tolerance);
+    return this.isAtDesiredPosition(desiredPosition, tolerance, false);
   }
 
   /**
