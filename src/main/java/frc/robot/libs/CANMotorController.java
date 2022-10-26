@@ -358,7 +358,7 @@ public class CANMotorController {
 
     this.lastPIDState = desiredState;
     this.lastDesiredVelocity = velocity;
-    return lastError = this.sparkMaxPIDController.setReference(velocity, CANSparkMax.ControlType.kVelocity);
+    return lastError = this.sparkMaxPIDController.setReference(velocity, CANSparkMax.ControlType.kVelocity, 1);
   }
   */
   public void setDesiredVelocity(double velocity) {
@@ -379,7 +379,7 @@ public class CANMotorController {
 
     this.lastPIDState = desiredState;
     this.lastDesiredPosition = position;
-    return lastError = this.sparkMaxPIDController.setReference(position, CANSparkMax.ControlType.kPosition);
+    return lastError = this.sparkMaxPIDController.setReference(position, CANSparkMax.ControlType.kPosition, 0);
   }
 
   private void updateVelocityReference() {
