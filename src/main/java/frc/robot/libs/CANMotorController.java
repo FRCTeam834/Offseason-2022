@@ -42,8 +42,8 @@ public class CANMotorController {
   private static final int deviceTypeID = 2;
 
   private double lastPosition;
-  private boolean isFirstPacket = false;
   private double lastVelocity;
+  private boolean isFirstPacket = false;
 
   /**
    * @param deviceID CAN ID
@@ -278,12 +278,20 @@ public class CANMotorController {
     this.sparkMax.setVoltage(voltage);
   }
 
-  /** */
-  public void setVelocity(double velocity, SimpleMotorFeedforward feedForward) {
-    this.setVoltage(feedForward.calculate(velocity));
+  /**
+   * 
+   * @param velocity desired rpm
+   * @param feedForward feedforward controller
+   */
+  public void setVelocity(double velocity, SimpleMotorFeedforward feedForwardController) {
+    this.setVoltage(feedForwardController.calculate(velocity));
   }
 
-  /** */
+  /**
+   * 
+   * @param velocity desired rpm
+   * @param kFF feedforward value
+   */
   public void setVelocity(double velocity, double kFF) {
     this.setVoltage(velocity * kFF);
   }
@@ -293,7 +301,7 @@ public class CANMotorController {
    * @param velocity
    */
   public REVLibError setDesiredVelocity(double velocity) {
-    lastVoltageOutput = lastPercentOutput = 0.0;
+    lastVoltageOutput = lastPercentOutput = Double.NaN;
 
     PIDState desiredState = new PIDState(velocity, CANSparkMax.ControlType.kVelocity);
     // Checks if input state is equivalent to the last desired state
@@ -309,8 +317,8 @@ public class CANMotorController {
    * @param position
    */
   public REVLibError setDesiredPosition(double position) {
-    lastVoltageOutput = lastPercentOutput = 0.0;
-    
+    lastVoltageOutput = lastPercentOutput = Double.NaN;
+
     PIDState desiredState = new PIDState(position, CANSparkMax.ControlType.kPosition);
     // Checks if input state is equivalent to the last desired state
     // If so, return as there is nothing to be done
