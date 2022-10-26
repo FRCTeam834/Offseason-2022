@@ -30,7 +30,7 @@ public final class Constants {
     public static final int BR_CANCODER_ID = 12;
   }
 
-  public static final class PIDS {
+  public static final class TuningConstants {
     public static final class SwerveModulePIDS {
       public static final double FL_STEER_kP = 0.0;
       public static final double FL_STEER_kI = 0.0;
@@ -48,12 +48,28 @@ public final class Constants {
       public static final double BR_STEER_kI = 0.0;
       public static final double BR_STEER_kD = 0.0;
     }
+    public static final class SwerveModuleFeedforwards {
+      public static final double FL_DRIVE_kS = 0.0;
+      public static final double FL_DRIVE_kV = 0.0;
+      public static final double FL_DRIVE_kA = 0.0;
+
+      public static final double FR_DRIVE_kS = 0.0;
+      public static final double FR_DRIVE_kV = 0.0;
+      public static final double FR_DRIVE_kA = 0.0;
+
+      public static final double BL_DRIVE_kS = 0.0;
+      public static final double BL_DRIVE_kV = 0.0;
+      public static final double BL_DRIVE_kA = 0.0;
+
+      public static final double BR_DRIVE_kS = 0.0;
+      public static final double BR_DRIVE_kV = 0.0;
+      public static final double BR_DRIVE_kA = 0.0;
+    }
   }
 
   public static final class DriveTrainConstants {
     // m/s
     public static final double MAX_SPEED = 0.0;
-    public static final double OPEN_LOOP_OMEGA_TOLERANCE = 0.0;
   }
 
   public static final class SwerveModuleConstants {

@@ -22,7 +22,7 @@ public class SwerveModule extends SubsystemBase {
   private final CANMotorController steerController;
   private final CANMotorController driveController;
   private final CANCoder canCoder;
-  private SimpleMotorFeedforward feedForward;
+  private SimpleMotorFeedforward driveFeedforward;
 
   // caching
   private SwerveModuleState lastDesiredState = new SwerveModuleState();
@@ -31,25 +31,32 @@ public class SwerveModule extends SubsystemBase {
   public SwerveModule(
     int steerID,
     int driveID,
-    int CANCoderID
+    int CANCoderID,
+    double ffkS,
+    double ffkV,
+    double ffkA
   ) {
     steerController = new CANMotorController(steerID);
     driveController = new CANMotorController(driveID);
     canCoder = new CANCoder(CANCoderID);
 
+    driveFeedforward = new SimpleMotorFeedforward(ffkS, ffkV, ffkA);
+
     // Config
     // These should not be touched (hence not in Constants)
     steerController.configFactoryDefault();
+    steerController.configInverted(false);
     steerController.configIdleMode(CANSparkMax.IdleMode.kBrake);
     steerController.configVoltageCompensation(12.0);
     steerController.configSmartCurrentLimit(20);
-    steerController.configPeriodicFramePeriods(10, 20, 20);
+    steerController.configPeriodicFramePeriods(10, 20, 10);
 
     driveController.configFactoryDefault();
+    driveController.configInverted(false);
     driveController.configIdleMode(CANSparkMax.IdleMode.kBrake);
     driveController.configVoltageCompensation(12.0);
     driveController.configSmartCurrentLimit(20);
-    driveController.configPeriodicFramePeriods(10, 20, 20);
+    driveController.configPeriodicFramePeriods(10, 20, 10);
 
     canCoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
     canCoder.configAbsoluteSensorRange(AbsoluteSensorRange.Signed_PlusMinus180);
@@ -121,10 +128,10 @@ public class SwerveModule extends SubsystemBase {
     return canCoder.getAbsolutePosition();
   }
 
-  /** */
+  /** Default: rpm */
   public void setVelocity(double velocity) {
     lastDesiredState.speedMetersPerSecond = velocity;
-    //driveController.setVelocity(velocity);
+    driveController.setVelocity(velocity, driveFeedforward);
   }
 
   /** Default: rpm (change using conversion factor) */
@@ -161,6 +168,6 @@ public class SwerveModule extends SubsystemBase {
   @Override
   public void periodic() {
     // Update relative encoder with CANCoder angle
-    steerController.getEncoder().setPosition(this.getCurrentAngle());
+    // steerController.getEncoder().setPosition(this.getCurrentAngle());
   }
 }

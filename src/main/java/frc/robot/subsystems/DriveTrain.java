@@ -13,7 +13,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CANIDS;
 import frc.robot.Constants.DriveTrainConstants;
 import frc.robot.Constants.SwerveModuleConstants;
-import frc.robot.Constants.PIDS.SwerveModulePIDS;
+import frc.robot.Constants.TuningConstants.SwerveModuleFeedforwards;
+import frc.robot.Constants.TuningConstants.SwerveModulePIDS;
 
 public class DriveTrain extends SubsystemBase {
   private static final DriveTrain instance = new DriveTrain();
@@ -34,22 +35,34 @@ public class DriveTrain extends SubsystemBase {
     frontLeftModule = new SwerveModule(
       CANIDS.FL_STEER_ID,
       CANIDS.FL_DRIVE_ID,
-      CANIDS.FL_CANCODER_ID
+      CANIDS.FL_CANCODER_ID,
+      SwerveModuleFeedforwards.FL_DRIVE_kS,
+      SwerveModuleFeedforwards.FL_DRIVE_kV,
+      SwerveModuleFeedforwards.FL_DRIVE_kA
     );
     frontRightModule = new SwerveModule(
       CANIDS.FR_STEER_ID,
       CANIDS.FR_DRIVE_ID,
-      CANIDS.FR_CANCODER_ID
+      CANIDS.FR_CANCODER_ID,
+      SwerveModuleFeedforwards.FR_DRIVE_kS,
+      SwerveModuleFeedforwards.FR_DRIVE_kV,
+      SwerveModuleFeedforwards.FL_DRIVE_kA
     );
     backLeftModule = new SwerveModule(
       CANIDS.BL_STEER_ID,
       CANIDS.BL_DRIVE_ID,
-      CANIDS.BL_CANCODER_ID
+      CANIDS.BL_CANCODER_ID,
+      SwerveModuleFeedforwards.BL_DRIVE_kS,
+      SwerveModuleFeedforwards.BL_DRIVE_kV,
+      SwerveModuleFeedforwards.BL_DRIVE_kA
     );
     backRightModule = new SwerveModule(
       CANIDS.BR_STEER_ID,
       CANIDS.BR_DRIVE_ID,
-      CANIDS.BR_CANCODER_ID
+      CANIDS.BR_CANCODER_ID,
+      SwerveModuleFeedforwards.BR_DRIVE_kS,
+      SwerveModuleFeedforwards.BR_DRIVE_kV,
+      SwerveModuleFeedforwards.BR_DRIVE_kA
     );
 
     kinematics = new SwerveDriveKinematics(
