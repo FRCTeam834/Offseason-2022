@@ -207,7 +207,6 @@ public class CANMotorController {
     this.velocityPIDController.setD(kD);
   }
   /** Set internal PID controller FF gain (corresponds to kV) */
-  // kFF for custom velocity set is already handled in feedforward
   public void configVelocityControlFF(double kFF) {
     this.sparkMaxPIDController.setFF(kFF, 1);
   }
@@ -341,6 +340,7 @@ public class CANMotorController {
    */
   public void setVelocity(double velocity, double kFF) {
     this.setVoltage(velocity * kFF);
+    this.configVelocityFeedforward(0.0, kFF);
   }
 
   /**
