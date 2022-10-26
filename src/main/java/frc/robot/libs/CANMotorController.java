@@ -27,7 +27,6 @@ public class CANMotorController {
   // Caching
   private PIDState lastPIDState;
   private REVLibError lastError;
-
   private double lastVoltageOutput;
   private double lastPercentOutput;
 
@@ -127,6 +126,10 @@ public class CANMotorController {
   /** */
   public void configFactoryDefault() {
     this.sparkMax.restoreFactoryDefaults();
+  }
+  /** */
+  public void configInverted(boolean inverted) {
+    this.sparkMax.setInverted(inverted);
   }
   /** */
   public void configIdleMode(CANSparkMax.IdleMode idleMode) {
@@ -247,6 +250,8 @@ public class CANMotorController {
   public void resetCache() {
     this.lastPIDState = null;
     this.lastError = null;
+    this.lastVoltageOutput = Double.NaN;
+    this.lastPercentOutput = Double.NaN;
   }
 
   /** Stop motor */
@@ -259,8 +264,8 @@ public class CANMotorController {
     // PID is killed on any open loop call
     this.lastPIDState = null;
 
-    if (percent == lastPercentOutput) return;
-    lastPercentOutput = percent;
+    if (percent == this.lastPercentOutput) return;
+    this.lastPercentOutput = percent;
 
     this.sparkMax.set(percent);
   }
@@ -272,8 +277,8 @@ public class CANMotorController {
     // PID is killed on any open loop call
     this.lastPIDState = null;
 
-    if (voltage == lastVoltageOutput) return;
-    lastVoltageOutput = voltage;
+    if (voltage == this.lastVoltageOutput) return;
+    this.lastVoltageOutput = voltage;
 
     this.sparkMax.setVoltage(voltage);
   }
@@ -301,7 +306,7 @@ public class CANMotorController {
    * @param velocity
    */
   public REVLibError setDesiredVelocity(double velocity) {
-    lastVoltageOutput = lastPercentOutput = Double.NaN;
+    this.lastVoltageOutput = this.lastPercentOutput = Double.NaN;
 
     PIDState desiredState = new PIDState(velocity, CANSparkMax.ControlType.kVelocity);
     // Checks if input state is equivalent to the last desired state
@@ -317,7 +322,7 @@ public class CANMotorController {
    * @param position
    */
   public REVLibError setDesiredPosition(double position) {
-    lastVoltageOutput = lastPercentOutput = Double.NaN;
+    this.lastVoltageOutput = this.lastPercentOutput = Double.NaN;
 
     PIDState desiredState = new PIDState(position, CANSparkMax.ControlType.kPosition);
     // Checks if input state is equivalent to the last desired state
