@@ -10,6 +10,7 @@ import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
 import edu.wpi.first.hal.CANData;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.CAN;
 import edu.wpi.first.wpilibj.Notifier;
@@ -252,6 +253,7 @@ public class CANMotorController {
 
   /** */
   public void set(double percent) {
+    // Cache must be reset -- PID is killed on any open loop call
     this.lastPIDState = null;
 
     this.sparkMax.set(percent);
@@ -265,6 +267,11 @@ public class CANMotorController {
     this.lastPIDState = null;
 
     this.sparkMax.setVoltage(voltage);
+  }
+
+  /** */
+  public void setVelocity(double velocity, SimpleMotorFeedforward feedForward) {
+    this.setVoltage(feedForward.calculate(velocity));
   }
 
   /**
