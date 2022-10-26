@@ -152,7 +152,8 @@ public class SwerveModule extends SubsystemBase {
     desiredState = SwerveModule.optimizeState(desiredState, this.getCurrentAngle());
 
     this.setDesiredAngle(desiredState.angle.getDegrees());
-    this.setDesiredVelocity(desiredState.speedMetersPerSecond);
+    this.setVelocity(desiredState.speedMetersPerSecond);
+    // this.setDesiredVelocity(desiredState.speedMetersPerSecond);
   }
 
   /** */
