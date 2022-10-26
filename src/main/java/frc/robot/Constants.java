@@ -35,18 +35,30 @@ public final class Constants {
       public static final double FL_STEER_kP = 0.0;
       public static final double FL_STEER_kI = 0.0;
       public static final double FL_STEER_kD = 0.0;
+      public static final double FL_DRIVE_kP = 0.0;
+      public static final double FL_DRIVE_kI = 0.0;
+      public static final double FL_DRIVE_kD = 0.0;
 
       public static final double FR_STEER_kP = 0.0;
       public static final double FR_STEER_kI = 0.0;
       public static final double FR_STEER_kD = 0.0;
+      public static final double FR_DRIVE_kP = 0.0;
+      public static final double FR_DRIVE_kI = 0.0;
+      public static final double FR_DRIVE_kD = 0.0;
 
       public static final double BL_STEER_kP = 0.0;
       public static final double BL_STEER_kI = 0.0;
       public static final double BL_STEER_kD = 0.0;
+      public static final double BL_DRIVE_kP = 0.0;
+      public static final double BL_DRIVE_kI = 0.0;
+      public static final double BL_DRIVE_kD = 0.0;
 
       public static final double BR_STEER_kP = 0.0;
       public static final double BR_STEER_kI = 0.0;
       public static final double BR_STEER_kD = 0.0;
+      public static final double BR_DRIVE_kP = 0.0;
+      public static final double BR_DRIVE_kI = 0.0;
+      public static final double BR_DRIVE_kD = 0.0;
     }
     public static final class SwerveModuleFeedforwards {
       public static final double FL_DRIVE_kS = 0.0;

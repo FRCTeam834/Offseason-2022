@@ -75,18 +75,30 @@ public class DriveTrain extends SubsystemBase {
     frontLeftModule.setSteerP(SwerveModulePIDS.FL_STEER_kP);
     frontLeftModule.setSteerI(SwerveModulePIDS.FL_STEER_kI);
     frontLeftModule.setSteerD(SwerveModulePIDS.FL_STEER_kD);
+    // frontLeftModule.setDriveP(SwerveModulePIDS.FL_DRIVE_kP);
+    // frontLeftModule.setDriveI(SwerveModulePIDS.FL_DRIVE_kI);
+    // frontLeftModule.setDriveD(SwerveModulePIDS.FL_DRIVE_kD);
 
     frontRightModule.setSteerP(SwerveModulePIDS.FR_STEER_kP);
     frontRightModule.setSteerI(SwerveModulePIDS.FR_STEER_kI);
     frontRightModule.setSteerD(SwerveModulePIDS.FR_STEER_kD);
+    // frontRightModule.setDriveP(SwerveModulePIDS.FR_DRIVE_kP);
+    // frontRightModule.setDriveI(SwerveModulePIDS.FR_DRIVE_kI);
+    // frontRightModule.setDriveD(SwerveModulePIDS.FR_DRIVE_kD);
 
     backLeftModule.setSteerP(SwerveModulePIDS.BL_STEER_kP);
     backLeftModule.setSteerI(SwerveModulePIDS.BL_STEER_kI);
     backLeftModule.setSteerD(SwerveModulePIDS.BL_STEER_kD);
+    // backLeftModule.setDriveP(SwerveModulePIDS.BL_DRIVE_kP);
+    // backLeftModule.setDriveI(SwerveModulePIDS.BL_DRIVE_kI);
+    // backLeftModule.setDriveD(SwerveModulePIDS.BL_DRIVE_kD);
 
-    backRightModule.setSteerP(SwerveModulePIDS.FL_STEER_kP);
+    backRightModule.setSteerP(SwerveModulePIDS.BR_STEER_kP);
     backRightModule.setSteerI(SwerveModulePIDS.BR_STEER_kI);
     backRightModule.setSteerD(SwerveModulePIDS.BR_STEER_kD);
+    // backRightModule.setDriveP(SwerveModulePIDS.BR_DRIVE_kP);
+    // backRightModule.setDriveI(SwerveModulePIDS.BR_DRIVE_kI);
+    // backRightModule.setDriveD(SwerveModulePIDS.BR_DRIVE_kD);
 
     if (DriverStation.isFMSAttached()) {
       frontLeftModule.getSteerController().burnFlash();

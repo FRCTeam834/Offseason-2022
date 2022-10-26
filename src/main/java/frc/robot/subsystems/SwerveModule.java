@@ -9,6 +9,7 @@ import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.revrobotics.CANSparkMax;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -22,6 +23,7 @@ public class SwerveModule extends SubsystemBase {
   private final CANMotorController steerController;
   private final CANMotorController driveController;
   private final CANCoder canCoder;
+  private PIDController drivePIDController;
   private SimpleMotorFeedforward driveFeedforward;
 
   // caching
@@ -40,6 +42,7 @@ public class SwerveModule extends SubsystemBase {
     driveController = new CANMotorController(driveID);
     canCoder = new CANCoder(CANCoderID);
 
+    drivePIDController = new PIDController(0.0, 0.0, 0.0);
     driveFeedforward = new SimpleMotorFeedforward(ffkS, ffkV, ffkA);
 
     // Config
@@ -112,15 +115,18 @@ public class SwerveModule extends SubsystemBase {
   }
   /** */
   public void setDriveP(double kP) {
-    driveController.setP(kP);
+    // driveController.setP(kP);
+    drivePIDController.setP(kP);
   }
   /** */
   public void setDriveI(double kI) {
-    driveController.setI(kI);
+    // driveController.setI(kI);
+    drivePIDController.setI(kI);
   }
   /** */
   public void setDriveD(double kD) {
-    driveController.setP(kD);
+    // driveController.setP(kD);
+    drivePIDController.setP(kD);
   }
 
   /** */
@@ -131,7 +137,10 @@ public class SwerveModule extends SubsystemBase {
   /** Default: rpm */
   public void setVelocity(double velocity) {
     lastDesiredState.speedMetersPerSecond = velocity;
-    driveController.setVelocity(velocity, driveFeedforward);
+    driveController.setVelocity(
+      drivePIDController.calculate(driveController.getCurrentVelocity(), velocity),
+      driveFeedforward
+    );
   }
 
   /** Default: rpm (change using conversion factor) */

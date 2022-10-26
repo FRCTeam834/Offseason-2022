@@ -10,6 +10,7 @@ import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
 import edu.wpi.first.hal.CANData;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.CAN;
@@ -24,11 +25,14 @@ public class CANMotorController {
   private final SparkMaxPIDController sparkMaxPIDController;
   private final RelativeEncoder sparkMaxEncoder;
 
+  private final PIDController velocityPIDController;
+
   // Caching
   private PIDState lastPIDState;
   private REVLibError lastError;
   private double lastVoltageOutput;
   private double lastPercentOutput;
+  private double desiredVelocity;
 
   // Custom velocity readings, inspired from 6328
   // https://github.com/Mechanical-Advantage/SwerveDevelopment/blob/main/src/main/java/frc/robot/util/SparkMaxDerivedVelocityController.java
@@ -305,6 +309,7 @@ public class CANMotorController {
    * Set desired velocity of motor
    * @param velocity
    */
+  /*
   public REVLibError setDesiredVelocity(double velocity) {
     this.lastVoltageOutput = this.lastPercentOutput = Double.NaN;
 
@@ -315,6 +320,11 @@ public class CANMotorController {
 
     this.lastPIDState = desiredState;
     return lastError = this.sparkMaxPIDController.setReference(velocity, CANSparkMax.ControlType.kVelocity);
+  }
+  */
+
+  public void setDesiredVelocity(double velocity) {
+    
   }
 
   /**
@@ -331,6 +341,10 @@ public class CANMotorController {
 
     this.lastPIDState = desiredState;
     return lastError = this.sparkMaxPIDController.setReference(position, CANSparkMax.ControlType.kPosition);
+  }
+
+  private void updateVelocity() {
+    
   }
 
   /** */
