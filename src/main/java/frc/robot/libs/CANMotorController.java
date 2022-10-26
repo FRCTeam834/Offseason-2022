@@ -274,6 +274,11 @@ public class CANMotorController {
     this.setVoltage(feedForward.calculate(velocity));
   }
 
+  /** */
+  public void setVelocity(double velocity, double kFF) {
+    this.setVoltage(velocity * kFF);
+  }
+
   /**
    * Set desired velocity of motor
    * @param velocity
