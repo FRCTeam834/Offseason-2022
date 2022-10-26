@@ -10,6 +10,7 @@ import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
 import edu.wpi.first.hal.CANData;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.CAN;
@@ -23,6 +24,12 @@ public class CANMotorController {
   private final CANSparkMax sparkMax;
   private final SparkMaxPIDController sparkMaxPIDController;
   private final RelativeEncoder sparkMaxEncoder;
+
+  private final PIDController velocityPIDController = new PIDController(0.0, 0.0, 0.0);
+  private SimpleMotorFeedforward velocityFeedforward = new SimpleMotorFeedforward(0.0, 0.0, 0.0);
+
+  private double lastDesiredPosition;
+  private double lastDesiredVelocity;
 
   // Caching
   private PIDState lastPIDState;
@@ -158,21 +165,51 @@ public class CANMotorController {
     this.sparkMaxEncoder.setPositionConversionFactor(factor);
   }
 
+  /** */
+  public void configVelocityFeedforward(double kS, double kV) {
+    this.velocityFeedforward = new SimpleMotorFeedforward(kS, kV);
+  }
+  /** */
+  public void configVelocityFeedforward(double kS, double kV, double kA) {
+    this.velocityFeedforward = new SimpleMotorFeedforward(kS, kV, kA);
+  }
+
   /** Set internal PID controller P gain */
-  public void setP(double kP) {
-    this.sparkMaxPIDController.setP(kP);
+  public void configPositionControlP(double kP) {
+    this.sparkMaxPIDController.setP(kP, 0);
   }
   /** Set internal PID controller I gain */
-  public void setI(double kI) {
-    this.sparkMaxPIDController.setI(kI);
+  public void configPositionControlI(double kI) {
+    this.sparkMaxPIDController.setI(kI, 0);
   }
   /** Set internal PID controller D gain */
-  public void setD(double kD) {
-    this.sparkMaxPIDController.setD(kD);
+  public void configPositionControlD(double kD) {
+    this.sparkMaxPIDController.setD(kD, 0);
   }
   /** Set internal PID controller FF gain (corresponds to kV) */
-  public void setFF(double kFF) {
-    this.sparkMaxPIDController.setFF(kFF);
+  public void configPositionControlFF(double kFF) {
+    this.sparkMaxPIDController.setFF(kFF, 0);
+  }
+
+  /** Set internal PID controller P gain */
+  public void configVelocityControlP(double kP) {
+    this.sparkMaxPIDController.setP(kP, 1);
+    this.velocityPIDController.setP(kP);
+  }
+  /** Set internal PID controller I gain */
+  public void configVelocityControlI(double kI) {
+    this.sparkMaxPIDController.setI(kI, 1);
+    this.velocityPIDController.setI(kI);
+  }
+  /** Set internal PID controller D gain */
+  public void configVelocityControlD(double kD) {
+    this.sparkMaxPIDController.setD(kD, 1);
+    this.velocityPIDController.setD(kD);
+  }
+  /** Set internal PID controller FF gain (corresponds to kV) */
+  // kFF for custom velocity set is already handled in feedforward
+  public void configVelocityControlFF(double kFF) {
+    this.sparkMaxPIDController.setFF(kFF, 1);
   }
 
   /** Burn flash */
@@ -227,7 +264,7 @@ public class CANMotorController {
    * @param useEncoder if true - use encoder calls
    * @return
    */
-  public double getCurrentVelocity(boolean useEncoder) {
+  public synchronized double getCurrentVelocity(boolean useEncoder) {
     if (useEncoder) {
       return this.sparkMaxEncoder.getVelocity();
     }
@@ -239,7 +276,7 @@ public class CANMotorController {
    * @param useEncoder if true - use encoder calls
    * @return
    */
-  public double getCurrentPosition(boolean useEncoder) {
+  public synchronized double getCurrentPosition(boolean useEncoder) {
     if (useEncoder) {
       return this.sparkMaxEncoder.getPosition();
     }
@@ -283,6 +320,11 @@ public class CANMotorController {
     this.sparkMax.setVoltage(voltage);
   }
 
+  /** */
+  public void setVelocity(double velocity) {
+    this.setVelocity(velocity, this.velocityFeedforward);
+  }
+
   /**
    * 
    * @param velocity desired rpm
@@ -305,6 +347,7 @@ public class CANMotorController {
    * Set desired velocity of motor
    * @param velocity
    */
+  /*
   public REVLibError setDesiredVelocity(double velocity) {
     this.lastVoltageOutput = this.lastPercentOutput = Double.NaN;
 
@@ -314,7 +357,12 @@ public class CANMotorController {
     if (desiredState.equals(this.lastPIDState)) return this.lastError;
 
     this.lastPIDState = desiredState;
+    this.lastDesiredVelocity = velocity;
     return lastError = this.sparkMaxPIDController.setReference(velocity, CANSparkMax.ControlType.kVelocity);
+  }
+  */
+  public void setDesiredVelocity(double velocity) {
+    this.lastDesiredVelocity = velocity;
   }
 
   /**
@@ -322,7 +370,7 @@ public class CANMotorController {
    * @param position
    */
   public REVLibError setDesiredPosition(double position) {
-    this.lastVoltageOutput = this.lastPercentOutput = Double.NaN;
+    this.lastVoltageOutput = this.lastPercentOutput = this.lastDesiredVelocity = Double.NaN;
 
     PIDState desiredState = new PIDState(position, CANSparkMax.ControlType.kPosition);
     // Checks if input state is equivalent to the last desired state
@@ -330,11 +378,22 @@ public class CANMotorController {
     if (desiredState.equals(this.lastPIDState)) return this.lastError;
 
     this.lastPIDState = desiredState;
+    this.lastDesiredPosition = position;
     return lastError = this.sparkMaxPIDController.setReference(position, CANSparkMax.ControlType.kPosition);
+  }
+
+  private void updateVelocityReference() {
+    this.setVelocity(this.velocityPIDController.calculate(
+      this.getCurrentVelocity(),
+      this.lastDesiredVelocity
+    ));
   }
 
   /** */
   private void update() {
+    if (!Double.isNaN(this.lastDesiredVelocity)) {
+      this.updateVelocityReference();
+    }
     // https://andymark-weblinc.netdna-ssl.com/media/W1siZiIsIjIwMjAvMDUvMTkvMTQvMDYvNDMvNDUyNGFkOTMtZjYwZi00ODgyLWFlNzQtNjAxMzU5MzQyMjBiL2FtLTQyNjEgU1BBUksgTUFYIC0gVXNlciBNYW51YWwuaHRtbCJdXQ/am-4261%20SPARK%20MAX%20-%20User%20Manual.html?sha=7c9ea7a1ed73eb42#section-3-3-2-1
     // Packet contains motor position in rotations
     // as 32-bit (4 byte) IEEE float
