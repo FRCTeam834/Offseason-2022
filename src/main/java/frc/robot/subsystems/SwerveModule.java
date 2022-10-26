@@ -124,7 +124,7 @@ public class SwerveModule extends SubsystemBase {
   /** */
   public void setVelocity(double velocity) {
     lastDesiredState.speedMetersPerSecond = velocity;
-    // driveController.setVelocity(velocity);
+    //driveController.setVelocity(velocity);
   }
 
   /** Default: rpm (change using conversion factor) */
