@@ -28,6 +28,9 @@ public class CANMotorController {
   private PIDState lastPIDState;
   private REVLibError lastError;
 
+  private double lastVoltageOutput;
+  private double lastPercentOutput;
+
   // Custom velocity readings, inspired from 6328
   // https://github.com/Mechanical-Advantage/SwerveDevelopment/blob/main/src/main/java/frc/robot/util/SparkMaxDerivedVelocityController.java
   private final CAN deviceInterface;
@@ -253,8 +256,11 @@ public class CANMotorController {
 
   /** */
   public void set(double percent) {
-    // Cache must be reset -- PID is killed on any open loop call
+    // PID is killed on any open loop call
     this.lastPIDState = null;
+
+    if (percent == lastPercentOutput) return;
+    lastPercentOutput = percent;
 
     this.sparkMax.set(percent);
   }
@@ -263,8 +269,11 @@ public class CANMotorController {
    * Set voltage of motor
    */
   public void setVoltage(double voltage) {
-    // Cache must be reset -- PID is killed on any open loop call
+    // PID is killed on any open loop call
     this.lastPIDState = null;
+
+    if (voltage == lastVoltageOutput) return;
+    lastVoltageOutput = voltage;
 
     this.sparkMax.setVoltage(voltage);
   }
@@ -284,6 +293,8 @@ public class CANMotorController {
    * @param velocity
    */
   public REVLibError setDesiredVelocity(double velocity) {
+    lastVoltageOutput = lastPercentOutput = 0.0;
+
     PIDState desiredState = new PIDState(velocity, CANSparkMax.ControlType.kVelocity);
     // Checks if input state is equivalent to the last desired state
     // If so, return as there is nothing to be done
@@ -298,6 +309,8 @@ public class CANMotorController {
    * @param position
    */
   public REVLibError setDesiredPosition(double position) {
+    lastVoltageOutput = lastPercentOutput = 0.0;
+    
     PIDState desiredState = new PIDState(position, CANSparkMax.ControlType.kPosition);
     // Checks if input state is equivalent to the last desired state
     // If so, return as there is nothing to be done
