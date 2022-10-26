@@ -38,7 +38,6 @@ public class CANMotorController {
   private static final int deviceTypeID = 2;
 
   private double lastPosition;
-  private double lastPacketTime;
   private boolean isFirstPacket = false;
   private double lastVelocity;
 
@@ -248,17 +247,24 @@ public class CANMotorController {
 
   /** Stop motor */
   public void halt() {
-    this.setVelocity(0);
+    this.set(0);
+  }
+
+  /** */
+  public void set(double percent) {
+    this.lastPIDState = null;
+
+    this.sparkMax.set(percent);
   }
   
   /**
-   * Set velocity of motor
+   * Set voltage of motor
    */
-  public void setVelocity(double velocity) {
+  public void setVoltage(double voltage) {
     // Cache must be reset -- PID is killed on any open loop call
     this.lastPIDState = null;
 
-    this.sparkMax.set(velocity);
+    this.sparkMax.setVoltage(voltage);
   }
 
   /**
@@ -302,17 +308,15 @@ public class CANMotorController {
       .wrap(buffer.data)
       .order(ByteOrder.BIG_ENDIAN) // CAN data is BE?
       .getFloat();
-    double packetTime = buffer.timestamp;
+    // double packetTime = buffer.timestamp;
 
     if (isFirstPacket) {
       isFirstPacket = false;
       lastPosition = position;
-      lastPacketTime = packetTime;
       // Velocity needs 2 data points to be calculated, so return
       return;
     }
     lastVelocity = velocityFilter.calculate(position);
     lastPosition = position;
-    lastPacketTime = packetTime;
   }
 }
