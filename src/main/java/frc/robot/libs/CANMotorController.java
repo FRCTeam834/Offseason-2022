@@ -4,97 +4,38 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
 import edu.wpi.first.hal.CANData;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.CAN;
 import edu.wpi.first.wpilibj.Notifier;
 
 /**
- * CANSparkMax wrapper
+ * 
+ * CANSparkMax wrapper class
+ * 
+ * Uses native methods and internal PID for positional control
+ * External motor ouput closed loop for velocity control
  */
 public class CANMotorController {
-
-  private final CANSparkMax sparkMax;
-  private final SparkMaxPIDController sparkMaxPIDController;
-  private final RelativeEncoder sparkMaxEncoder;
-
-  private final PIDController velocityPIDController = new PIDController(0.0, 0.0, 0.0);
-  private SimpleMotorFeedforward velocityFeedforward = new SimpleMotorFeedforward(0.0, 0.0, 0.0);
-
-  private double lastDesiredPosition;
-  private double lastDesiredVelocity;
-
-  // Caching
-  private PIDState lastPIDState;
-  private REVLibError lastError;
-  private double lastVoltageOutput;
-  private double lastPercentOutput;
-
-  // Custom velocity readings, inspired from 6328
-  // https://github.com/Mechanical-Advantage/SwerveDevelopment/blob/main/src/main/java/frc/robot/util/SparkMaxDerivedVelocityController.java
-  private final CAN deviceInterface;
-  private final LinearFilter velocityFilter; // Rolling derivative
-  private final Notifier updateNotifier;
-
-  // https://docs.wpilib.org/en/stable/docs/software/can-devices/can-addressing.html
-  private static final int manufacturerID = 5; // REV
-  private static final int deviceTypeID = 2;
-
-  private double lastPosition;
-  private double lastVelocity;
-  private boolean isFirstPacket = false;
-
   /**
-   * @param deviceID CAN ID
+   * Stores a SparkMaxPIDController reference state (Replaced by this.lastDesired<ControlType>)
    */
-  public CANMotorController(
-    int deviceID
-  ) {
-    this(deviceID, 10, 5);
-  }
-
-  /**
-   * @param deviceID CAN ID
-   * @param updatePeriodMs ms
-   * @param filterPoints num points for velocity moving average
-   */
-  public CANMotorController(
-    int deviceID,
-    int updatePeriodMs,
-    int filterPoints
-  ) {
-    sparkMax = new CANSparkMax(deviceID, CANSparkMax.MotorType.kBrushless);
-    sparkMaxPIDController = sparkMax.getPIDController();
-    sparkMaxEncoder = sparkMax.getEncoder();
-
-    deviceInterface = new CAN(sparkMax.getDeviceId(), manufacturerID, deviceTypeID);
-    velocityFilter = LinearFilter.backwardFiniteDifference(1, filterPoints, updatePeriodMs / 1000.0);
-
-    updateNotifier = new Notifier(this::update);
-    updateNotifier.startPeriodic(updatePeriodMs / 1000.0);
-  }
-
-  /**
-   * Stores a SparkMaxPID reference state
-   */
-  private static final class PIDState {
+  @Deprecated (forRemoval = true)
+  private static final class SparkMaxPIDState {
     public final double setpoint;
     public final CANSparkMax.ControlType controlType;
 
-    public PIDState(double setpoint, CANSparkMax.ControlType controlType) {
+    public SparkMaxPIDState(double setpoint, CANSparkMax.ControlType controlType) {
       this.setpoint = setpoint;
       this.controlType = controlType;
     }
 
-    /** */
-    public boolean equals(PIDState expected) {
+    public boolean equals(SparkMaxPIDState expected) {
       if (expected == null) return false;
       return (
         this.setpoint == expected.setpoint &&
@@ -105,147 +46,150 @@ public class CANMotorController {
 
   /**
    * 
-   * Is value in bounds [-range, range]
-   * @param value
-   * @param range
+   * Is value in the given interval [-range, range]
+   * @param value tested value
+   * @param range interval bounds
    * @return
    */
-  private static final boolean inclusiveInRange(double value, double range) {
-    range = Math.abs(range);
-    return (value <= range && value >= -range);
+  private static final boolean inInclusiveRange(double value, double range) {
+    return (
+      value <= Math.abs(range) &&
+      value >= -Math.abs(range)
+    );
+  }
+  
+  /**
+   * 
+   * 
+   * 
+   */
+
+  // https://docs.wpilib.org/en/stable/docs/software/can-devices/can-addressing.html
+  private static final int manufacturerID = 5;
+  private static final int deviceTypeID = 2;
+
+  private final CANSparkMax sparkMax;
+  private final SparkMaxPIDController sparkMaxPIDController; // PID controller on the spark max
+  private final RelativeEncoder sparkMaxEncoder; // NEO internal encoder
+
+  private double lastPosition;
+  private double lastVelocity;
+  private double lastDesiredPosition;
+  private double lastDesiredVelocity;
+  private double lastDesiredVoltage;
+
+  private double velocityConversionFactor;
+  private double positionConversionFactor;
+
+  // Custom velocity filtering
+  // Inspired by 6328: https://github.com/Mechanical-Advantage/SwerveDevelopment/blob/main/src/main/java/frc/robot/util/SparkMaxDerivedVelocityController.java
+  private final CAN deviceInterface; // Read CAN packets directly
+  private final LinearFilter velocityFilter; // Rolling derivative
+  private final Notifier updateNotifier;
+  private boolean isFirstPacket = true;
+
+  // Velocity PIDF
+  private PIDController velocityPIDController = new PIDController(0.0, 0.0, 0.0);
+  private double velocityFeedforwardConstant;
+
+  /**
+   * 
+   * Creates CANMotorController with 10ms timestep and 5 filter points
+   * @param CANID
+   */
+  public CANMotorController(int CANID) {
+    this(CANID, 10, 5);
   }
 
-  /** Get sparkmax */
-  public CANSparkMax getSparkMax() {
-    return this.sparkMax;
+  /**
+   * 
+   * @param CANID CAN ID of sparkmax controller
+   * @param updateTimestep milliseconds per update (time delta)
+   * @param velocityFilterPoints number of points on velocity filter
+   */
+  public CANMotorController(int CANID, int updateTimestep, int velocityFilterPoints) {
+    this.sparkMax = new CANSparkMax(CANID, CANSparkMax.MotorType.kBrushless);
+    this.sparkMaxPIDController = this.sparkMax.getPIDController();
+    this.sparkMaxEncoder = this.sparkMax.getEncoder();
+
+    this.deviceInterface = new CAN(this.sparkMax.getDeviceId(), CANMotorController.manufacturerID, CANMotorController.deviceTypeID);
+    this.velocityFilter = LinearFilter.backwardFiniteDifference(1, velocityFilterPoints, updateTimestep / 1000.0);
+
+    this.updateNotifier = new Notifier(this::update);
+    this.updateNotifier.startPeriodic(updateTimestep / 1000.0);
   }
 
-  /** Get internal PID controller */
-  public SparkMaxPIDController getPIDController() {
-    return this.sparkMaxPIDController;
-  }
+  // Config methods
 
-  /** Get internal encoder */
-  public RelativeEncoder getEncoder() {
-    return this.sparkMaxEncoder;
-  }
-
-  /** */
-  public void configFactoryDefault() {
+  public void configRestoreFactoryDefaults() {
     this.sparkMax.restoreFactoryDefaults();
   }
-  /** */
-  public void configInverted(boolean inverted) {
-    this.sparkMax.setInverted(inverted);
+  public void configInverted(boolean isInverted) {
+    this.sparkMax.setInverted(isInverted);
   }
-  /** */
   public void configIdleMode(CANSparkMax.IdleMode idleMode) {
     this.sparkMax.setIdleMode(idleMode);
   }
-  /** */
   public void configVoltageCompensation(double voltage) {
     this.sparkMax.enableVoltageCompensation(voltage);
   }
-  /** */
-  public void configSmartCurrentLimit(int amps) {
-    this.sparkMax.setSmartCurrentLimit(amps);
+  public void configSmartCurrentLimit(int limit) {
+    this.sparkMax.setSmartCurrentLimit(limit);
   }
-  /** */
   public void configPeriodicFramePeriods(int k0, int k1, int k2) {
     this.sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus0, k0);
     this.sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus1, k1);
     this.sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus2, k2);
   }
-  /** */
-  public void configVelocityConversionFactor(double factor) {
-    this.sparkMaxEncoder.setVelocityConversionFactor(factor);
-  }
-  /** */
   public void configPositionConversionFactor(double factor) {
-    this.sparkMaxEncoder.setPositionConversionFactor(factor);
+    this.positionConversionFactor = factor;
+  }
+  public void configVelocityConversionFactor(double factor) {
+    this.velocityConversionFactor = factor;
   }
 
-  /** */
-  public void configVelocityFeedforward(double kS, double kV) {
-    this.velocityFeedforward = new SimpleMotorFeedforward(kS, kV);
-  }
-  /** */
-  public void configVelocityFeedforward(double kS, double kV, double kA) {
-    this.velocityFeedforward = new SimpleMotorFeedforward(kS, kV, kA);
-  }
-
-  /** Set internal PID controller P gain */
   public void configPositionControlP(double kP) {
     this.sparkMaxPIDController.setP(kP, 0);
   }
-  /** Set internal PID controller I gain */
   public void configPositionControlI(double kI) {
     this.sparkMaxPIDController.setI(kI, 0);
   }
-  /** Set internal PID controller D gain */
   public void configPositionControlD(double kD) {
     this.sparkMaxPIDController.setD(kD, 0);
   }
-  /** Set internal PID controller FF gain (corresponds to kV) */
   public void configPositionControlFF(double kFF) {
     this.sparkMaxPIDController.setFF(kFF, 0);
   }
 
-  /** Set internal PID controller P gain */
   public void configVelocityControlP(double kP) {
-    this.sparkMaxPIDController.setP(kP, 1);
     this.velocityPIDController.setP(kP);
   }
-  /** Set internal PID controller I gain */
   public void configVelocityControlI(double kI) {
-    this.sparkMaxPIDController.setI(kI, 1);
     this.velocityPIDController.setI(kI);
   }
-  /** Set internal PID controller D gain */
   public void configVelocityControlD(double kD) {
-    this.sparkMaxPIDController.setD(kD, 1);
     this.velocityPIDController.setD(kD);
   }
-  /** Set internal PID controller FF gain (corresponds to kV) */
   public void configVelocityControlFF(double kFF) {
-    this.sparkMaxPIDController.setFF(kFF, 1);
+    this.velocityFeedforwardConstant = kFF;
   }
 
-  /** Burn flash */
   public void burnFlash() {
     this.sparkMax.burnFlash();
   }
 
-  /** */
-  public boolean isAtDesiredVelocity(double desiredVelocity, double tolerance) {
-    return this.isAtDesiredVelocity(desiredVelocity, tolerance, false);
+  //
+
+  /** Middleman through all position control */
+  private void setLastDesiredPosition(double position) {
+    this.lastDesiredVelocity = Double.NaN;
+    this.lastDesiredPosition = position * this.positionConversionFactor;
   }
 
-  /** */
-  public boolean isAtDesiredPosition(double desiredPosition, double tolerance) {
-    return this.isAtDesiredPosition(desiredPosition, tolerance, false);
-  }
-
-  /**
-   * 
-   * @param desiredVelocity
-   * @param tolerance bilateral tolerance (+/-)
-   * @param useEncoder if true - use encoder calls
-   * @return
-   */
-  public boolean isAtDesiredVelocity(double desiredVelocity, double tolerance, boolean useEncoder) {
-    return CANMotorController.inclusiveInRange(this.getCurrentVelocity(useEncoder) - desiredVelocity, tolerance);
-  }
-
-  /**
-   * 
-   * @param desiredPosition
-   * @param tolerance bilateral tolerance (+/-)
-   * @param useEncoder if true - use encoder calls
-   * @return
-   */
-  public boolean isAtDesiredPosition(double desiredPosition, double tolerance, boolean useEncoder) {
-    return CANMotorController.inclusiveInRange(this.getCurrentPosition(useEncoder) - desiredPosition, tolerance);
+  /** Middleman through all velocity control */
+  private void setLastDesiredVelocity(double velocity) {
+    this.lastDesiredPosition = Double.NaN;
+    this.lastDesiredVelocity = velocity * this.velocityConversionFactor;
   }
 
   /** */
@@ -253,14 +197,9 @@ public class CANMotorController {
     return this.getCurrentVelocity(false);
   }
 
-  /** */
-  public double getCurrentPosition() {
-    return this.getCurrentPosition(false);
-  }
-
   /**
    * 
-   * @param useEncoder if true - use encoder calls
+   * @param useEncoder if true - get velocity from encoder !Not recommended
    * @return
    */
   public synchronized double getCurrentVelocity(boolean useEncoder) {
@@ -270,9 +209,14 @@ public class CANMotorController {
     return this.lastVelocity;
   }
 
+  /** */
+  public double getCurrentPosition() {
+    return this.getCurrentPosition(false);
+  }
+
   /**
    * 
-   * @param useEncoder if true - use encoder calls
+   * @param useEncoder if true - get position from encoder
    * @return
    */
   public synchronized double getCurrentPosition(boolean useEncoder) {
@@ -282,118 +226,86 @@ public class CANMotorController {
     return this.lastPosition;
   }
 
-  /** Reset cache for PID state; Shouldn't be needed */
-  public void resetCache() {
-    this.lastPIDState = null;
-    this.lastError = null;
-    this.lastVoltageOutput = Double.NaN;
-    this.lastPercentOutput = Double.NaN;
+  /** */
+  public boolean isAtPosition(double position, double tolerance) {
+    return this.isAtPosition(position, tolerance, false);
   }
 
-  /** Stop motor */
-  public void halt() {
-    this.set(0);
+  /**
+   * 
+   * @param position target position
+   * @param tolerance bilateral tolerance (+/-)
+   * @param useEncoder if true - get position from encoder
+   * @return
+   */
+  public boolean isAtPosition(double position, double tolerance, boolean useEncoder) {
+    return CANMotorController.inInclusiveRange(this.getCurrentPosition(useEncoder) - position, tolerance);
   }
 
   /** */
-  public void set(double percent) {
-    // PID is killed on any open loop call
-    this.lastPIDState = null;
-
-    if (percent == this.lastPercentOutput) return;
-    this.lastPercentOutput = percent;
-
-    this.sparkMax.set(percent);
+  public boolean isAtVelocity(double velocity, double tolerance) {
+    return this.isAtVelocity(velocity, tolerance, false);
   }
-  
+
   /**
-   * Set voltage of motor
+   * 
+   * @param velocity target velocity
+   * @param tolerance bilateral tolerance (+/-)
+   * @param useEncoder if true - get velocity from encoder !Not recommended
+   * @return
+   */
+  public boolean isAtVelocity(double velocity, double tolerance, boolean useEncoder) {
+    return CANMotorController.inInclusiveRange(this.getCurrentVelocity(useEncoder) - velocity, tolerance);
+  }
+
+  /**
+   * 
+   * @param voltage
    */
   public void setVoltage(double voltage) {
-    // PID is killed on any open loop call
-    this.lastPIDState = null;
-
-    if (voltage == this.lastVoltageOutput) return;
-    this.lastVoltageOutput = voltage;
+    if (voltage == this.lastDesiredVoltage) return;
+    this.lastDesiredVoltage = voltage;
 
     this.sparkMax.setVoltage(voltage);
   }
 
-  /** */
-  public void setVelocity(double velocity) {
-    this.setVelocity(velocity, this.velocityFeedforward);
-  }
-
   /**
    * 
-   * @param velocity desired rpm
-   * @param feedForward feedforward controller
-   */
-  public void setVelocity(double velocity, SimpleMotorFeedforward feedForwardController) {
-    this.setVoltage(feedForwardController.calculate(velocity));
-  }
-
-  /**
-   * 
-   * @param velocity desired rpm
-   * @param kFF feedforward value
-   */
-  public void setVelocity(double velocity, double kFF) {
-    this.setVoltage(velocity * kFF);
-    this.configVelocityFeedforward(0.0, kFF);
-  }
-
-  /**
-   * Set desired velocity of motor
+   * Set velocity
    * @param velocity
    */
-  /*
-  public REVLibError setDesiredVelocity(double velocity) {
-    this.lastVoltageOutput = this.lastPercentOutput = Double.NaN;
-
-    PIDState desiredState = new PIDState(velocity, CANSparkMax.ControlType.kVelocity);
-    // Checks if input state is equivalent to the last desired state
-    // If so, return as there is nothing to be done
-    if (desiredState.equals(this.lastPIDState)) return this.lastError;
-
-    this.lastPIDState = desiredState;
-    this.lastDesiredVelocity = velocity;
-    return lastError = this.sparkMaxPIDController.setReference(velocity, CANSparkMax.ControlType.kVelocity, 1);
-  }
-  */
-  public void setDesiredVelocity(double velocity) {
-    this.lastDesiredVelocity = velocity;
+  public void setVelocity(double velocity) {
+    this.setVoltage(this.velocityPIDController.calculate(velocity) + this.velocityFeedforwardConstant);
   }
 
   /**
-   * Set desired position of motor
-   * @param position
+   * 
+   * @param velocity
    */
-  public REVLibError setDesiredPosition(double position) {
-    this.lastVoltageOutput = this.lastPercentOutput = this.lastDesiredVelocity = Double.NaN;
-
-    PIDState desiredState = new PIDState(position, CANSparkMax.ControlType.kPosition);
-    // Checks if input state is equivalent to the last desired state
-    // If so, return as there is nothing to be done
-    if (desiredState.equals(this.lastPIDState)) return this.lastError;
-
-    this.lastPIDState = desiredState;
-    this.lastDesiredPosition = position;
-    return lastError = this.sparkMaxPIDController.setReference(position, CANSparkMax.ControlType.kPosition, 0);
+  public void setDesiredVelocity(double velocity) {
+    this.setLastDesiredVelocity(velocity);
   }
 
-  private void updateVelocityReference() {
-    this.setVelocity(this.velocityPIDController.calculate(
-      this.getCurrentVelocity(),
-      this.lastDesiredVelocity
-    ));
+  /**
+   * 
+   * @param position
+   * @return void
+   */
+  public void setDesiredPosition(double position) {
+    if (position == this.lastDesiredPosition) return;
+
+    this.setLastDesiredPosition(position);
+    this.sparkMaxPIDController.setReference(this.lastDesiredPosition, CANSparkMax.ControlType.kPosition, 0);
   }
 
   /** */
+  private void updateVelocity() {
+    if (Double.isNaN(this.lastDesiredVelocity)) return;
+    this.setVelocity(this.lastDesiredVoltage);
+  }
+
   private void update() {
-    if (!Double.isNaN(this.lastDesiredVelocity)) {
-      this.updateVelocityReference();
-    }
+    this.updateVelocity();
     // https://andymark-weblinc.netdna-ssl.com/media/W1siZiIsIjIwMjAvMDUvMTkvMTQvMDYvNDMvNDUyNGFkOTMtZjYwZi00ODgyLWFlNzQtNjAxMzU5MzQyMjBiL2FtLTQyNjEgU1BBUksgTUFYIC0gVXNlciBNYW51YWwuaHRtbCJdXQ/am-4261%20SPARK%20MAX%20-%20User%20Manual.html?sha=7c9ea7a1ed73eb42#section-3-3-2-1
     // Packet contains motor position in rotations
     // as 32-bit (4 byte) IEEE float
@@ -403,17 +315,16 @@ public class CANMotorController {
     // Extract position data from bytes
     double position = ByteBuffer
       .wrap(buffer.data)
-      .order(ByteOrder.BIG_ENDIAN) // CAN data is BE?
+      .order(ByteOrder.BIG_ENDIAN)
       .getFloat();
     // double packetTime = buffer.timestamp;
+    lastPosition = position;
 
     if (isFirstPacket) {
       isFirstPacket = false;
-      lastPosition = position;
       // Velocity needs 2 data points to be calculated, so return
       return;
     }
     lastVelocity = velocityFilter.calculate(position);
-    lastPosition = position;
   }
 }
