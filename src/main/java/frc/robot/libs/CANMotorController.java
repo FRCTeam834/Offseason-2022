@@ -120,6 +120,16 @@ public class CANMotorController {
     this.updateNotifier.startPeriodic(updateTimestep / 1000.0);
   }
 
+  public CANSparkMax getSparkMax() {
+    return this.sparkMax;
+  }
+  public SparkMaxPIDController getSparkMaxPIDController() {
+    return this.sparkMaxPIDController;
+  }
+  public RelativeEncoder getSparkMaxEncoder() {
+    return this.sparkMaxEncoder;
+  }
+
   // Config methods
 
   public void configRestoreFactoryDefaults() {
@@ -264,6 +274,7 @@ public class CANMotorController {
    * @param voltage
    */
   public void setVoltage(double voltage) {
+    // Caching can be used as sparkMax.setVoltage is a set-and-forget call
     if (voltage == this.lastDesiredVoltage) return;
     this.lastDesiredVoltage = voltage;
 
@@ -278,7 +289,12 @@ public class CANMotorController {
     this.setDesiredVelocity(velocity, 0.0);
   }
 
-  /** */
+  /**
+   * 
+   * Run on RIO - structured to mimic sparkMax integrated PIDF
+   * @param velocity
+   * @param arbFF
+   */
   public void setDesiredVelocity(double velocity, double arbFF) {
     this.setLastDesiredVelocity(velocity);
     this.velocityArbFF = arbFF;
@@ -306,7 +322,7 @@ public class CANMotorController {
   private void updateVelocity() {
     if (Double.isNaN(this.lastDesiredVelocity)) return;
     this.setVoltage(
-      this.velocityPIDController.calculate(this.lastDesiredVelocity) +
+      this.velocityPIDController.calculate(this.lastDesiredVelocity, this.getCurrentVelocity()) +
       (this.velocityArbFF * Math.signum(this.lastDesiredVelocity) + this.velocityFeedforward * this.lastDesiredVelocity) // feedforward calculation ks * signum(vel) + kv * vel
     );
   }
