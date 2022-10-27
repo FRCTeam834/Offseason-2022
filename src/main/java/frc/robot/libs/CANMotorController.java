@@ -275,7 +275,7 @@ public class CANMotorController {
    * @param velocity
    */
   public void setVelocity(double velocity) {
-    this.setVoltage(this.velocityPIDController.calculate(velocity) + this.velocityFeedforwardConstant);
+    this.setVoltage(velocity + this.velocityFeedforwardConstant);
   }
 
   /**
@@ -301,7 +301,7 @@ public class CANMotorController {
   /** */
   private void updateVelocity() {
     if (Double.isNaN(this.lastDesiredVelocity)) return;
-    this.setVelocity(this.lastDesiredVoltage);
+    this.setVelocity(this.velocityPIDController.calculate(this.lastDesiredVelocity));
   }
 
   private void update() {
