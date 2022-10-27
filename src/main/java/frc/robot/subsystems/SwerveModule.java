@@ -47,14 +47,14 @@ public class SwerveModule extends SubsystemBase {
 
     // Config
     // These should not be touched (hence not in Constants)
-    steerController.configFactoryDefault();
+    steerController.configRestoreFactoryDefaults();
     steerController.configInverted(false);
     steerController.configIdleMode(CANSparkMax.IdleMode.kBrake);
     steerController.configVoltageCompensation(12.0);
     steerController.configSmartCurrentLimit(20);
     steerController.configPeriodicFramePeriods(10, 20, 10);
 
-    driveController.configFactoryDefault();
+    driveController.configRestoreFactoryDefaults();
     driveController.configInverted(false);
     driveController.configIdleMode(CANSparkMax.IdleMode.kBrake);
     driveController.configVoltageCompensation(12.0);
@@ -103,44 +103,35 @@ public class SwerveModule extends SubsystemBase {
 
   /** */
   public void setSteerP(double kP) {
-    steerController.setP(kP);
+    steerController.configPositionControlP(kP);
   }
   /** */
   public void setSteerI(double kI) {
-    steerController.setI(kI);
+    steerController.configPositionControlI(kI);
   }
   /** */
   public void setSteerD(double kD) {
-    steerController.setD(kD);
+    steerController.configPositionControlD(kD);
   }
   /** */
   public void setDriveP(double kP) {
     // driveController.setP(kP);
-    drivePIDController.setP(kP);
+    driveController.configVelocityControlP(kP);
   }
   /** */
   public void setDriveI(double kI) {
     // driveController.setI(kI);
-    drivePIDController.setI(kI);
+    driveController.configVelocityControlI(kI);
   }
   /** */
   public void setDriveD(double kD) {
     // driveController.setP(kD);
-    drivePIDController.setP(kD);
+    driveController.configVelocityControlD(kD);
   }
 
   /** */
   public double getCurrentAngle() {
     return canCoder.getAbsolutePosition();
-  }
-
-  /** Default: rpm */
-  public void setVelocity(double velocity) {
-    lastDesiredState.speedMetersPerSecond = velocity;
-    driveController.setVelocity(
-      drivePIDController.calculate(driveController.getCurrentVelocity(), velocity),
-      driveFeedforward
-    );
   }
 
   /** Default: rpm (change using conversion factor) */
@@ -161,18 +152,18 @@ public class SwerveModule extends SubsystemBase {
     desiredState = SwerveModule.optimizeState(desiredState, this.getCurrentAngle());
 
     this.setDesiredAngle(desiredState.angle.getDegrees());
-    this.setVelocity(desiredState.speedMetersPerSecond);
+    this.setDesiredVelocity(desiredState.speedMetersPerSecond);
     // this.setDesiredVelocity(desiredState.speedMetersPerSecond);
   }
 
   /** */
-  public boolean isAtDesiredVelocity(double velocity) {
-    return driveController.isAtDesiredVelocity(velocity, SwerveModuleConstants.AT_VELOCITY_TOLERANCE);
+  public boolean isAtVelocity(double velocity) {
+    return driveController.isAtVelocity(velocity, SwerveModuleConstants.AT_VELOCITY_TOLERANCE);
   }
 
   /** */
-  public boolean isAtDesiredPosition(double position) {
-    return steerController.isAtDesiredPosition(position, SwerveModuleConstants.AT_POSITION_TOLERANCE);
+  public boolean isAtPosition(double position) {
+    return steerController.isAtPosition(position, SwerveModuleConstants.AT_POSITION_TOLERANCE);
   }
 
   @Override
