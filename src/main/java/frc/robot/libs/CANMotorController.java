@@ -90,7 +90,8 @@ public class CANMotorController {
 
   // Velocity PIDF
   private PIDController velocityPIDController = new PIDController(0.0, 0.0, 0.0);
-  private double velocityFeedforwardConstant;
+  private double velocityFeedforward; // kV
+  private double velocityArbFF; // kS
 
   /**
    * 
@@ -171,7 +172,7 @@ public class CANMotorController {
     this.velocityPIDController.setD(kD);
   }
   public void configVelocityControlFF(double kFF) {
-    this.velocityFeedforwardConstant = kFF;
+    this.velocityFeedforward = kFF;
   }
 
   public void burnFlash() {
@@ -271,37 +272,43 @@ public class CANMotorController {
 
   /**
    * 
-   * Set velocity
-   * @param velocity
-   */
-  public void setVelocity(double velocity) {
-    this.setVoltage(velocity + this.velocityFeedforwardConstant);
-  }
-
-  /**
-   * 
    * @param velocity
    */
   public void setDesiredVelocity(double velocity) {
+    this.setDesiredVelocity(velocity, 0.0);
+  }
+
+  /** */
+  public void setDesiredVelocity(double velocity, double arbFF) {
     this.setLastDesiredVelocity(velocity);
+    this.velocityArbFF = arbFF;
+  }
+
+  /** */
+  public void setDesiredPosition(double position) {
+    this.setDesiredPosition(position, 0.0);
   }
 
   /**
    * 
    * @param position
+   * @param arbFF
    * @return void
    */
-  public void setDesiredPosition(double position) {
+  public void setDesiredPosition(double position, double arbFF) {
     if (position == this.lastDesiredPosition) return;
 
     this.setLastDesiredPosition(position);
-    this.sparkMaxPIDController.setReference(this.lastDesiredPosition, CANSparkMax.ControlType.kPosition, 0);
+    this.sparkMaxPIDController.setReference(this.lastDesiredPosition, CANSparkMax.ControlType.kPosition, 0, arbFF);
   }
 
   /** */
   private void updateVelocity() {
     if (Double.isNaN(this.lastDesiredVelocity)) return;
-    this.setVelocity(this.velocityPIDController.calculate(this.lastDesiredVelocity));
+    this.setVoltage(
+      this.velocityPIDController.calculate(this.lastDesiredVelocity) +
+      (this.velocityArbFF * Math.signum(this.lastDesiredVelocity) + this.velocityFeedforward * this.lastDesiredVelocity) // feedforward calculation ks * signum(vel) + kv * vel
+    );
   }
 
   private void update() {
