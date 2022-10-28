@@ -4,9 +4,13 @@
 
 package frc.robot;
 
+import com.revrobotics.CANSparkMax;
+
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.libs.CANMotorController;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -17,10 +21,25 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
 
+  // One swerve module
+  CANMotorController steerController = new CANMotorController(1);
+  CANMotorController driveController = new CANMotorController(2);
+
+  Joystick joystick = new Joystick(0);
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
+
+    driveController.configInverted(false);
+    driveController.configIdleMode(CANSparkMax.IdleMode.kBrake);
+    driveController.configVoltageCompensation(12);
+    driveController.configSmartCurrentLimit(20);
+    driveController.configPeriodicFramePeriods(10, 20, 10);
+
+    // units should be rpm I guess
+    driveController.setDesiredVelocity(1);
   }
 
   /**
@@ -29,7 +48,9 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void configureButtonBindings() {}
+  private void configureButtonBindings() {
+
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
