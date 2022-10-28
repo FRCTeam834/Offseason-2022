@@ -18,12 +18,13 @@ import edu.wpi.first.wpilibj.Notifier;
  * 
  * CANSparkMax wrapper class
  * 
- * Uses native methods and internal PID for positional control
- * External motor ouput closed loop for velocity control
+ * Positional control on spark maxes
+ * Velocity control on rio -- mimics sparkmax api
  */
-public class CANMotorController {
+public class SparkMaxController {
   /**
-   * Stores a SparkMaxPIDController reference state (Replaced by this.lastDesired<ControlType>)
+   * Stores a SparkMaxPIDController reference state
+   * (Replaced by this.lastDesired<ControlType>)
    */
   @Deprecated (forRemoval = true)
   private static final class SparkMaxPIDState {
@@ -72,11 +73,11 @@ public class CANMotorController {
   private final SparkMaxPIDController sparkMaxPIDController; // PID controller on the spark max
   private final RelativeEncoder sparkMaxEncoder; // NEO internal encoder
 
-  private double lastPosition;
-  private double lastVelocity;
-  private double lastDesiredPosition;
-  private double lastDesiredVelocity;
-  private double lastDesiredVoltage;
+  private double lastPosition; // Unit: Rotations
+  private double lastVelocity; // Unit: RPM
+  private double lastDesiredPosition; // Unit: Rotations
+  private double lastDesiredVelocity; // Unit: RPM
+  private double lastDesiredVoltage; // Unit: Volts
 
   private double velocityConversionFactor;
   private double positionConversionFactor;
@@ -98,7 +99,7 @@ public class CANMotorController {
    * Creates CANMotorController with 10ms timestep and 5 filter points
    * @param CANID
    */
-  public CANMotorController(int CANID) {
+  public SparkMaxController(int CANID) {
     this(CANID, 10, 5);
   }
 
@@ -108,12 +109,12 @@ public class CANMotorController {
    * @param updateTimestep milliseconds per update (time delta)
    * @param velocityFilterPoints number of points on velocity filter
    */
-  public CANMotorController(int CANID, int updateTimestep, int velocityFilterPoints) {
+  public SparkMaxController(int CANID, int updateTimestep, int velocityFilterPoints) {
     this.sparkMax = new CANSparkMax(CANID, CANSparkMax.MotorType.kBrushless);
     this.sparkMaxPIDController = this.sparkMax.getPIDController();
     this.sparkMaxEncoder = this.sparkMax.getEncoder();
 
-    this.deviceInterface = new CAN(this.sparkMax.getDeviceId(), CANMotorController.manufacturerID, CANMotorController.deviceTypeID);
+    this.deviceInterface = new CAN(this.sparkMax.getDeviceId(), SparkMaxController.manufacturerID, SparkMaxController.deviceTypeID);
     this.velocityFilter = LinearFilter.backwardFiniteDifference(1, velocityFilterPoints, updateTimestep / 1000.0);
 
     this.updateNotifier = new Notifier(this::update);
@@ -250,7 +251,7 @@ public class CANMotorController {
    * @return
    */
   public boolean isAtPosition(double position, double tolerance, boolean useEncoder) {
-    return CANMotorController.inInclusiveRange(this.getCurrentPosition(useEncoder) - position, tolerance);
+    return SparkMaxController.inInclusiveRange(this.getCurrentPosition(useEncoder) - position, tolerance);
   }
 
   /** */
@@ -266,7 +267,7 @@ public class CANMotorController {
    * @return
    */
   public boolean isAtVelocity(double velocity, double tolerance, boolean useEncoder) {
-    return CANMotorController.inInclusiveRange(this.getCurrentVelocity(useEncoder) - velocity, tolerance);
+    return SparkMaxController.inInclusiveRange(this.getCurrentVelocity(useEncoder) - velocity, tolerance);
   }
 
   /**

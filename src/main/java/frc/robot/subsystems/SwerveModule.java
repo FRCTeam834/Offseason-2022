@@ -15,13 +15,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveModuleConstants;
-import frc.robot.libs.CANMotorController;
+import frc.robot.libs.SparkMaxController;
 import frc.robot.libs.MathPlus;
 
 public class SwerveModule extends SubsystemBase {
 
-  private final CANMotorController steerController;
-  private final CANMotorController driveController;
+  private final SparkMaxController steerController;
+  private final SparkMaxController driveController;
   private final CANCoder canCoder;
   private PIDController drivePIDController;
   private SimpleMotorFeedforward driveFeedforward;
@@ -38,8 +38,8 @@ public class SwerveModule extends SubsystemBase {
     double ffkV,
     double ffkA
   ) {
-    steerController = new CANMotorController(steerID);
-    driveController = new CANMotorController(driveID);
+    steerController = new SparkMaxController(steerID);
+    driveController = new SparkMaxController(driveID);
     canCoder = new CANCoder(CANCoderID);
 
     drivePIDController = new PIDController(0.0, 0.0, 0.0);
@@ -92,12 +92,12 @@ public class SwerveModule extends SubsystemBase {
   }
 
   /** */
-  public CANMotorController getSteerController() {
+  public SparkMaxController getSteerController() {
     return steerController;
   }
 
   /** */
-  public CANMotorController getDriveController() {
+  public SparkMaxController getDriveController() {
     return driveController;
   }
 
