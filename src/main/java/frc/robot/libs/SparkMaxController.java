@@ -96,11 +96,11 @@ public class SparkMaxController {
 
   /**
    * 
-   * Creates CANMotorController with 10ms timestep and 5 filter points
+   * Creates CANMotorController with 20ms timestep and 5 filter points
    * @param CANID
    */
   public SparkMaxController(int CANID) {
-    this(CANID, 10, 5);
+    this(CANID, 20, 5);
   }
 
   /**
@@ -118,7 +118,9 @@ public class SparkMaxController {
     this.velocityFilter = LinearFilter.backwardFiniteDifference(1, velocityFilterPoints, updateTimestep / 1000.0);
 
     this.updateNotifier = new Notifier(this::update);
-    this.updateNotifier.startPeriodic(updateTimestep / 1000.0);
+    if (updateTimestep > 0) {
+      this.updateNotifier.startPeriodic(updateTimestep / 1000.0);
+    }
   }
 
   public CANSparkMax getSparkMax() {
@@ -133,61 +135,78 @@ public class SparkMaxController {
 
   // Config methods
 
-  public void configRestoreFactoryDefaults() {
+  public SparkMaxController configRestoreFactoryDefaults() {
     this.sparkMax.restoreFactoryDefaults();
+    return this;
   }
-  public void configInverted(boolean isInverted) {
+  public SparkMaxController configInverted(boolean isInverted) {
     this.sparkMax.setInverted(isInverted);
+    return this;
   }
-  public void configIdleMode(CANSparkMax.IdleMode idleMode) {
+  public SparkMaxController configIdleMode(CANSparkMax.IdleMode idleMode) {
     this.sparkMax.setIdleMode(idleMode);
+    return this;
   }
-  public void configVoltageCompensation(double voltage) {
+  public SparkMaxController configVoltageCompensation(double voltage) {
     this.sparkMax.enableVoltageCompensation(voltage);
+    return this;
   }
-  public void configSmartCurrentLimit(int limit) {
+  public SparkMaxController configSmartCurrentLimit(int limit) {
     this.sparkMax.setSmartCurrentLimit(limit);
+    return this;
   }
-  public void configPeriodicFramePeriods(int k0, int k1, int k2) {
+  public SparkMaxController configPeriodicFramePeriods(int k0, int k1, int k2) {
     this.sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus0, k0);
     this.sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus1, k1);
     this.sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus2, k2);
+    return this;
   }
-  public void configPositionConversionFactor(double factor) {
+  public SparkMaxController configPositionConversionFactor(double factor) {
     this.positionConversionFactor = factor;
+    return this;
   }
-  public void configVelocityConversionFactor(double factor) {
+  public SparkMaxController configVelocityConversionFactor(double factor) {
     this.velocityConversionFactor = factor;
+    return this;
   }
 
-  public void configPositionControlP(double kP) {
+  public SparkMaxController configPositionControlP(double kP) {
     this.sparkMaxPIDController.setP(kP, 0);
+    return this;
   }
-  public void configPositionControlI(double kI) {
+  public SparkMaxController configPositionControlI(double kI) {
     this.sparkMaxPIDController.setI(kI, 0);
+    return this;
   }
-  public void configPositionControlD(double kD) {
+  public SparkMaxController configPositionControlD(double kD) {
     this.sparkMaxPIDController.setD(kD, 0);
+    return this;
   }
-  public void configPositionControlFF(double kFF) {
+  public SparkMaxController configPositionControlFF(double kFF) {
     this.sparkMaxPIDController.setFF(kFF, 0);
+    return this;
   }
 
-  public void configVelocityControlP(double kP) {
+  public SparkMaxController configVelocityControlP(double kP) {
     this.velocityPIDController.setP(kP);
+    return this;
   }
-  public void configVelocityControlI(double kI) {
+  public SparkMaxController configVelocityControlI(double kI) {
     this.velocityPIDController.setI(kI);
+    return this;
   }
-  public void configVelocityControlD(double kD) {
+  public SparkMaxController configVelocityControlD(double kD) {
     this.velocityPIDController.setD(kD);
+    return this;
   }
-  public void configVelocityControlFF(double kFF) {
+  public SparkMaxController configVelocityControlFF(double kFF) {
     this.velocityFeedforward = kFF;
+    return this;
   }
 
-  public void burnFlash() {
+  public SparkMaxController burnFlash() {
     this.sparkMax.burnFlash();
+    return this;
   }
 
   //

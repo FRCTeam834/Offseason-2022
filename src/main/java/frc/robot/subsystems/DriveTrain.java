@@ -4,22 +4,13 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.CANIDS;
-import frc.robot.Constants.DriveTrainConstants;
-import frc.robot.Constants.SwerveModuleConstants;
-import frc.robot.Constants.TuningConstants.SwerveModuleFeedforwards;
-import frc.robot.Constants.TuningConstants.SwerveModulePIDS;
+import frc.robot.utilities.SwerveModuleFactory;
 
 public class DriveTrain extends SubsystemBase {
   private static final DriveTrain instance = new DriveTrain();
-
-  private static final DriveTrain getInstance() {
+  /** */
+  public static final DriveTrain getInstance() {
     return instance;
   }
 
@@ -27,120 +18,13 @@ public class DriveTrain extends SubsystemBase {
   private final SwerveModule frontRightModule;
   private final SwerveModule backLeftModule;
   private final SwerveModule backRightModule;
-
-  private final SwerveDriveKinematics kinematics;
-
+  
   /** Creates a new DriveTrain. */
-  public DriveTrain() {
-    frontLeftModule = new SwerveModule(
-      CANIDS.FL_STEER_ID,
-      CANIDS.FL_DRIVE_ID,
-      CANIDS.FL_CANCODER_ID,
-      SwerveModuleFeedforwards.FL_DRIVE_kS,
-      SwerveModuleFeedforwards.FL_DRIVE_kV,
-      SwerveModuleFeedforwards.FL_DRIVE_kA
-    );
-    frontRightModule = new SwerveModule(
-      CANIDS.FR_STEER_ID,
-      CANIDS.FR_DRIVE_ID,
-      CANIDS.FR_CANCODER_ID,
-      SwerveModuleFeedforwards.FR_DRIVE_kS,
-      SwerveModuleFeedforwards.FR_DRIVE_kV,
-      SwerveModuleFeedforwards.FL_DRIVE_kA
-    );
-    backLeftModule = new SwerveModule(
-      CANIDS.BL_STEER_ID,
-      CANIDS.BL_DRIVE_ID,
-      CANIDS.BL_CANCODER_ID,
-      SwerveModuleFeedforwards.BL_DRIVE_kS,
-      SwerveModuleFeedforwards.BL_DRIVE_kV,
-      SwerveModuleFeedforwards.BL_DRIVE_kA
-    );
-    backRightModule = new SwerveModule(
-      CANIDS.BR_STEER_ID,
-      CANIDS.BR_DRIVE_ID,
-      CANIDS.BR_CANCODER_ID,
-      SwerveModuleFeedforwards.BR_DRIVE_kS,
-      SwerveModuleFeedforwards.BR_DRIVE_kV,
-      SwerveModuleFeedforwards.BR_DRIVE_kA
-    );
-
-    kinematics = new SwerveDriveKinematics(
-      SwerveModuleConstants.FL_POS,
-      SwerveModuleConstants.FR_POS,
-      SwerveModuleConstants.BL_POS,
-      SwerveModuleConstants.BR_POS
-    );
-
-    frontLeftModule.setSteerP(SwerveModulePIDS.FL_STEER_kP);
-    frontLeftModule.setSteerI(SwerveModulePIDS.FL_STEER_kI);
-    frontLeftModule.setSteerD(SwerveModulePIDS.FL_STEER_kD);
-    // frontLeftModule.setDriveP(SwerveModulePIDS.FL_DRIVE_kP);
-    // frontLeftModule.setDriveI(SwerveModulePIDS.FL_DRIVE_kI);
-    // frontLeftModule.setDriveD(SwerveModulePIDS.FL_DRIVE_kD);
-
-    frontRightModule.setSteerP(SwerveModulePIDS.FR_STEER_kP);
-    frontRightModule.setSteerI(SwerveModulePIDS.FR_STEER_kI);
-    frontRightModule.setSteerD(SwerveModulePIDS.FR_STEER_kD);
-    // frontRightModule.setDriveP(SwerveModulePIDS.FR_DRIVE_kP);
-    // frontRightModule.setDriveI(SwerveModulePIDS.FR_DRIVE_kI);
-    // frontRightModule.setDriveD(SwerveModulePIDS.FR_DRIVE_kD);
-
-    backLeftModule.setSteerP(SwerveModulePIDS.BL_STEER_kP);
-    backLeftModule.setSteerI(SwerveModulePIDS.BL_STEER_kI);
-    backLeftModule.setSteerD(SwerveModulePIDS.BL_STEER_kD);
-    // backLeftModule.setDriveP(SwerveModulePIDS.BL_DRIVE_kP);
-    // backLeftModule.setDriveI(SwerveModulePIDS.BL_DRIVE_kI);
-    // backLeftModule.setDriveD(SwerveModulePIDS.BL_DRIVE_kD);
-
-    backRightModule.setSteerP(SwerveModulePIDS.BR_STEER_kP);
-    backRightModule.setSteerI(SwerveModulePIDS.BR_STEER_kI);
-    backRightModule.setSteerD(SwerveModulePIDS.BR_STEER_kD);
-    // backRightModule.setDriveP(SwerveModulePIDS.BR_DRIVE_kP);
-    // backRightModule.setDriveI(SwerveModulePIDS.BR_DRIVE_kI);
-    // backRightModule.setDriveD(SwerveModulePIDS.BR_DRIVE_kD);
-
-    if (DriverStation.isFMSAttached()) {
-      frontLeftModule.getSteerController().burnFlash();
-      frontLeftModule.getDriveController().burnFlash();
-
-      frontRightModule.getSteerController().burnFlash();
-      frontRightModule.getDriveController().burnFlash();
-
-      backLeftModule.getSteerController().burnFlash();
-      backLeftModule.getDriveController().burnFlash();
-
-      backRightModule.getSteerController().burnFlash();
-      backRightModule.getDriveController().burnFlash();
-    }
-  }
-
-  /**
-   * 
-   * Closed loop drive
-   * @param vx m/s
-   * @param vy m/s
-   * @param omega deg/s
-   */
-  public void drive(
-    double vx,
-    double vy,
-    double omega
-  ) {
-    ChassisSpeeds speeds = new ChassisSpeeds(vx, vy, omega);
-    SwerveModuleState[] desiredStates = kinematics.toSwerveModuleStates(speeds);
-
-    setDesiredModuleStates(desiredStates);
-  }
-
-  public void setDesiredModuleStates(SwerveModuleState[] desiredStates) {
-    // Normalization to ensure no speeds are beyond what is physically possible
-    SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, DriveTrainConstants.MAX_SPEED);
-
-    frontLeftModule.setDesiredState(desiredStates[0]);
-    frontRightModule.setDesiredState(desiredStates[1]);
-    backLeftModule.setDesiredState(desiredStates[2]);
-    backRightModule.setDesiredState(desiredStates[3]);
+  private DriveTrain() {
+    frontLeftModule = SwerveModuleFactory.getFLModule();
+    frontRightModule = SwerveModuleFactory.getFRModule();
+    backLeftModule = SwerveModuleFactory.getBLModule();
+    backRightModule = SwerveModuleFactory.getBRModule();
   }
 
   @Override

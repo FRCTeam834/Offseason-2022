@@ -30,72 +30,63 @@ public final class Constants {
     public static final int BR_CANCODER_ID = 12;
   }
 
-  public static final class TuningConstants {
-    public static final class SwerveModulePIDS {
-      public static final double FL_STEER_kP = 0.0;
-      public static final double FL_STEER_kI = 0.0;
-      public static final double FL_STEER_kD = 0.0;
-      public static final double FL_DRIVE_kP = 0.0;
-      public static final double FL_DRIVE_kI = 0.0;
-      public static final double FL_DRIVE_kD = 0.0;
+  public static final class PIDGAINS {
+    public static final double FL_STEER_kP  = 0.0;
+    public static final double FL_STEER_kI  = 0.0;
+    public static final double FL_STEER_kD  = 0.0;
+    public static final double FL_STEER_kFF = 0.0;
 
-      public static final double FR_STEER_kP = 0.0;
-      public static final double FR_STEER_kI = 0.0;
-      public static final double FR_STEER_kD = 0.0;
-      public static final double FR_DRIVE_kP = 0.0;
-      public static final double FR_DRIVE_kI = 0.0;
-      public static final double FR_DRIVE_kD = 0.0;
+    public static final double FL_DRIVE_kP  = 0.0;
+    public static final double FL_DRIVE_kI  = 0.0;
+    public static final double FL_DRIVE_kD  = 0.0;
+    public static final double FL_DRIVE_kFF = 0.0;
 
-      public static final double BL_STEER_kP = 0.0;
-      public static final double BL_STEER_kI = 0.0;
-      public static final double BL_STEER_kD = 0.0;
-      public static final double BL_DRIVE_kP = 0.0;
-      public static final double BL_DRIVE_kI = 0.0;
-      public static final double BL_DRIVE_kD = 0.0;
+    public static final double FR_STEER_kP  = 0.0;
+    public static final double FR_STEER_kI  = 0.0;
+    public static final double FR_STEER_kD  = 0.0;
+    public static final double FR_STEER_kFF = 0.0;
 
-      public static final double BR_STEER_kP = 0.0;
-      public static final double BR_STEER_kI = 0.0;
-      public static final double BR_STEER_kD = 0.0;
-      public static final double BR_DRIVE_kP = 0.0;
-      public static final double BR_DRIVE_kI = 0.0;
-      public static final double BR_DRIVE_kD = 0.0;
-    }
-    public static final class SwerveModuleFeedforwards {
-      public static final double FL_DRIVE_kS = 0.0;
-      public static final double FL_DRIVE_kV = 0.0;
-      public static final double FL_DRIVE_kA = 0.0;
+    public static final double FR_DRIVE_kP  = 0.0;
+    public static final double FR_DRIVE_kI  = 0.0;
+    public static final double FR_DRIVE_kD  = 0.0;
+    public static final double FR_DRIVE_kFF = 0.0;
 
-      public static final double FR_DRIVE_kS = 0.0;
-      public static final double FR_DRIVE_kV = 0.0;
-      public static final double FR_DRIVE_kA = 0.0;
+    public static final double BL_STEER_kP  = 0.0;
+    public static final double BL_STEER_kI  = 0.0;
+    public static final double BL_STEER_kD  = 0.0;
+    public static final double BL_STEER_kFF = 0.0;
 
-      public static final double BL_DRIVE_kS = 0.0;
-      public static final double BL_DRIVE_kV = 0.0;
-      public static final double BL_DRIVE_kA = 0.0;
+    public static final double BL_DRIVE_kP  = 0.0;
+    public static final double BL_DRIVE_kI  = 0.0;
+    public static final double BL_DRIVE_kD  = 0.0;
+    public static final double BL_DRIVE_kFF = 0.0;
 
-      public static final double BR_DRIVE_kS = 0.0;
-      public static final double BR_DRIVE_kV = 0.0;
-      public static final double BR_DRIVE_kA = 0.0;
-    }
+    public static final double BR_STEER_kP  = 0.0;
+    public static final double BR_STEER_kI  = 0.0;
+    public static final double BR_STEER_kD  = 0.0;
+    public static final double BR_STEER_kFF = 0.0;
+
+    public static final double BR_DRIVE_kP  = 0.0;
+    public static final double BR_DRIVE_kI  = 0.0;
+    public static final double BR_DRIVE_kD  = 0.0;
+    public static final double BR_DRIVE_kFF = 0.0;
   }
 
-  public static final class DriveTrainConstants {
-    // m/s
+  public static final class SWERVEMODULECONSTANTS {
+    // meters per second
     public static final double MAX_SPEED = 0.0;
+    public static final double WHEEL_DIAMETER = 0.0;
+    public static final double GEAR_RATIO = 0.0;
+    // degrees
+    public static final double POSITION_CONVERSION_FACTOR = 360 * Math.PI * WHEEL_DIAMETER / GEAR_RATIO;
+    // meters per second
+    public static final double VELOCITY_CONVERSION_FACTOR = 60 * Math.PI * WHEEL_DIAMETER;
   }
 
-  public static final class SwerveModuleConstants {
-    public static final Translation2d FL_POS = new Translation2d(0.0, 0.0);
-    public static final Translation2d FR_POS = new Translation2d(0.0, 0.0);
-    public static final Translation2d BL_POS = new Translation2d(0.0, 0.0);
-    public static final Translation2d BR_POS = new Translation2d(0.0, 0.0);
-
-    // !Convert to deg/s
-    public static final double DRIVE_POS_CONVERSION_FACTOR = 0;
-    // !Convert to m/s
-    public static final double DRIVE_VEL_CONVERSION_FACTOR = 0;
-
-    public static final double AT_VELOCITY_TOLERANCE = 0.0;
-    public static final double AT_POSITION_TOLERANCE = 0.0;
+  public static final class DRIVETRAINCONSTANTS {
+    public static final Translation2d FLM_POS = new Translation2d(0.0, 0.0);
+    public static final Translation2d FRM_POS = new Translation2d(0.0, 0.0);
+    public static final Translation2d BLM_POS = new Translation2d(0.0, 0.0);
+    public static final Translation2d BRM_POS = new Translation2d(0.0, 0.0);
   }
 }
