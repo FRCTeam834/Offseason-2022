@@ -10,11 +10,12 @@ public class MathPlus {
 
   /**
    * Returns normalized difference between two angles [-180, 180)
+   * !Note: This is b - a
    * @param a deg
    * @param b deg
    * @return deg
    */
-  public static final double realAngleDiff(double a, double b) {
+  public static final double realAngleDiff(double b, double a) {
     double d = (b - a) % 360.0;
     if (d < -180) d += 360;
     else if (d >= 180) d -= 360;
@@ -27,8 +28,8 @@ public class MathPlus {
    * @param b deg
    * @return deg
    */
-  public static final double absRealAngleDiff(double a, double b) {
-    return Math.abs(realAngleDiff(a, b));
+  public static final double absRealAngleDiff(double b, double a) {
+    return Math.abs(realAngleDiff(b, a));
   }
 
   /**
