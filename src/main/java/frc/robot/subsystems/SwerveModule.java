@@ -16,14 +16,19 @@ import frc.robot.libs.MathPlus;
 import frc.robot.libs.SparkMaxController;
 
 public class SwerveModule extends SubsystemBase {
+
+  /** Less aggressive 120 degree module optimization compared to wpilib 90 deg */
+  public static final SwerveModuleState optimizeModuleState(SwerveModuleState state, double currentAngle) {
+    return SwerveModule.optimizeModuleState(state, currentAngle, 120.0);
+  }
+
   /**
-   * 
-   * Less aggressive state optimization using 120 degrees instead of 90
+   * Module state optimization
    * @param state
    * @param currentAngle
    */
-  public static final SwerveModuleState optimizeModuleState(SwerveModuleState state, double currentAngle) {
-    if (MathPlus.absRealAngleDiff(currentAngle, state.angle.getDegrees()) < 120) {
+  public static final SwerveModuleState optimizeModuleState(SwerveModuleState state, double currentAngle, double threshold) {
+    if (MathPlus.absRealAngleDiff(currentAngle, state.angle.getDegrees()) < threshold) {
       return new SwerveModuleState(
         state.speedMetersPerSecond,
         Rotation2d.fromDegrees(MathPlus.matchAngleScope(state.angle.getDegrees(), currentAngle))
@@ -82,6 +87,14 @@ public class SwerveModule extends SubsystemBase {
   }
 
   /**
+   * Get current velocity of module
+   * @return
+   */
+  public double getCurrentVelocity() {
+    return driveController.getCurrentVelocity();
+  }
+
+  /**
    * Set desired module state; closed loop
    * @param desiredState
    */
@@ -106,7 +119,7 @@ public class SwerveModule extends SubsystemBase {
   /** */
   public SwerveModuleState getCurrentState() {
     return new SwerveModuleState(
-      driveController.getCurrentVelocity(),
+      getCurrentVelocity(),
       Rotation2d.fromDegrees(steerController.getCurrentPosition())
     );
   }

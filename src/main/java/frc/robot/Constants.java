@@ -4,7 +4,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -93,5 +95,12 @@ public final class Constants {
     public static final Translation2d FRM_POS = new Translation2d(0.0, 0.0);
     public static final Translation2d BLM_POS = new Translation2d(0.0, 0.0);
     public static final Translation2d BRM_POS = new Translation2d(0.0, 0.0);
+
+    public static final SwerveModuleState[] IDLE_MODULE_CONFIGURATION = {
+      new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
+      new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
+      new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
+      new SwerveModuleState(0, Rotation2d.fromDegrees(45))
+    };
   }
 }

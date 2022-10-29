@@ -41,9 +41,8 @@ public class DriveTrain extends SubsystemBase {
     );
   }
 
-  /** */
+  /** Set module states to desired states; closed loop */
   private void setDesiredModuleStates(SwerveModuleState[] desiredStates) {
-    //
     SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SWERVEMODULECONSTANTS.MAX_SPEED);
 
     frontLeftModule.setDesiredState(desiredStates[0]);
@@ -52,9 +51,24 @@ public class DriveTrain extends SubsystemBase {
     backRightModule.setDesiredState(desiredStates[3]);
   }
 
+  /** Set module states to desired states; open loop */
+  private void setDesiredModuleStatesOpenLoop(SwerveModuleState[] desiredStates) {
+    SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SWERVEMODULECONSTANTS.MAX_SPEED);
+
+    frontLeftModule.setDesiredStateOpenLoop(desiredStates[0]);
+    frontRightModule.setDesiredStateOpenLoop(desiredStates[1]);
+    backLeftModule.setDesiredStateOpenLoop(desiredStates[2]);
+    backRightModule.setDesiredStateOpenLoop(desiredStates[3]);
+  }
+
   /** */
   public void setDesiredSpeeds(ChassisSpeeds speeds) {
     setDesiredModuleStates(kinematics.toSwerveModuleStates(speeds));
+  }
+
+  /** */
+  public void setDesiredSpeedsOpenLoop(ChassisSpeeds speeds) {
+    setDesiredModuleStatesOpenLoop(kinematics.toSwerveModuleStates(speeds));
   }
 
   /**
@@ -69,6 +83,11 @@ public class DriveTrain extends SubsystemBase {
     double omega
   ) {
     setDesiredSpeeds(new ChassisSpeeds(vx, vy, omega));
+  }
+
+  /** */
+  public void setIdleModuleStates() {
+    setDesiredModuleStates(DRIVETRAINCONSTANTS.IDLE_MODULE_CONFIGURATION);
   }
 
   @Override
