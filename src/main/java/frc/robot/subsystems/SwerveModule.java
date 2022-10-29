@@ -64,8 +64,8 @@ public class SwerveModule extends SubsystemBase {
 
     canCoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
     canCoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
-    // Seed relative encoder on startup
-    steerController.getSparkMaxEncoder().setPosition(canCoder.getAbsolutePosition());
+
+    seedSteerEncoder();
   }
   
   /** */
@@ -76,6 +76,11 @@ public class SwerveModule extends SubsystemBase {
   /** */
   public SparkMaxController getDriveController() {
     return driveController;
+  }
+
+  /** */
+  private void seedSteerEncoder() {
+    steerController.getSparkMaxEncoder().setPosition(getCurrentAngle());
   }
 
   /**
