@@ -34,7 +34,7 @@ public class MathPlus {
 
   /**
    * 
-   * Matches targedAngle to scope of scopeAngle (0, 360]
+   * Matches targedAngle to scope of scopeAngle
    * @param targetAngle
    * @param scopeAngle
    * @return

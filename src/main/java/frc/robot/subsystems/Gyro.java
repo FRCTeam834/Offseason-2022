@@ -10,9 +10,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CANIDS;
 
+/**
+ * !TODO: Rename this
+ */
 public class Gyro extends SubsystemBase {
   private static final Gyro instance = new Gyro();
 
+  /** */
   public static final Gyro getInstance() {
     return instance;
   }
@@ -23,10 +27,12 @@ public class Gyro extends SubsystemBase {
     gyro = new Pigeon2(CANIDS.PIGEON2_ID);
   }
 
+  /** */
   public double getYaw() {
     return gyro.getYaw();
   }
 
+  /** */
   public Rotation2d getYawAsRotation2d() {
     return Rotation2d.fromDegrees(getYaw());
   }

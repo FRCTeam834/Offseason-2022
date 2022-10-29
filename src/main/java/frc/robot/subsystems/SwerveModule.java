@@ -16,7 +16,6 @@ import frc.robot.libs.MathPlus;
 import frc.robot.libs.SparkMaxController;
 
 public class SwerveModule extends SubsystemBase {
-
   /** Less aggressive 120 degree module optimization compared to wpilib 90 deg */
   public static final SwerveModuleState optimizeModuleState(SwerveModuleState state, double currentAngle) {
     return SwerveModule.optimizeModuleState(state, currentAngle, 120.0);
