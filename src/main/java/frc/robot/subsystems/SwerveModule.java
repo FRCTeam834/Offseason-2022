@@ -44,6 +44,9 @@ public class SwerveModule extends SubsystemBase {
   private final SparkMaxController driveController;
   private final CANCoder canCoder;
 
+  private SwerveModuleState desiredState;
+  private boolean openLoop;
+
   /**
    * 
    * @param steerCANID
@@ -94,37 +97,34 @@ public class SwerveModule extends SubsystemBase {
   }
 
   /**
-   * Set desired module state; closed loop
+   * Set desired module state
    * @param desiredState
    */
-  public void setDesiredState(SwerveModuleState desiredState) {
+  public void setDesiredState(SwerveModuleState desiredState, boolean openLoop) {
     desiredState = SwerveModule.optimizeModuleState(desiredState, steerController.getCurrentPosition());
-
-    driveController.setDesiredVelocity(desiredState.speedMetersPerSecond);
-    steerController.setDesiredPosition(desiredState.angle.getDegrees());
-  }
-
-  /**
-   * Set desired module state; open loop
-   * @param desiredState
-   */
-  public void setDesiredStateOpenLoop(SwerveModuleState desiredState) {
-    desiredState = SwerveModule.optimizeModuleState(desiredState, steerController.getCurrentPosition());
-
-    driveController.getSparkMax().set(desiredState.speedMetersPerSecond / SWERVEMODULECONSTANTS.MAX_SPEED);
-    steerController.setDesiredPosition(desiredState.angle.getDegrees());
+    this.desiredState = desiredState;
+    this.openLoop = openLoop;
   }
 
   /** */
   public SwerveModuleState getCurrentState() {
     return new SwerveModuleState(
       getCurrentVelocity(),
-      Rotation2d.fromDegrees(steerController.getCurrentPosition())
+      Rotation2d.fromDegrees(getCurrentAngle())
     );
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    if (this.desiredState == null) return;
+    
+    if (openLoop) {
+      driveController.getSparkMax().set(this.desiredState.speedMetersPerSecond / SWERVEMODULECONSTANTS.MAX_SPEED);
+      steerController.setDesiredPosition(this.desiredState.angle.getDegrees());
+    } else {
+      driveController.setDesiredVelocity(this.desiredState.speedMetersPerSecond);
+      steerController.setDesiredPosition(this.desiredState.angle.getDegrees());
+    }
   }
 }
