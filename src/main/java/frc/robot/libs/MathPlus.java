@@ -50,4 +50,15 @@ public class MathPlus {
     }
     return targetAngle;
   }
+
+  /**
+   * 
+   * Converts targetAngle to equivalent angle in bounds (0, 360]
+   * @param targetAngle
+   * @return
+   */
+  public static final double convertAngle0To360(double targetAngle) {
+    while (targetAngle < 0) targetAngle += 360;
+    return targetAngle % 360.0;
+  }
 }

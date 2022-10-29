@@ -83,7 +83,7 @@ public class SwerveModule extends SubsystemBase {
    * @return
    */
   public double getCurrentAngle() {
-    return canCoder.getAbsolutePosition() - magnetOffset;
+    return MathPlus.convertAngle0To360(canCoder.getAbsolutePosition() - magnetOffset);
   }
 
   /**
