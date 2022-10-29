@@ -43,7 +43,6 @@ public class SwerveModule extends SubsystemBase {
   private final SparkMaxController steerController;
   private final SparkMaxController driveController;
   private final CANCoder canCoder;
-  private final double magnetOffset;
 
   /**
    * 
@@ -60,12 +59,12 @@ public class SwerveModule extends SubsystemBase {
     steerController = new SparkMaxController(steerCANID, 0, 0);
     driveController = new SparkMaxController(steerCANID, 20, 5);
     canCoder = new CANCoder(CANCoderID);
-    this.magnetOffset = magnetOffset;
 
     canCoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
     canCoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
 
-    seedSteerEncoder();
+    // seed internal encoder
+    steerController.getSparkMaxEncoder().setPosition(MathPlus.convertAngle0To360(canCoder.getAbsolutePosition() - magnetOffset));
   }
   
   /** */
@@ -78,17 +77,12 @@ public class SwerveModule extends SubsystemBase {
     return driveController;
   }
 
-  /** */
-  private void seedSteerEncoder() {
-    steerController.getSparkMaxEncoder().setPosition(getCurrentAngle());
-  }
-
   /**
    * Get current angle of module
    * @return
    */
   public double getCurrentAngle() {
-    return MathPlus.convertAngle0To360(canCoder.getAbsolutePosition() - magnetOffset);
+    return steerController.getCurrentPosition();
   }
 
   /**
