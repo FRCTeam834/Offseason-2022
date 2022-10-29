@@ -8,6 +8,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.DRIVETRAINCONSTANTS;
 import frc.robot.Constants.SWERVEMODULECONSTANTS;
 import frc.robot.utilities.SwerveModuleFactory;
@@ -83,6 +84,20 @@ public class DriveTrain extends SubsystemBase {
     double omega
   ) {
     setDesiredSpeeds(new ChassisSpeeds(vx, vy, omega));
+  }
+
+  /**
+   * 
+   * @param vx
+   * @param vy
+   * @param omega
+   */
+  public void driveFieldCentric(
+    double vx,
+    double vy,
+    double omega
+  ) {
+    setDesiredSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, RobotContainer.gyro.getYawAsRotation2d()));
   }
 
   /** */

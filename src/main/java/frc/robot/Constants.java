@@ -30,6 +30,8 @@ public final class Constants {
     public static final int BR_STEER_ID    = 10;
     public static final int BR_DRIVE_ID    = 11;
     public static final int BR_CANCODER_ID = 12;
+    
+    public static final int PIGEON2_ID     = 13;
   }
 
   public static final class PIDGAINS {
