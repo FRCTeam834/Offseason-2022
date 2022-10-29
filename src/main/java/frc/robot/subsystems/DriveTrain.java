@@ -42,18 +42,33 @@ public class DriveTrain extends SubsystemBase {
   }
 
   /** Set module states to desired states; closed loop */
-  private void setDesiredModuleStates(SwerveModuleState[] desiredStates, boolean openLoopDrive) {
+  private void setDesiredModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SWERVEMODULECONSTANTS.MAX_SPEED);
 
-    frontLeftModule.setDesiredState(desiredStates[0], openLoopDrive);
-    frontRightModule.setDesiredState(desiredStates[1], openLoopDrive);
-    backLeftModule.setDesiredState(desiredStates[2], openLoopDrive);
-    backRightModule.setDesiredState(desiredStates[3], openLoopDrive);
+    frontLeftModule.setDesiredState(desiredStates[0]);
+    frontRightModule.setDesiredState(desiredStates[1]);
+    backLeftModule.setDesiredState(desiredStates[2]);
+    backRightModule.setDesiredState(desiredStates[3]);
+  }
+
+  /** Set module states to desired states; open loop */
+  private void setDesiredModuleStatesOpenLoop(SwerveModuleState[] desiredStates) {
+    SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SWERVEMODULECONSTANTS.MAX_SPEED);
+
+    frontLeftModule.setDesiredStateOpenLoop(desiredStates[0]);
+    frontRightModule.setDesiredStateOpenLoop(desiredStates[1]);
+    backLeftModule.setDesiredStateOpenLoop(desiredStates[2]);
+    backRightModule.setDesiredStateOpenLoop(desiredStates[3]);
   }
 
   /** */
-  public void setDesiredSpeeds(ChassisSpeeds speeds, boolean openLoopDrive) {
-    setDesiredModuleStates(kinematics.toSwerveModuleStates(speeds), openLoopDrive);
+  public void setDesiredSpeeds(ChassisSpeeds speeds) {
+    setDesiredModuleStates(kinematics.toSwerveModuleStates(speeds));
+  }
+
+  /** */
+  public void setDesiredSpeedsOpenLoop(ChassisSpeeds speeds) {
+    setDesiredModuleStatesOpenLoop(kinematics.toSwerveModuleStates(speeds));
   }
 
   /**
@@ -67,12 +82,12 @@ public class DriveTrain extends SubsystemBase {
     double vy,
     double omega
   ) {
-    setDesiredSpeeds(new ChassisSpeeds(vx, vy, omega), false);
+    setDesiredSpeeds(new ChassisSpeeds(vx, vy, omega));
   }
 
   /** */
   public void setIdleModuleStates() {
-    setDesiredModuleStates(DRIVETRAINCONSTANTS.IDLE_MODULE_CONFIGURATION, false);
+    setDesiredModuleStates(DRIVETRAINCONSTANTS.IDLE_MODULE_CONFIGURATION);
   }
 
   @Override
