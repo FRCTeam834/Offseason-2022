@@ -30,4 +30,24 @@ public class MathPlus {
   public static final double absRealAngleDiff(double a, double b) {
     return Math.abs(realAngleDiff(a, b));
   }
+
+  /**
+   * 
+   * Matches targedAngle to scope of scopeAngle (0, 360]
+   * @param targetAngle
+   * @param scopeAngle
+   * @return
+   */
+  public static final double matchAngleScope(double targetAngle, double scopeAngle) {
+    if (targetAngle < scopeAngle) {
+      while (Math.abs(targetAngle - scopeAngle) >= 180) {
+        targetAngle += 360;
+      }
+    } else {
+      while (Math.abs(targetAngle - scopeAngle) >= 180) {
+        targetAngle -= 360;
+      }
+    }
+    return targetAngle;
+  }
 }

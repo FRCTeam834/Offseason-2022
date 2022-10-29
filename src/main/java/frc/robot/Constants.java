@@ -81,6 +81,11 @@ public final class Constants {
     public static final double POSITION_CONVERSION_FACTOR = 360 * Math.PI * WHEEL_DIAMETER / GEAR_RATIO;
     // meters per second
     public static final double VELOCITY_CONVERSION_FACTOR = 60 * Math.PI * WHEEL_DIAMETER;
+
+    public static final double FL_MAGNET_OFFSET = 0.0;
+    public static final double FR_MAGNET_OFFSET = 0.0;
+    public static final double BL_MAGNET_OFFSET = 0.0;
+    public static final double BR_MAGNET_OFFSET = 0.0;
   }
 
   public static final class DRIVETRAINCONSTANTS {

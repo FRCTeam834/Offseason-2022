@@ -19,7 +19,9 @@ import edu.wpi.first.wpilibj.Notifier;
  * CANSparkMax wrapper class
  * 
  * Positional control on spark maxes
- * Velocity control on rio -- mimics sparkmax api
+ * Velocity control on rio -- mimics sparkmax api !Note: PIDF gains will be different
+ * 
+ * @author Keller
  */
 public class SparkMaxController {
   /**
@@ -106,7 +108,7 @@ public class SparkMaxController {
   /**
    * 
    * @param CANID CAN ID of sparkmax controller
-   * @param updateTimestep milliseconds per update (time delta)
+   * @param updateTimestep milliseconds per update (time delta) !Note: 10ms is the lowest recommended
    * @param velocityFilterPoints number of points on velocity filter
    */
   public SparkMaxController(int CANID, int updateTimestep, int velocityFilterPoints) {
