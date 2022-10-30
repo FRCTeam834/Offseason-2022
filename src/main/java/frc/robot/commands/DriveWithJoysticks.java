@@ -7,6 +7,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.DRIVERCONSTANTS;
 import frc.robot.Constants.PIDGAINS;
@@ -24,6 +25,7 @@ public class DriveWithJoysticks extends CommandBase {
 
   private PIDController keepAnglePIDController = PIDGAINS.KEEP_ANGLE.generateController();
   private double keepAngle;
+  private Timer timeSinceLastTurn = new Timer();
 
   // Limits acceleration
   private SlewRateLimiter xRateLimiter = new SlewRateLimiter(DRIVERCONSTANTS.TRANSLATIONAL_RATELIMIT);
@@ -49,7 +51,10 @@ public class DriveWithJoysticks extends CommandBase {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    timeSinceLastTurn.reset();
+    timeSinceLastTurn.start();
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -78,6 +83,16 @@ public class DriveWithJoysticks extends CommandBase {
     double vx = speed * Math.cos(theta);
     double vy = speed * Math.sin(theta);
     double omega = DRIVERCONSTANTS.MAX_STEER_SPEED * steerInput;
+
+    if (omega != 0) {
+      timeSinceLastTurn.reset();
+    }
+
+    if(timeSinceLastTurn.get() < 0.2) {
+      keepAngle = gyro.getYaw();
+    } else {
+      omega = keepAnglePIDController.calculate(gyro.getYaw(), keepAngle);
+    }
 
     if (vx == 0 && vy == 0 && omega == 0) {
       driveTrain.setIdleModuleStates();
