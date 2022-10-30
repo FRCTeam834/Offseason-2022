@@ -79,7 +79,11 @@ public class DriveWithJoysticks extends CommandBase {
     double vy = speed * Math.sin(theta);
     double omega = DRIVERCONSTANTS.MAX_STEER_SPEED * steerInput;
 
-    driveTrain.driveFieldCentric(vx, vy, omega, true);
+    if (vx == 0 && vy == 0 && omega == 0) {
+      driveTrain.setIdleModuleStates();
+    } else {
+      driveTrain.driveFieldCentric(vx, vy, omega, true);
+    }
   }
 
   // Called once the command ends or is interrupted.

@@ -11,11 +11,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CANIDS;
 
 public class Pigeon extends SubsystemBase {
-  
+
   private final Pigeon2 gyro;
   /** Creates a new Gyro. */
   public Pigeon() {
     gyro = new Pigeon2(CANIDS.PIGEON2_ID);
+  }
+
+  public void zeroYaw() {
+    gyro.setYaw(0);
   }
 
   /** */
