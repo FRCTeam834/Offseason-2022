@@ -9,6 +9,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DRIVETRAINCONSTANTS;
 import frc.robot.Constants.SWERVEMODULECONSTANTS;
@@ -25,8 +27,12 @@ public class DriveTrain extends SubsystemBase {
   private final SwerveDriveKinematics kinematics;
   private final SwerveDriveOdometry odometry;
 
+  private final Field2d field = new Field2d();
+
   /** Creates a new DriveTrain. */
   public DriveTrain(Pigeon gyro) {
+    SmartDashboard.putData("Field", field);
+
     this.gyro = gyro;
 
     frontLeftModule = SwerveModuleFactory.getFLModule();
@@ -140,5 +146,7 @@ public class DriveTrain extends SubsystemBase {
       backLeftModule.getCurrentState(),
       backRightModule.getCurrentState()
     );
+
+    field.setRobotPose(odometry.getPoseMeters());
   }
 }

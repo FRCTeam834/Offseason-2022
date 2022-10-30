@@ -55,8 +55,8 @@ public class SwerveModule extends SubsystemBase {
     int CANCoderID,
     double magnetOffset
   ) {
-    steerController = new SparkMaxController(steerCANID, 0, 0);
-    driveController = new SparkMaxController(steerCANID, 20, 5);
+    steerController = new SparkMaxController(steerCANID, 0, 5);
+    driveController = new SparkMaxController(driveCANID, 20, 5);
     canCoder = new CANCoder(CANCoderID);
 
     canCoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
