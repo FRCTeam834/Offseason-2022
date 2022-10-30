@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.DriveTrain;
-import frc.robot.subsystems.Gyro;
+import frc.robot.subsystems.Pigeon;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -18,7 +18,7 @@ import frc.robot.subsystems.Gyro;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  public static final Gyro gyro = Gyro.getInstance();
+  public static final Pigeon gyro = Pigeon.getInstance();
   public static final DriveTrain driveTrain = DriveTrain.getInstance();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */

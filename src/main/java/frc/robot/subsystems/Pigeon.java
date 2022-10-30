@@ -10,20 +10,17 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CANIDS;
 
-/**
- * !TODO: Rename this
- */
-public class Gyro extends SubsystemBase {
-  private static final Gyro instance = new Gyro();
+public class Pigeon extends SubsystemBase {
+  private static final Pigeon instance = new Pigeon();
 
   /** */
-  public static final Gyro getInstance() {
+  public static final Pigeon getInstance() {
     return instance;
   }
 
   private final Pigeon2 gyro;
   /** Creates a new Gyro. */
-  private Gyro() {
+  private Pigeon() {
     gyro = new Pigeon2(CANIDS.PIGEON2_ID);
   }
 
