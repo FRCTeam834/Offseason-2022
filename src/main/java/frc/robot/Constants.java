@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -30,7 +31,7 @@ public final class Constants {
     public static final int BR_STEER_ID    = 10;
     public static final int BR_DRIVE_ID    = 11;
     public static final int BR_CANCODER_ID = 12;
-    
+
     public static final int PIGEON2_ID     = 13;
   }
 
@@ -74,6 +75,22 @@ public final class Constants {
     public static final double BR_DRIVE_kI  = 0.0;
     public static final double BR_DRIVE_kD  = 0.0;
     public static final double BR_DRIVE_kFF = 0.0;
+
+    // ProfiledPIDController
+    public static final double AUTON_STEER_kP = 0.0;
+    public static final double AUTON_STEER_kI = 0.0;
+    public static final double AUTON_STEER_kD = 0.0;
+    public static final TrapezoidProfile.Constraints AUTON_STEER_CONSTRAINTS = new TrapezoidProfile.Constraints(
+      0.0, 0.0
+    );
+
+    public static final double AUTON_X_kP = 0.0;
+    public static final double AUTON_X_kI = 0.0;
+    public static final double AUTON_X_kD = 0.0;
+
+    public static final double AUTON_Y_kP = 0.0;
+    public static final double AUTON_Y_kI = 0.0;
+    public static final double AUTON_Y_kD = 0.0;
   }
 
   public static final class SWERVEMODULECONSTANTS {

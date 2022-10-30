@@ -4,8 +4,10 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DRIVETRAINCONSTANTS;
@@ -21,6 +23,7 @@ public class DriveTrain extends SubsystemBase {
   private final SwerveModule backRightModule;
 
   private final SwerveDriveKinematics kinematics;
+  private final SwerveDriveOdometry odometry;
 
   /** Creates a new DriveTrain. */
   public DriveTrain(Pigeon gyro) {
@@ -37,6 +40,17 @@ public class DriveTrain extends SubsystemBase {
       DRIVETRAINCONSTANTS.BLM_POS,
       DRIVETRAINCONSTANTS.BRM_POS
     );
+
+    odometry = new SwerveDriveOdometry(kinematics, gyro.getYawAsRotation2d());
+  }
+
+  private SwerveModuleState[] getCurrentModuleStates() {
+    return new SwerveModuleState[] {
+      frontLeftModule.getCurrentState(),
+      frontRightModule.getCurrentState(),
+      backLeftModule.getCurrentState(),
+      backRightModule.getCurrentState()
+    };
   }
 
   /** Set module states to desired states; closed loop */
@@ -78,9 +92,14 @@ public class DriveTrain extends SubsystemBase {
   public void driveRobotCentric(
     double vx,
     double vy,
-    double omega
+    double omega,
+    boolean openLoopDrive
   ) {
-    setDesiredSpeeds(new ChassisSpeeds(vx, vy, omega));
+    if (openLoopDrive) {
+      setDesiredSpeedsOpenLoop(new ChassisSpeeds(vx, vy, omega));
+    } else {
+      setDesiredSpeeds(new ChassisSpeeds(vx, vy, omega));
+    }
   }
 
   /**
@@ -92,9 +111,14 @@ public class DriveTrain extends SubsystemBase {
   public void driveFieldCentric(
     double vx,
     double vy,
-    double omega
+    double omega,
+    boolean openLoopDrive
   ) {
-    setDesiredSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, gyro.getYawAsRotation2d()));
+    if (openLoopDrive) {
+      setDesiredSpeedsOpenLoop(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, gyro.getYawAsRotation2d()));
+    } else {
+      setDesiredSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, gyro.getYawAsRotation2d()));
+    }
   }
 
   /** */
@@ -102,8 +126,19 @@ public class DriveTrain extends SubsystemBase {
     setDesiredModuleStates(DRIVETRAINCONSTANTS.IDLE_MODULE_CONFIGURATION);
   }
 
+  public void updateOdometryPose(Pose2d updatedPose) {
+    odometry.resetPosition(updatedPose, gyro.getYawAsRotation2d());
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    odometry.update(
+      gyro.getYawAsRotation2d(),
+      frontLeftModule.getCurrentState(),
+      frontRightModule.getCurrentState(),
+      backLeftModule.getCurrentState(),
+      backRightModule.getCurrentState()
+    );
   }
 }

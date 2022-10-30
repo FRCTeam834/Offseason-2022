@@ -360,7 +360,7 @@ public class SparkMaxController {
     // Extract position data from bytes
     double position = ByteBuffer
       .wrap(buffer.data)
-      .order(ByteOrder.BIG_ENDIAN)
+      .order(ByteOrder.LITTLE_ENDIAN)
       .getFloat();
     // double packetTime = buffer.timestamp;
     lastPosition = position;
