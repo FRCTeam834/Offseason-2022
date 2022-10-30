@@ -4,9 +4,10 @@
 
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.DRIVERCONSTANTS;
@@ -20,8 +21,9 @@ public class DriveWithJoysticks extends CommandBase {
   private DriveTrain driveTrain;
   private Pigeon gyro;
 
-  private Joystick steerJoystick;
-  private Joystick driveJoystick;
+  private DoubleSupplier xRaw;
+  private DoubleSupplier yRaw;
+  private DoubleSupplier steerRaw;
 
   private PIDController keepAnglePIDController = PIDGAINS.KEEP_ANGLE.generateController();
   private double keepAngle;
@@ -36,15 +38,17 @@ public class DriveWithJoysticks extends CommandBase {
   public DriveWithJoysticks(
     DriveTrain driveTrain,
     Pigeon gyro,
-    Joystick steerJoystick,
-    Joystick driveJoystick
+    DoubleSupplier xRaw,
+    DoubleSupplier yRaw,
+    DoubleSupplier steerRaw
   ) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.driveTrain = driveTrain;
     this.gyro = gyro;
 
-    this.steerJoystick = steerJoystick;
-    this.driveJoystick = driveJoystick;
+    this.xRaw = xRaw;
+    this.yRaw = yRaw;
+    this.steerRaw = steerRaw;
 
     addRequirements(driveTrain);
   }
@@ -62,17 +66,17 @@ public class DriveWithJoysticks extends CommandBase {
     // raw value -> deadzone -> scaling -> ratelimit
     double xInput = xRateLimiter.calculate(
       DRIVERCONSTANTS.JOYSTICK_SCALING_FUNCTION.calculate(
-        MathPlus.applyDeadzone(driveJoystick.getX(), DRIVERCONSTANTS.TRANSLATIONAL_DEADZONE)
+        MathPlus.applyDeadzone(xRaw.getAsDouble(), DRIVERCONSTANTS.TRANSLATIONAL_DEADZONE)
     ));
 
     double yInput = yRateLimiter.calculate(
       DRIVERCONSTANTS.JOYSTICK_SCALING_FUNCTION.calculate(
-        MathPlus.applyDeadzone(driveJoystick.getY(), DRIVERCONSTANTS.TRANSLATIONAL_DEADZONE)
+        MathPlus.applyDeadzone(yRaw.getAsDouble(), DRIVERCONSTANTS.TRANSLATIONAL_DEADZONE)
     ));
 
     double steerInput = steerRateLimiter.calculate(
       DRIVERCONSTANTS.JOYSTICK_SCALING_FUNCTION.calculate(
-        MathPlus.applyDeadzone(steerJoystick.getX(), DRIVERCONSTANTS.STEER_DEADZONE)
+        MathPlus.applyDeadzone(steerRaw.getAsDouble(), DRIVERCONSTANTS.STEER_DEADZONE)
       )
     );
 
