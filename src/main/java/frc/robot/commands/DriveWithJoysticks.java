@@ -70,6 +70,16 @@ public class DriveWithJoysticks extends CommandBase {
         MathPlus.applyDeadzone(steerJoystick.getX(), DRIVERCONSTANTS.STEER_DEADZONE)
       )
     );
+
+    double theta = Math.atan2(yInput, xInput);
+    // sqrt(2) / hypot(x, y) = % max speed; where sqrt(2) is hypot of 1 by 1 triangle
+    double speed = 1.414214 / Math.hypot(xInput, yInput) * DRIVERCONSTANTS.MAX_TRANSLATIONAL_SPEED;
+
+    double vx = speed * Math.cos(theta);
+    double vy = speed * Math.sin(theta);
+    double omega = DRIVERCONSTANTS.MAX_STEER_SPEED * steerInput;
+
+    driveTrain.driveFieldCentric(vx, vy, omega, true);
   }
 
   // Called once the command ends or is interrupted.

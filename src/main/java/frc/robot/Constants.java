@@ -24,6 +24,11 @@ public final class Constants {
     public static final int LEFT_JOYSTICK_PORT = 0;
     public static final int RIGHT_JOYSTICK_PORT = 1;
 
+    // meters per second
+    public static final double MAX_TRANSLATIONAL_SPEED = 3;
+    // degrees per second
+    public static final double MAX_STEER_SPEED = 180;
+
     public static final double TRANSLATIONAL_DEADZONE = 0.1;
     public static final double STEER_DEADZONE = 0.1;
 
