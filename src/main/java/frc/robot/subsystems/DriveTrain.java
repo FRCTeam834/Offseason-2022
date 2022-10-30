@@ -8,17 +8,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.RobotContainer;
 import frc.robot.Constants.DRIVETRAINCONSTANTS;
 import frc.robot.Constants.SWERVEMODULECONSTANTS;
 import frc.robot.utilities.SwerveModuleFactory;
 
 public class DriveTrain extends SubsystemBase {
-  private static final DriveTrain instance = new DriveTrain();
-  /** */
-  public static final DriveTrain getInstance() {
-    return instance;
-  }
+  private final Pigeon gyro;
 
   private final SwerveModule frontLeftModule;
   private final SwerveModule frontRightModule;
@@ -28,7 +23,9 @@ public class DriveTrain extends SubsystemBase {
   private final SwerveDriveKinematics kinematics;
 
   /** Creates a new DriveTrain. */
-  private DriveTrain() {
+  public DriveTrain(Pigeon gyro) {
+    this.gyro = gyro;
+
     frontLeftModule = SwerveModuleFactory.getFLModule();
     frontRightModule = SwerveModuleFactory.getFRModule();
     backLeftModule = SwerveModuleFactory.getBLModule();
@@ -97,7 +94,7 @@ public class DriveTrain extends SubsystemBase {
     double vy,
     double omega
   ) {
-    setDesiredSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, RobotContainer.gyro.getYawAsRotation2d()));
+    setDesiredSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, gyro.getYawAsRotation2d()));
   }
 
   /** */

@@ -18,8 +18,8 @@ import frc.robot.subsystems.Pigeon;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  public static final Pigeon gyro = Pigeon.getInstance();
-  public static final DriveTrain driveTrain = DriveTrain.getInstance();
+  public static final Pigeon gyro = new Pigeon();
+  public static final DriveTrain driveTrain = new DriveTrain(gyro);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

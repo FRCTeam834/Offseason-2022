@@ -11,16 +11,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CANIDS;
 
 public class Pigeon extends SubsystemBase {
-  private static final Pigeon instance = new Pigeon();
-
-  /** */
-  public static final Pigeon getInstance() {
-    return instance;
-  }
-
+  
   private final Pigeon2 gyro;
   /** Creates a new Gyro. */
-  private Pigeon() {
+  public Pigeon() {
     gyro = new Pigeon2(CANIDS.PIGEON2_ID);
   }
 
