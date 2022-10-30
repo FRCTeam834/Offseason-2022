@@ -5,8 +5,10 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.DRIVERCONSTANTS;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Pigeon;
 
@@ -20,6 +22,9 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public static final Pigeon gyro = new Pigeon();
   public static final DriveTrain driveTrain = new DriveTrain(gyro);
+
+  public static final Joystick leftJoystick = new Joystick(DRIVERCONSTANTS.LEFT_JOYSTICK_PORT);
+  public static final Joystick rightJoystick = new Joystick(DRIVERCONSTANTS.RIGHT_JOYSTICK_PORT);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

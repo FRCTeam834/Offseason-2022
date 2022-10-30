@@ -59,16 +59,16 @@ public class SwerveModuleFactory {
     ));
 
     module.getSteerController()
-      .configPositionControlP(PIDGAINS.FL_STEER_kP)
-      .configPositionControlI(PIDGAINS.FL_STEER_kI)
-      .configPositionControlD(PIDGAINS.FL_STEER_kD)
-      .configPositionControlFF(PIDGAINS.FL_STEER_kFF);
+      .configPositionControlP(PIDGAINS.FL_STEER.kP)
+      .configPositionControlI(PIDGAINS.FL_STEER.kI)
+      .configPositionControlD(PIDGAINS.FL_STEER.kD)
+      .configPositionControlFF(PIDGAINS.FL_STEER.kFF);
 
     module.getDriveController()
-      .configVelocityControlP(PIDGAINS.FL_DRIVE_kP)
-      .configVelocityControlI(PIDGAINS.FL_DRIVE_kI)
-      .configVelocityControlD(PIDGAINS.FL_DRIVE_kD)
-      .configVelocityControlFF(PIDGAINS.FL_DRIVE_kFF);
+      .configVelocityControlP(PIDGAINS.FL_DRIVE.kP)
+      .configVelocityControlI(PIDGAINS.FL_DRIVE.kI)
+      .configVelocityControlD(PIDGAINS.FL_DRIVE.kD)
+      .configVelocityControlFF(PIDGAINS.FL_DRIVE.kFF);
 
     if (DriverStation.isFMSAttached()) {
       module.getSteerController().burnFlash();
@@ -87,16 +87,16 @@ public class SwerveModuleFactory {
     ));
 
     module.getSteerController()
-      .configPositionControlP(PIDGAINS.FR_STEER_kP)
-      .configPositionControlI(PIDGAINS.FR_STEER_kI)
-      .configPositionControlD(PIDGAINS.FR_STEER_kD)
-      .configPositionControlFF(PIDGAINS.FR_STEER_kFF);
+      .configPositionControlP(PIDGAINS.FR_STEER.kP)
+      .configPositionControlI(PIDGAINS.FR_STEER.kI)
+      .configPositionControlD(PIDGAINS.FR_STEER.kD)
+      .configPositionControlFF(PIDGAINS.FR_STEER.kFF);
 
     module.getDriveController()
-      .configVelocityControlP(PIDGAINS.FR_DRIVE_kP)
-      .configVelocityControlI(PIDGAINS.FR_DRIVE_kI)
-      .configVelocityControlD(PIDGAINS.FR_DRIVE_kD)
-      .configVelocityControlFF(PIDGAINS.FR_DRIVE_kFF);
+      .configVelocityControlP(PIDGAINS.FR_DRIVE.kP)
+      .configVelocityControlI(PIDGAINS.FR_DRIVE.kI)
+      .configVelocityControlD(PIDGAINS.FR_DRIVE.kD)
+      .configVelocityControlFF(PIDGAINS.FR_DRIVE.kFF);
 
     if (DriverStation.isFMSAttached()) {
       module.getSteerController().burnFlash();
@@ -115,16 +115,16 @@ public class SwerveModuleFactory {
     ));
 
     module.getSteerController()
-      .configPositionControlP(PIDGAINS.BL_STEER_kP)
-      .configPositionControlI(PIDGAINS.BL_STEER_kI)
-      .configPositionControlD(PIDGAINS.BL_STEER_kD)
-      .configPositionControlFF(PIDGAINS.BL_STEER_kFF);
+      .configPositionControlP(PIDGAINS.BL_STEER.kP)
+      .configPositionControlI(PIDGAINS.BL_STEER.kI)
+      .configPositionControlD(PIDGAINS.BL_STEER.kD)
+      .configPositionControlFF(PIDGAINS.BL_STEER.kFF);
 
     module.getDriveController()
-      .configVelocityControlP(PIDGAINS.BL_DRIVE_kP)
-      .configVelocityControlI(PIDGAINS.BL_DRIVE_kI)
-      .configVelocityControlD(PIDGAINS.BL_DRIVE_kD)
-      .configVelocityControlFF(PIDGAINS.BL_DRIVE_kFF);
+      .configVelocityControlP(PIDGAINS.BL_DRIVE.kP)
+      .configVelocityControlI(PIDGAINS.BL_DRIVE.kI)
+      .configVelocityControlD(PIDGAINS.BL_DRIVE.kD)
+      .configVelocityControlFF(PIDGAINS.BL_DRIVE.kFF);
 
     if (DriverStation.isFMSAttached()) {
       module.getSteerController().burnFlash();
@@ -143,16 +143,16 @@ public class SwerveModuleFactory {
     ));
 
     module.getSteerController()
-      .configPositionControlP(PIDGAINS.BR_STEER_kP)
-      .configPositionControlI(PIDGAINS.BR_STEER_kI)
-      .configPositionControlD(PIDGAINS.BR_STEER_kD)
-      .configPositionControlFF(PIDGAINS.BR_STEER_kFF);
+      .configPositionControlP(PIDGAINS.BR_STEER.kP)
+      .configPositionControlI(PIDGAINS.BR_STEER.kI)
+      .configPositionControlD(PIDGAINS.BR_STEER.kD)
+      .configPositionControlFF(PIDGAINS.BR_STEER.kFF);
 
     module.getDriveController()
-      .configVelocityControlP(PIDGAINS.BR_DRIVE_kP)
-      .configVelocityControlI(PIDGAINS.BR_DRIVE_kI)
-      .configVelocityControlD(PIDGAINS.BR_DRIVE_kD)
-      .configVelocityControlFF(PIDGAINS.BR_DRIVE_kFF);
+      .configVelocityControlP(PIDGAINS.BR_DRIVE.kP)
+      .configVelocityControlI(PIDGAINS.BR_DRIVE.kI)
+      .configVelocityControlD(PIDGAINS.BR_DRIVE.kD)
+      .configVelocityControlFF(PIDGAINS.BR_DRIVE.kFF);
 
     if (DriverStation.isFMSAttached()) {
       module.getSteerController().burnFlash();

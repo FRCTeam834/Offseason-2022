@@ -62,4 +62,17 @@ public class MathPlus {
     while (targetAngle < 0) targetAngle += 360;
     return targetAngle % 360.0;
   }
+
+  /**
+   * 
+   * @param value
+   * @param deadzone
+   * @return
+   */
+  public static final double applyDeadzone(double value, double deadzone) {
+    if (Math.abs(value) <= deadzone) {
+      return 0.0;
+    }
+    return value;
+  }
 }
