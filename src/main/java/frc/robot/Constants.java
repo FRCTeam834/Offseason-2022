@@ -35,6 +35,9 @@ public final class Constants {
     public static final double TRANSLATIONAL_RATELIMIT = 2.0;
     public static final double STEER_RATELIMIT = 4.0;
     public static final UnitSignum JOYSTICK_SCALING_FUNCTION = new UnitSignum(100, 2, 1, 0);
+
+    // seconds
+    public static final double KEEP_ANGLE_ENABLE_TIME = 0.2;
   }
 
   public static final class CANIDS {

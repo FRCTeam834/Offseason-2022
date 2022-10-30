@@ -88,10 +88,14 @@ public class DriveWithJoysticks extends CommandBase {
       timeSinceLastTurn.reset();
     }
 
-    if(timeSinceLastTurn.get() < 0.2) {
+    if(timeSinceLastTurn.get() < DRIVERCONSTANTS.KEEP_ANGLE_ENABLE_TIME) {
+      // Allow time for robot to finish rotation
       keepAngle = gyro.getYaw();
     } else {
-      omega = keepAnglePIDController.calculate(gyro.getYaw(), keepAngle);
+      if (vx != 0 || vy != 0) {
+        // Don't perform keep angle if there is no intention to move
+        omega = keepAnglePIDController.calculate(gyro.getYaw(), keepAngle);
+      }
     }
 
     if (vx == 0 && vy == 0 && omega == 0) {
