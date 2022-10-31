@@ -54,7 +54,14 @@ public class MathPlus {
 
   /** Default 90 degrees */
   public static final double optimizeSwerveAngle(double targetAngle, double currentAngle) {
-    return optimizeSwerveAngle(targetAngle, currentAngle, 90);
+    double a = matchAngleScope(targetAngle, currentAngle); // Case 1
+    double b = matchAngleScope(targetAngle - 180, currentAngle); // Case 2
+
+    //if (absRealAngleDiff(a, currentAngle) > absRealAngleDiff(b, currentAngle)) {
+    if (Math.abs(a - currentAngle) > Math.abs(b - currentAngle)) {
+      return b;
+    }
+    return a;
   }
   /**
    * 
