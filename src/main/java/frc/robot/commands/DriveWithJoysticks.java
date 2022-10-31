@@ -10,8 +10,9 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants.DRIVERCONSTANTS;
+import frc.robot.Constants.DRIVECONSTANTS;
 import frc.robot.Constants.PIDGAINS;
+import frc.robot.Constants.SWERVEMODULECONSTANTS;
 import frc.robot.libs.MathPlus;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Pigeon;
@@ -30,9 +31,9 @@ public class DriveWithJoysticks extends CommandBase {
   private Timer timeSinceLastTurn = new Timer();
 
   // Limits acceleration
-  private SlewRateLimiter xRateLimiter = new SlewRateLimiter(DRIVERCONSTANTS.TRANSLATIONAL_RATELIMIT);
-  private SlewRateLimiter yRateLimiter = new SlewRateLimiter(DRIVERCONSTANTS.TRANSLATIONAL_RATELIMIT);
-  private SlewRateLimiter steerRateLimiter = new SlewRateLimiter(DRIVERCONSTANTS.STEER_RATELIMIT);
+  private SlewRateLimiter xRateLimiter = new SlewRateLimiter(DRIVECONSTANTS.TRANSLATIONAL_RATELIMIT);
+  private SlewRateLimiter yRateLimiter = new SlewRateLimiter(DRIVECONSTANTS.TRANSLATIONAL_RATELIMIT);
+  private SlewRateLimiter steerRateLimiter = new SlewRateLimiter(DRIVECONSTANTS.STEER_RATELIMIT);
 
   /** Creates a new DriveWithJoysticks. */
   public DriveWithJoysticks(
@@ -67,34 +68,31 @@ public class DriveWithJoysticks extends CommandBase {
   public void execute() {
     // raw value -> deadzone -> scaling -> ratelimit
     double xInput = xRateLimiter.calculate(
-      DRIVERCONSTANTS.JOYSTICK_SCALING_FUNCTION.calculate(
-        MathPlus.applyDeadzone(xRaw.getAsDouble(), DRIVERCONSTANTS.TRANSLATIONAL_DEADZONE)
+      DRIVECONSTANTS.JOYSTICK_SCALING_FUNCTION.calculate(
+        MathPlus.applyDeadzone(xRaw.getAsDouble(), DRIVECONSTANTS.TRANSLATIONAL_DEADZONE)
     ));
 
     double yInput = yRateLimiter.calculate(
-      DRIVERCONSTANTS.JOYSTICK_SCALING_FUNCTION.calculate(
-        MathPlus.applyDeadzone(yRaw.getAsDouble(), DRIVERCONSTANTS.TRANSLATIONAL_DEADZONE)
+      DRIVECONSTANTS.JOYSTICK_SCALING_FUNCTION.calculate(
+        MathPlus.applyDeadzone(yRaw.getAsDouble(), DRIVECONSTANTS.TRANSLATIONAL_DEADZONE)
     ));
 
     double steerInput = steerRateLimiter.calculate(
-      DRIVERCONSTANTS.JOYSTICK_SCALING_FUNCTION.calculate(
-        MathPlus.applyDeadzone(steerRaw.getAsDouble(), DRIVERCONSTANTS.STEER_DEADZONE)
+      DRIVECONSTANTS.JOYSTICK_SCALING_FUNCTION.calculate(
+        MathPlus.applyDeadzone(steerRaw.getAsDouble(), DRIVECONSTANTS.STEER_DEADZONE)
       )
     );
 
-    double theta = Math.atan2(yInput, xInput);
-    // sqrt(2) / hypot(x, y) = % max speed; where sqrt(2) is hypot of 1 by 1 triangle
-    double speed = 1.414214 / Math.hypot(xInput, yInput) * DRIVERCONSTANTS.MAX_TRANSLATIONAL_SPEED;
-
-    double vx = speed * Math.cos(theta);
-    double vy = speed * Math.sin(theta);
-    double omega = DRIVERCONSTANTS.MAX_STEER_SPEED * steerInput;
+    // !Note: Normalization is handled by desaturateWheelSpeeds
+    double vx = xInput * SWERVEMODULECONSTANTS.MAX_SPEED;
+    double vy = yInput * SWERVEMODULECONSTANTS.MAX_SPEED;
+    double omega = steerInput * DRIVECONSTANTS.MAX_STEER_SPEED;
 
     if (omega != 0) {
       timeSinceLastTurn.reset();
     }
 
-    if(timeSinceLastTurn.get() < DRIVERCONSTANTS.KEEP_ANGLE_ENABLE_TIME) {
+    if(timeSinceLastTurn.get() < DRIVECONSTANTS.KEEP_ANGLE_ENABLE_TIME) {
       // Allow time for robot to finish rotation
       keepAngle = gyro.getYaw();
     } else {

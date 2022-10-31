@@ -10,11 +10,35 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.DRIVECONSTANTS;
 import frc.robot.Constants.DRIVETRAINCONSTANTS;
 import frc.robot.Constants.SWERVEMODULECONSTANTS;
 import frc.robot.utilities.SwerveModuleFactory;
 
 public class DriveTrain extends SubsystemBase {
+  /**
+   * Better desaturateWheelSpeeds
+   * Credit to 2363
+   * https://www.chiefdelphi.com/t/good-vs-bad-swerve/414439/32
+   * @param moduleStates
+   */
+  public static final void desaturateWheelSpeeds(SwerveModuleState[] moduleStates, ChassisSpeeds speeds) {
+    double translationalK = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond) / DRIVECONSTANTS.MAX_TRANSLATIONAL_SPEED;
+    double rotationalK = Math.abs(speeds.omegaRadiansPerSecond) / DRIVECONSTANTS.MAX_STEER_SPEED;
+    double k = Math.max(translationalK, rotationalK);
+  
+    // Find the how fast the fastest spinning drive motor is spinning                                       
+    double realMaxSpeed = 0.0;
+    for (SwerveModuleState moduleState : moduleStates) {
+      realMaxSpeed = Math.max(realMaxSpeed, Math.abs(moduleState.speedMetersPerSecond));
+    }
+  
+    double scale = Math.min(k * SWERVEMODULECONSTANTS.MAX_SPEED / realMaxSpeed, 1);
+    for (SwerveModuleState moduleState : moduleStates) {
+      moduleState.speedMetersPerSecond *= scale;
+    }
+  }
+
   private final Pigeon gyro;
 
   private final SwerveModule frontLeftModule;
@@ -55,8 +79,6 @@ public class DriveTrain extends SubsystemBase {
 
   /** Set module states to desired states; closed loop */
   private void setDesiredModuleStates(SwerveModuleState[] desiredStates) {
-    SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SWERVEMODULECONSTANTS.MAX_SPEED);
-
     frontLeftModule.setDesiredState(desiredStates[0]);
     frontRightModule.setDesiredState(desiredStates[1]);
     backLeftModule.setDesiredState(desiredStates[2]);
@@ -65,8 +87,6 @@ public class DriveTrain extends SubsystemBase {
 
   /** Set module states to desired states; open loop */
   private void setDesiredModuleStatesOpenLoop(SwerveModuleState[] desiredStates) {
-    SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, SWERVEMODULECONSTANTS.MAX_SPEED);
-
     frontLeftModule.setDesiredStateOpenLoop(desiredStates[0]);
     frontRightModule.setDesiredStateOpenLoop(desiredStates[1]);
     backLeftModule.setDesiredStateOpenLoop(desiredStates[2]);
@@ -75,11 +95,15 @@ public class DriveTrain extends SubsystemBase {
 
   /** */
   public void setDesiredSpeeds(ChassisSpeeds speeds) {
-    setDesiredModuleStates(kinematics.toSwerveModuleStates(speeds));
+    SwerveModuleState[] desiredStates = kinematics.toSwerveModuleStates(speeds);
+    DriveTrain.desaturateWheelSpeeds(desiredStates, speeds);
+    setDesiredModuleStates(desiredStates);
   }
 
   /** */
   public void setDesiredSpeedsOpenLoop(ChassisSpeeds speeds) {
+    SwerveModuleState[] desiredStates = kinematics.toSwerveModuleStates(speeds);
+    DriveTrain.desaturateWheelSpeeds(desiredStates, speeds);
     setDesiredModuleStatesOpenLoop(kinematics.toSwerveModuleStates(speeds));
   }
 

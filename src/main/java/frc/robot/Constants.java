@@ -20,11 +20,11 @@ import frc.robot.libs.UnitSignum;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final class DRIVERCONSTANTS {
+  public static final class DRIVECONSTANTS {
     public static final int LEFT_JOYSTICK_PORT = 0;
     public static final int RIGHT_JOYSTICK_PORT = 1;
 
-    // meters per second
+    // m/s
     public static final double MAX_TRANSLATIONAL_SPEED = 3;
     // degrees per second
     public static final double MAX_STEER_SPEED = 180;
