@@ -310,7 +310,7 @@ public class SparkMaxController {
   public void set(double percent) {
     DesiredState desiredState = new DesiredState(percent, ControlType.PERCENT);
 
-    if (!lastDesiredState.equals(desiredState)) return;
+    if (lastDesiredState.equals(desiredState)) return;
     this.lastDesiredState = desiredState;
 
     this.sparkMax.set(percent);
@@ -324,7 +324,7 @@ public class SparkMaxController {
     // Caching can be used as sparkMax.setVoltage is a set-and-forget call
     DesiredState desiredState = new DesiredState(voltage, ControlType.VOLTAGE);
 
-    if (!lastDesiredState.equals(desiredState)) return;
+    if (lastDesiredState.equals(desiredState)) return;
     this.lastDesiredState = desiredState;
 
     this.sparkMax.setVoltage(voltage);
@@ -341,10 +341,12 @@ public class SparkMaxController {
   /**
    * 
    * Run on RIO - structured to mimic sparkMax integrated PIDF
+   * Note: No caching needed here since it is rio run
    * @param velocity
    * @param arbFF
    */
   public void setDesiredVelocity(double velocity, double arbFF) {
+    // Apply conversion factor
     velocity *= this.velocityConversionFactor;
 
     this.lastDesiredState = new DesiredState(velocity, ControlType.VELOCITY);
@@ -363,11 +365,12 @@ public class SparkMaxController {
    * @return void
    */
   public void setDesiredPosition(double position, double arbFF) {
+    // Apply conversion factor
     position *= this.positionConversionFactor;
-    
+
     DesiredState desiredState = new DesiredState(position, ControlType.POSITION);
 
-    if (!this.lastDesiredState.equals(desiredState)) return;
+    if (this.lastDesiredState.equals(desiredState)) return;
     this.lastDesiredState = desiredState;
 
     this.sparkMaxPIDController.setReference(position, CANSparkMax.ControlType.kPosition, 0, arbFF);
@@ -376,9 +379,11 @@ public class SparkMaxController {
   /** */
   private void updateVelocity() {
     if (!this.lastDesiredState.controlType.equals(ControlType.VELOCITY)) return;
+
+    double desiredVelocity = this.lastDesiredState.setpoint;
     this.setVoltage(
-      this.velocityPIDController.calculate(this.lastDesiredState.setpoint, this.getCurrentVelocity()) +
-      (this.velocityArbFF * Math.signum(this.lastDesiredState.setpoint) + this.velocityFeedforward * this.lastDesiredState.setpoint) // feedforward calculation ks * signum(vel) + kv * vel
+      this.velocityPIDController.calculate(desiredVelocity, this.getCurrentVelocity()) +
+      (this.velocityArbFF * Math.signum(desiredVelocity) + this.velocityFeedforward * desiredVelocity) // feedforward calculation ks * signum(vel) + kv * vel
     );
   }
 

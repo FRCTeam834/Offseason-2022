@@ -110,7 +110,7 @@ public class SwerveModule extends SubsystemBase {
   public void setDesiredStateOpenLoop(SwerveModuleState desiredState) {
     desiredState = SwerveModule.optimizeModuleState(desiredState, steerController.getCurrentPosition());
 
-    driveController.getSparkMax().set(desiredState.speedMetersPerSecond / SWERVEMODULECONSTANTS.MAX_SPEED);
+    driveController.set(desiredState.speedMetersPerSecond / SWERVEMODULECONSTANTS.MAX_SPEED);
     steerController.setDesiredPosition(desiredState.angle.getDegrees());
   }
 
