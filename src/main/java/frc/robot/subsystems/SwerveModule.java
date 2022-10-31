@@ -27,7 +27,7 @@ public class SwerveModule extends SubsystemBase {
    * @param currentAngle
    */
   public static final SwerveModuleState optimizeModuleState(SwerveModuleState state, double currentAngle, double threshold) {
-    if (MathPlus.absRealAngleDiff(currentAngle, state.angle.getDegrees()) < threshold) {
+    if (MathPlus.absRealAngleDiff(currentAngle, state.angle.getDegrees()) <= threshold) {
       return new SwerveModuleState(
         state.speedMetersPerSecond,
         Rotation2d.fromDegrees(MathPlus.optimizeSwerveAngle(state.angle.getDegrees(), currentAngle, 120))

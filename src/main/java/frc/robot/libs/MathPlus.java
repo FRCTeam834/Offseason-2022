@@ -75,7 +75,7 @@ public class MathPlus {
     double b = matchAngleScope(targetAngle - 180, currentAngle); // Case 2
 
     // Difference has not reached threshold, do not consider option 2
-    if (absRealAngleDiff(targetAngle, currentAngle) < threshold) {
+    if (absRealAngleDiff(targetAngle, currentAngle) <= threshold) {
       return a;
     }
 
