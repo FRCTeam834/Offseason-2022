@@ -123,7 +123,7 @@ public class DriveTrain extends SubsystemBase {
 
   /** */
   public void setIdleModuleStates() {
-    setDesiredModuleStates(DRIVETRAINCONSTANTS.IDLE_MODULE_CONFIGURATION);
+    setDesiredModuleStatesOpenLoop(DRIVETRAINCONSTANTS.IDLE_MODULE_CONFIGURATION);
   }
 
   /** */
