@@ -30,12 +30,12 @@ public class SwerveModule extends SubsystemBase {
     if (MathPlus.absRealAngleDiff(currentAngle, state.angle.getDegrees()) < threshold) {
       return new SwerveModuleState(
         state.speedMetersPerSecond,
-        Rotation2d.fromDegrees(MathPlus.optimizeSwerveAngle(state.angle.getDegrees(), currentAngle))
+        Rotation2d.fromDegrees(MathPlus.optimizeSwerveAngle(state.angle.getDegrees(), currentAngle, 120))
       );
     }
     return new SwerveModuleState(
       -state.speedMetersPerSecond,
-      Rotation2d.fromDegrees(MathPlus.optimizeSwerveAngle(state.angle.getDegrees() + 180, currentAngle))
+      Rotation2d.fromDegrees(MathPlus.optimizeSwerveAngle(state.angle.getDegrees() + 180, currentAngle, 120))
     );
   }
 

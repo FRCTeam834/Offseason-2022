@@ -52,16 +52,25 @@ public class MathPlus {
     return targetAngle;
   }
 
+  /** Default 90 degrees */
+  public static final double optimizeSwerveAngle(double targetAngle, double currentAngle) {
+    return optimizeSwerveAngle(targetAngle, currentAngle, 90);
+  }
   /**
    * 
-   * Optimize angle so swerve module never has to turn more than 90 degrees
+   * Optimize angle so swerve module never has to turn more than <threshold> degrees
    * @param targetAngle
    * @param scopeAngle
    * @return
    */
-  public static final double optimizeSwerveAngle(double targetAngle, double currentAngle) {
+  public static final double optimizeSwerveAngle(double targetAngle, double currentAngle, double threshold) {
     double a = matchAngleScope(targetAngle, currentAngle); // Case 1
     double b = matchAngleScope(targetAngle - 180, currentAngle); // Case 2
+
+    // Difference has not reached threshold, do not consider option 2
+    if (absRealAngleDiff(targetAngle, currentAngle) < threshold) {
+      return a;
+    }
 
     //if (absRealAngleDiff(a, currentAngle) > absRealAngleDiff(b, currentAngle)) {
     if (Math.abs(a - currentAngle) > Math.abs(b - currentAngle)) {
