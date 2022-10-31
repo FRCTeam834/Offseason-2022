@@ -8,11 +8,6 @@ import frc.robot.Constants.PIDGAINS;
 import frc.robot.Constants.SWERVEMODULECONSTANTS;
 import frc.robot.subsystems.SwerveModule;
 
-/**
- * 
- * Not really a factory class but oh well
- * 
- */
 public class SwerveModuleFactory {
 
   private static final CANSparkMax.IdleMode idleMode = CANSparkMax.IdleMode.kBrake;

@@ -29,6 +29,7 @@ public final class Constants {
     // degrees per second
     public static final double MAX_STEER_SPEED = 180;
 
+    // Joystick deadzones
     public static final double TRANSLATIONAL_DEADZONE = 0.1;
     public static final double STEER_DEADZONE = 0.1;
 

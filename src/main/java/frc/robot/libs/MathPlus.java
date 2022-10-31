@@ -34,7 +34,7 @@ public class MathPlus {
 
   /**
    * 
-   * Matches targedAngle to scope of scopeAngle
+   * Matches targetAngle to (0, 360] scope of scopeAngle
    * @param targetAngle
    * @param scopeAngle
    * @return
@@ -50,6 +50,24 @@ public class MathPlus {
       }
     }
     return targetAngle;
+  }
+
+  /**
+   * 
+   * Optimize angle so swerve module never has to turn more than 90 degrees
+   * @param targetAngle
+   * @param scopeAngle
+   * @return
+   */
+  public static final double optimizeSwerveAngle(double targetAngle, double currentAngle) {
+    double a = matchAngleScope(targetAngle, currentAngle); // Case 1
+    double b = matchAngleScope(targetAngle - 180, currentAngle); // Case 2
+
+    //if (absRealAngleDiff(a, currentAngle) > absRealAngleDiff(b, currentAngle)) {
+    if (Math.abs(a - currentAngle) > Math.abs(b - currentAngle)) {
+      return b;
+    }
+    return a;
   }
 
   /**
