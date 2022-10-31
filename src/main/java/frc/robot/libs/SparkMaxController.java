@@ -26,7 +26,7 @@ import edu.wpi.first.wpilibj.Notifier;
 public class SparkMaxController {
   /**
    * Stores a SparkMaxPIDController reference state
-   * (Replaced by LastDesiredState)
+   * (Replaced by DesiredState)
    */
   @Deprecated (forRemoval = true)
   private static final class SparkMaxPIDState {
@@ -47,10 +47,14 @@ public class SparkMaxController {
     }
   }
 
+  /** */
   private enum ControlType {
     POSITION, VELOCITY, VOLTAGE, PERCENT
   }
 
+  /**
+   * Stores the last desired state
+   */
   private static final class DesiredState {
     public final double setpoint;
     public final ControlType controlType;
@@ -341,6 +345,8 @@ public class SparkMaxController {
    * @param arbFF
    */
   public void setDesiredVelocity(double velocity, double arbFF) {
+    velocity *= this.velocityConversionFactor;
+
     this.lastDesiredState = new DesiredState(velocity, ControlType.VELOCITY);
     this.velocityArbFF = arbFF;
   }
@@ -357,6 +363,8 @@ public class SparkMaxController {
    * @return void
    */
   public void setDesiredPosition(double position, double arbFF) {
+    position *= this.positionConversionFactor;
+    
     DesiredState desiredState = new DesiredState(position, ControlType.POSITION);
 
     if (!this.lastDesiredState.equals(desiredState)) return;
