@@ -50,6 +50,8 @@ public class DriveWithJoysticks extends CommandBase {
     this.yRaw = yRaw;
     this.steerRaw = steerRaw;
 
+    keepAnglePIDController.enableContinuousInput(0, 360);
+
     addRequirements(driveTrain);
   }
 
