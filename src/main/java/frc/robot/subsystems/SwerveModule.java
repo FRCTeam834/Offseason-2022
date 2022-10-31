@@ -115,6 +115,12 @@ public class SwerveModule extends SubsystemBase {
   }
 
   /** */
+  public void halt() {
+    this.steerController.set(0);
+    this.driveController.set(0);
+  }
+
+  /** */
   public SwerveModuleState getCurrentState() {
     return new SwerveModuleState(
       getCurrentVelocity(),

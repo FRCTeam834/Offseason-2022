@@ -26,7 +26,7 @@ import edu.wpi.first.wpilibj.Notifier;
 public class SparkMaxController {
   /**
    * Stores a SparkMaxPIDController reference state
-   * (Replaced by this.lastDesired<ControlType>)
+   * (Replaced by LastDesiredState)
    */
   @Deprecated (forRemoval = true)
   private static final class SparkMaxPIDState {
@@ -39,6 +39,28 @@ public class SparkMaxController {
     }
 
     public boolean equals(SparkMaxPIDState expected) {
+      if (expected == null) return false;
+      return (
+        this.setpoint == expected.setpoint &&
+        this.controlType.equals(expected.controlType)
+      );
+    }
+  }
+
+  private enum ControlType {
+    POSITION, VELOCITY, VOLTAGE, PERCENT
+  }
+
+  private static final class DesiredState {
+    public final double setpoint;
+    public final ControlType controlType;
+
+    public DesiredState(double setpoint, ControlType controlType) {
+      this.setpoint = setpoint;
+      this.controlType = controlType;
+    }
+
+    public boolean equals(DesiredState expected) {
       if (expected == null) return false;
       return (
         this.setpoint == expected.setpoint &&
@@ -77,9 +99,10 @@ public class SparkMaxController {
 
   private double lastPosition; // Unit: Rotations
   private double lastVelocity; // Unit: RPM
-  private double lastDesiredPosition; // Unit: Rotations
-  private double lastDesiredVelocity; // Unit: RPM
-  private double lastDesiredVoltage; // Unit: Volts
+  private DesiredState lastDesiredState;
+  // private double lastDesiredPosition; // Unit: Rotations
+  // private double lastDesiredVelocity; // Unit: RPM
+  // private double lastDesiredVoltage; // Unit: Volts
 
   private double velocityConversionFactor;
   private double positionConversionFactor;
@@ -213,18 +236,6 @@ public class SparkMaxController {
 
   //
 
-  /** Middleman through all position control */
-  private void setLastDesiredPosition(double position) {
-    this.lastDesiredVelocity = Double.NaN;
-    this.lastDesiredPosition = position * this.positionConversionFactor;
-  }
-
-  /** Middleman through all velocity control */
-  private void setLastDesiredVelocity(double velocity) {
-    this.lastDesiredPosition = Double.NaN;
-    this.lastDesiredVelocity = velocity * this.velocityConversionFactor;
-  }
-
   /** */
   public double getCurrentVelocity() {
     return this.getCurrentVelocity(false);
@@ -291,14 +302,26 @@ public class SparkMaxController {
     return SparkMaxController.inInclusiveRange(this.getCurrentVelocity(useEncoder) - velocity, tolerance);
   }
 
+  /** */
+  public void set(double percent) {
+    DesiredState desiredState = new DesiredState(percent, ControlType.PERCENT);
+
+    if (!lastDesiredState.equals(desiredState)) return;
+    this.lastDesiredState = desiredState;
+
+    this.sparkMax.set(percent);
+  }
+
   /**
    * 
    * @param voltage
    */
   public void setVoltage(double voltage) {
     // Caching can be used as sparkMax.setVoltage is a set-and-forget call
-    if (voltage == this.lastDesiredVoltage) return;
-    this.lastDesiredVoltage = voltage;
+    DesiredState desiredState = new DesiredState(voltage, ControlType.VOLTAGE);
+
+    if (!lastDesiredState.equals(desiredState)) return;
+    this.lastDesiredState = desiredState;
 
     this.sparkMax.setVoltage(voltage);
   }
@@ -318,7 +341,7 @@ public class SparkMaxController {
    * @param arbFF
    */
   public void setDesiredVelocity(double velocity, double arbFF) {
-    this.setLastDesiredVelocity(velocity);
+    this.lastDesiredState = new DesiredState(velocity, ControlType.VELOCITY);
     this.velocityArbFF = arbFF;
   }
 
@@ -334,18 +357,20 @@ public class SparkMaxController {
    * @return void
    */
   public void setDesiredPosition(double position, double arbFF) {
-    if (position == this.lastDesiredPosition) return;
+    DesiredState desiredState = new DesiredState(position, ControlType.POSITION);
 
-    this.setLastDesiredPosition(position);
-    this.sparkMaxPIDController.setReference(this.lastDesiredPosition, CANSparkMax.ControlType.kPosition, 0, arbFF);
+    if (!this.lastDesiredState.equals(desiredState)) return;
+    this.lastDesiredState = desiredState;
+
+    this.sparkMaxPIDController.setReference(position, CANSparkMax.ControlType.kPosition, 0, arbFF);
   }
 
   /** */
   private void updateVelocity() {
-    if (Double.isNaN(this.lastDesiredVelocity)) return;
+    if (!this.lastDesiredState.controlType.equals(ControlType.VELOCITY)) return;
     this.setVoltage(
-      this.velocityPIDController.calculate(this.lastDesiredVelocity, this.getCurrentVelocity()) +
-      (this.velocityArbFF * Math.signum(this.lastDesiredVelocity) + this.velocityFeedforward * this.lastDesiredVelocity) // feedforward calculation ks * signum(vel) + kv * vel
+      this.velocityPIDController.calculate(this.lastDesiredState.setpoint, this.getCurrentVelocity()) +
+      (this.velocityArbFF * Math.signum(this.lastDesiredState.setpoint) + this.velocityFeedforward * this.lastDesiredState.setpoint) // feedforward calculation ks * signum(vel) + kv * vel
     );
   }
 

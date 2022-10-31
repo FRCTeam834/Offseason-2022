@@ -126,6 +126,14 @@ public class DriveTrain extends SubsystemBase {
     setDesiredModuleStates(DRIVETRAINCONSTANTS.IDLE_MODULE_CONFIGURATION);
   }
 
+  /** */
+  public void haltAllModules() {
+    frontLeftModule.halt();
+    frontRightModule.halt();
+    backLeftModule.halt();
+    backRightModule.halt();
+  }
+
   public void updateOdometryPose(Pose2d updatedPose) {
     odometry.resetPosition(updatedPose, gyro.getYawAsRotation2d());
   }
