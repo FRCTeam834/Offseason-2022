@@ -9,7 +9,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.robot.libs.PIDGains;
-import frc.robot.libs.UnitSignum;
+import frc.robot.libs.UnitQuad;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -35,7 +35,7 @@ public final class Constants {
 
     public static final double TRANSLATIONAL_RATELIMIT = 2.0;
     public static final double STEER_RATELIMIT = 4.0;
-    public static final UnitSignum JOYSTICK_SCALING_FUNCTION = new UnitSignum(100, 2, 1, 0);
+    public static final UnitQuad JOYSTICK_SCALING_FUNCTION = new UnitQuad();
 
     // seconds
     public static final double KEEP_ANGLE_ENABLE_TIME = 0.2;

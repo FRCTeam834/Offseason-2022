@@ -2,6 +2,8 @@ package frc.robot.libs;
 
 /**
  * 
+ * !Note: This class is kinda useless
+ * 
  * Signum scaled to fit (1, 1)
  * 
  * Tuning:
