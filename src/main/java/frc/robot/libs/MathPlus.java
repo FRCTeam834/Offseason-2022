@@ -52,7 +52,7 @@ public class MathPlus {
     return targetAngle;
   }
 
-  /** Default 90 degrees */
+  /** Optimize angle so swerve module never has to turn more than 90 degrees */
   public static final double optimizeSwerveAngle(double targetAngle, double currentAngle) {
     double a = matchAngleScope(targetAngle, currentAngle); // Case 1
     double b = matchAngleScope(targetAngle - 180, currentAngle); // Case 2

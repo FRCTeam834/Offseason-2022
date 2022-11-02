@@ -9,6 +9,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DRIVECONSTANTS;
 import frc.robot.Constants.DRIVETRAINCONSTANTS;
@@ -66,15 +68,6 @@ public class DriveTrain extends SubsystemBase {
     );
 
     odometry = new SwerveDriveOdometry(kinematics, gyro.getYawAsRotation2d());
-  }
-
-  private SwerveModuleState[] getCurrentModuleStates() {
-    return new SwerveModuleState[] {
-      frontLeftModule.getCurrentState(),
-      frontRightModule.getCurrentState(),
-      backLeftModule.getCurrentState(),
-      backRightModule.getCurrentState()
-    };
   }
 
   /** Set module states to desired states; closed loop */
@@ -147,6 +140,10 @@ public class DriveTrain extends SubsystemBase {
 
   /** */
   public void setIdleModuleStates() {
+    if (DRIVETRAINCONSTANTS.IDLE_MODULE_CONFIGURATION == null) {
+      haltAllModules();
+      return;
+    }
     setDesiredModuleStatesOpenLoop(DRIVETRAINCONSTANTS.IDLE_MODULE_CONFIGURATION);
   }
 
@@ -158,8 +155,8 @@ public class DriveTrain extends SubsystemBase {
     backRightModule.halt();
   }
 
-  public void updateOdometryPose(Pose2d updatedPose) {
-    odometry.resetPosition(updatedPose, gyro.getYawAsRotation2d());
+  public void resetOdometryPose(Pose2d newPose) {
+    odometry.resetPosition(newPose, gyro.getYawAsRotation2d());
   }
 
   @Override
@@ -172,5 +169,11 @@ public class DriveTrain extends SubsystemBase {
       backLeftModule.getCurrentState(),
       backRightModule.getCurrentState()
     );
+  }
+
+  public CommandBase followPath() {
+    return new RunCommand(() -> {
+
+    });
   }
 }

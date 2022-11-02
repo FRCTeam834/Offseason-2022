@@ -2,22 +2,24 @@ package frc.robot.libs;
 
 import edu.wpi.first.math.controller.PIDController;
 
+/**
+ * Helper class that stores PIDF gains
+ */
 public class PIDGains {
   public double kP;
   public double kI;
   public double kD;
   public double kFF;
 
-  public static PIDGains PD(double kP, double kD) {
-    return new PIDGains(kP, 0.0, kD, 0.0);
-  }
-
   public PIDGains(double kP) {
     this(kP, 0.0, 0.0, 0.0);
   }
 
-  public PIDGains(double kP, double kI) {
-    this(kP, kI, 0.0, 0.0);
+  /**
+   * PI controllers are never used, two arg constructor will be a PD controller instead
+   */
+  public PIDGains(double kP, double kD) {
+    this(kP, 0.0, kD, 0.0);
   }
 
   public PIDGains(double kP, double kI, double kD) {

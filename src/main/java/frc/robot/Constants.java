@@ -10,6 +10,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.robot.libs.PIDGains;
 import frc.robot.libs.UnitQuad;
+import frc.robot.libs.UnitScaleFunction;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -35,7 +36,7 @@ public final class Constants {
 
     public static final double TRANSLATIONAL_RATELIMIT = 2.0;
     public static final double STEER_RATELIMIT = 4.0;
-    public static final UnitQuad JOYSTICK_SCALING_FUNCTION = new UnitQuad();
+    public static final UnitScaleFunction JOYSTICK_SCALING_FUNCTION = new UnitQuad();
 
     // seconds
     public static final double KEEP_ANGLE_ENABLE_TIME = 0.2;

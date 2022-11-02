@@ -8,12 +8,16 @@ import frc.robot.Constants.PIDGAINS;
 import frc.robot.Constants.SWERVEMODULECONSTANTS;
 import frc.robot.subsystems.SwerveModule;
 
+/**
+ * "Factory" class
+ */
 public class SwerveModuleFactory {
 
   private static final CANSparkMax.IdleMode idleMode = CANSparkMax.IdleMode.kBrake;
   private static final boolean isInverted = false;
   private static final double nominalVoltage = 12;
-  private static final int smartCurrentLimit = 20;
+  private static final int steerSmartCurrentLimit = 20;
+  private static final int driveSmartCurrentLimit = 20;
 
   private static final int steerPeriodicFramek0 = 255;
   private static final int steerPeriodicFramek1 = 255;
@@ -29,7 +33,7 @@ public class SwerveModuleFactory {
       .configIdleMode(idleMode)
       .configInverted(isInverted)
       .configVoltageCompensation(nominalVoltage)
-      .configSmartCurrentLimit(smartCurrentLimit)
+      .configSmartCurrentLimit(steerSmartCurrentLimit)
       .configPositionConversionFactor(SWERVEMODULECONSTANTS.POSITION_CONVERSION_FACTOR)
       .configPeriodicFramePeriods(steerPeriodicFramek0, steerPeriodicFramek1, steerPeriodicFramek2);
 
@@ -38,7 +42,7 @@ public class SwerveModuleFactory {
       .configIdleMode(idleMode)
       .configInverted(isInverted)
       .configVoltageCompensation(nominalVoltage)
-      .configSmartCurrentLimit(smartCurrentLimit)
+      .configSmartCurrentLimit(driveSmartCurrentLimit)
       .configVelocityConversionFactor(SWERVEMODULECONSTANTS.VELOCITY_CONVERSION_FACTOR)
       .configPeriodicFramePeriods(drivePeriodicFramek0, drivePeriodicFramek1, drivePeriodicFramek2);
 
