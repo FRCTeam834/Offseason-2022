@@ -94,14 +94,20 @@ public class DriveWithJoysticks extends CommandBase {
       timeSinceLastTurn.reset();
     }
 
+    double currentYaw = gyro.getYaw();
+
     if(timeSinceLastTurn.get() < DRIVECONSTANTS.KEEP_ANGLE_ENABLE_TIME) {
       // Allow some time for robot to finish rotation
-      keepAngle = gyro.getYaw();
+      keepAngle = currentYaw;
     } else {
       // Don't perform keep angle if there is no intention to move
-      if (vx == 0 && vy == 0) {
+      if (
+        vx == 0 && vy == 0 &&
+        // Only correct heading if it's off by certain threshold, helps with jittering
+        Math.abs(currentYaw - keepAngle) > DRIVECONSTANTS.KEEP_ANGLE_ENABLE_TOLERANCE
+      ) {
         // Calculate omega in order to maintain the heading
-        omega = keepAnglePIDController.calculate(gyro.getYaw(), keepAngle);
+        omega = keepAnglePIDController.calculate(currentYaw, keepAngle);
       }
     }
 

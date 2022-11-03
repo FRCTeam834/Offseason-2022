@@ -40,6 +40,8 @@ public final class Constants {
 
     // seconds
     public static final double KEEP_ANGLE_ENABLE_TIME = 0.2;
+    // degrees
+    public static final double KEEP_ANGLE_ENABLE_TOLERANCE = 0.5;
   }
 
   public static final class CANIDS {
