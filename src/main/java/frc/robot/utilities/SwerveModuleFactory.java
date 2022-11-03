@@ -19,10 +19,12 @@ public class SwerveModuleFactory {
   private static final int steerSmartCurrentLimit = 20;
   private static final int driveSmartCurrentLimit = 20;
 
+  private static final int steerControlFramePeriod = 10;
   private static final int steerPeriodicFramek0 = 255;
   private static final int steerPeriodicFramek1 = 255;
   private static final int steerPeriodicFramek2 = 20;
 
+  private static final int driveControlFramePeriod = 10;
   private static final int drivePeriodicFramek0 = 255;
   private static final int drivePeriodicFramek1 = 255;
   private static final int drivePeriodicFramek2 = 10;
@@ -35,6 +37,7 @@ public class SwerveModuleFactory {
       .configVoltageCompensation(nominalVoltage)
       .configSmartCurrentLimit(steerSmartCurrentLimit)
       .configPositionConversionFactor(SWERVEMODULECONSTANTS.POSITION_CONVERSION_FACTOR)
+      .configControlFramePeriod(steerControlFramePeriod)
       .configPeriodicFramePeriods(steerPeriodicFramek0, steerPeriodicFramek1, steerPeriodicFramek2);
 
     module.getDriveController()
@@ -44,6 +47,7 @@ public class SwerveModuleFactory {
       .configVoltageCompensation(nominalVoltage)
       .configSmartCurrentLimit(driveSmartCurrentLimit)
       .configVelocityConversionFactor(SWERVEMODULECONSTANTS.VELOCITY_CONVERSION_FACTOR)
+      .configControlFramePeriod(driveControlFramePeriod)
       .configPeriodicFramePeriods(drivePeriodicFramek0, drivePeriodicFramek1, drivePeriodicFramek2);
 
     return module;

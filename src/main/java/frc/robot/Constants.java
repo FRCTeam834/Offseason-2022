@@ -26,13 +26,13 @@ public final class Constants {
     public static final int RIGHT_JOYSTICK_PORT = 1;
 
     // m/s
-    public static final double MAX_TRANSLATIONAL_SPEED = 3;
+    public static final double MAX_TRANSLATIONAL_SPEED = 4;
     // degrees per second
-    public static final double MAX_STEER_SPEED = 180;
+    public static final double MAX_STEER_SPEED = 360;
 
     // Joystick deadzones
-    public static final double TRANSLATIONAL_DEADZONE = 0.1;
-    public static final double STEER_DEADZONE = 0.1;
+    public static final double TRANSLATIONAL_DEADZONE = 0.075;
+    public static final double STEER_DEADZONE = 0.075;
 
     public static final double TRANSLATIONAL_RATELIMIT = 2.0;
     public static final double STEER_RATELIMIT = 4.0;
@@ -61,28 +61,28 @@ public final class Constants {
   }
 
   public static final class PIDGAINS {
-    public static final PIDGains FL_STEER = new PIDGains(0.0);
-    public static final PIDGains FL_DRIVE = new PIDGains(0.0);
+    public static final PIDGains FL_STEER = new PIDGains(1.0);
+    public static final PIDGains FL_DRIVE = new PIDGains(1.0);
 
-    public static final PIDGains FR_STEER = new PIDGains(0.0);
-    public static final PIDGains FR_DRIVE = new PIDGains(0.0);
+    public static final PIDGains FR_STEER = new PIDGains(1.0);
+    public static final PIDGains FR_DRIVE = new PIDGains(1.0);
 
-    public static final PIDGains BL_STEER = new PIDGains(0.0);
-    public static final PIDGains BL_DRIVE = new PIDGains(0.0);
+    public static final PIDGains BL_STEER = new PIDGains(1.0);
+    public static final PIDGains BL_DRIVE = new PIDGains(1.0);
 
-    public static final PIDGains BR_STEER = new PIDGains(0.0);
-    public static final PIDGains BR_DRIVE = new PIDGains(0.0);
+    public static final PIDGains BR_STEER = new PIDGains(1.0);
+    public static final PIDGains BR_DRIVE = new PIDGains(1.0);
 
-    public static final PIDGains KEEP_ANGLE = new PIDGains(0.0);
+    public static final PIDGains KEEP_ANGLE = new PIDGains(1.0);
 
-    public static final PIDGains AUTON_X = new PIDGains(0.0);
-    public static final PIDGains AUTON_Y = new PIDGains(0.0);
-    public static final PIDGains AUTON_STEER = new PIDGains(0.0);
+    public static final PIDGains AUTON_X = new PIDGains(1.0);
+    public static final PIDGains AUTON_Y = new PIDGains(1.0);
+    public static final PIDGains AUTON_STEER = new PIDGains(1.0);
   }
 
   public static final class SWERVEMODULECONSTANTS {
     // meters per second
-    public static final double MAX_SPEED = 0.0;
+    public static final double MAX_SPEED = 4.5;
     public static final double WHEEL_DIAMETER = 0.0;
     public static final double GEAR_RATIO = 0.0;
     // degrees
@@ -102,6 +102,7 @@ public final class Constants {
     public static final Translation2d BLM_POS = new Translation2d(0.0, 0.0);
     public static final Translation2d BRM_POS = new Translation2d(0.0, 0.0);
 
+    // Set as null if no idle configuration is wanted
     public static final SwerveModuleState[] IDLE_MODULE_CONFIGURATION = {
       new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
       new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),

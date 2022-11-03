@@ -190,6 +190,10 @@ public class SparkMaxController {
     this.sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus2, k2);
     return this;
   }
+  public SparkMaxController configControlFramePeriod(int ms) {
+    this.sparkMax.setControlFramePeriodMs(ms);
+    return this;
+  }
   public SparkMaxController configPositionConversionFactor(double factor) {
     this.positionConversionFactor = factor;
     return this;
