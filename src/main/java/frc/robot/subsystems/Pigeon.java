@@ -19,7 +19,11 @@ public class Pigeon extends SubsystemBase {
   }
 
   public void zeroYaw() {
-    gyro.setYaw(0);
+    setYaw(0);
+  }
+
+  public void setYaw(double yaw) {
+    gyro.setYaw(yaw);
   }
 
   /** */

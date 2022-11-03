@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DRIVECONSTANTS;
+import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Pigeon;
 
@@ -28,6 +29,13 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    driveTrain.setDefaultCommand(new DriveWithJoysticks(
+      driveTrain,
+      gyro,
+      rightJoystick::getX,
+      rightJoystick::getY,
+      leftJoystick::getX
+    ));
     // Configure the button bindings
     configureButtonBindings();
   }

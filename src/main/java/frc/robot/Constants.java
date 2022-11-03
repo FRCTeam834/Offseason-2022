@@ -76,9 +76,6 @@ public final class Constants {
     public static final PIDGains AUTON_X = new PIDGains(0.0);
     public static final PIDGains AUTON_Y = new PIDGains(0.0);
     public static final PIDGains AUTON_STEER = new PIDGains(0.0);
-    public static final TrapezoidProfile.Constraints AUTON_STEER_CONSTRAINTS = new TrapezoidProfile.Constraints(
-      0.0, 0.0
-    );
   }
 
   public static final class SWERVEMODULECONSTANTS {

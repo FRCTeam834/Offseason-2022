@@ -4,16 +4,21 @@
 
 package frc.robot.subsystems;
 
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DRIVECONSTANTS;
 import frc.robot.Constants.DRIVETRAINCONSTANTS;
+import frc.robot.Constants.PIDGAINS;
 import frc.robot.Constants.SWERVEMODULECONSTANTS;
 import frc.robot.utilities.SwerveModuleFactory;
 
@@ -155,7 +160,14 @@ public class DriveTrain extends SubsystemBase {
     backRightModule.halt();
   }
 
+  public Pose2d getCurrentPose() {
+    // Replace with currentPose variable later, it will be generated via vision
+    return odometry.getPoseMeters();
+  }
+
   public void resetOdometryPose(Pose2d newPose) {
+    gyro.setYaw(newPose.getRotation().getDegrees());
+
     odometry.resetPosition(newPose, gyro.getYawAsRotation2d());
   }
 
@@ -171,9 +183,33 @@ public class DriveTrain extends SubsystemBase {
     );
   }
 
-  public CommandBase followPath() {
-    return new RunCommand(() -> {
-
-    });
+  /**
+   * 
+   * Path following command
+   * @param trajectory path
+   * @param resetOdometry reset odometry - set as true if this is the first path
+   * @return
+   */
+  public Command getFollowPathCommand(
+    PathPlannerTrajectory trajectory,
+    boolean resetOdometry
+  ) {
+    return new SequentialCommandGroup(
+      new InstantCommand(() -> {
+        if (resetOdometry) {
+          resetOdometryPose(trajectory.getInitialHolonomicPose());
+        }
+      }),
+      new PPSwerveControllerCommand(
+        trajectory,
+        this::getCurrentPose,
+        kinematics,
+        PIDGAINS.AUTON_X.generateController(),
+        PIDGAINS.AUTON_Y.generateController(),
+        PIDGAINS.AUTON_STEER.generateController(),
+        this::setDesiredModuleStates,
+        // subsystem requirements
+        this)
+    );
   }
 }
