@@ -14,7 +14,6 @@ import frc.robot.subsystems.SwerveModule;
 public class SwerveModuleFactory {
 
   private static final CANSparkMax.IdleMode idleMode = CANSparkMax.IdleMode.kBrake;
-  private static final boolean isInverted = false;
   private static final double nominalVoltage = 12;
   private static final int steerSmartCurrentLimit = 20;
   private static final int driveSmartCurrentLimit = 20;
@@ -29,7 +28,7 @@ public class SwerveModuleFactory {
   private static final int drivePeriodicFramek1 = 255;
   private static final int drivePeriodicFramek2 = 10;
 
-  private static final SwerveModule buildDefaults(SwerveModule module) {
+  private static final SwerveModule buildDefaults(SwerveModule module, boolean isInverted) {
     module.getSteerController()
       .configRestoreFactoryDefaults()
       .configIdleMode(idleMode)
@@ -53,13 +52,13 @@ public class SwerveModuleFactory {
     return module;
   }
 
-  public static final SwerveModule getFLModule() {
+  public static final SwerveModule getFLModule(boolean isInverted) {
     SwerveModule module = SwerveModuleFactory.buildDefaults(new SwerveModule(
       CANIDS.FL_STEER_ID,
       CANIDS.FL_DRIVE_ID,
       CANIDS.FL_CANCODER_ID,
       SWERVEMODULECONSTANTS.FL_MAGNET_OFFSET
-    ));
+    ), isInverted);
 
     module.getSteerController()
       .configPositionControlP(PIDGAINS.FL_STEER.kP)
@@ -81,13 +80,13 @@ public class SwerveModuleFactory {
     return module;
   }
 
-  public static final SwerveModule getFRModule() {
+  public static final SwerveModule getFRModule(boolean isInverted) {
     SwerveModule module = SwerveModuleFactory.buildDefaults(new SwerveModule(
       CANIDS.FR_STEER_ID,
       CANIDS.FR_DRIVE_ID,
       CANIDS.FR_CANCODER_ID,
       SWERVEMODULECONSTANTS.FR_MAGNET_OFFSET
-    ));
+    ), isInverted);
 
     module.getSteerController()
       .configPositionControlP(PIDGAINS.FR_STEER.kP)
@@ -109,13 +108,13 @@ public class SwerveModuleFactory {
     return module;
   }
 
-  public static final SwerveModule getBLModule() {
+  public static final SwerveModule getBLModule(boolean isInverted) {
     SwerveModule module = SwerveModuleFactory.buildDefaults(new SwerveModule(
       CANIDS.BL_STEER_ID,
       CANIDS.BL_DRIVE_ID,
       CANIDS.BL_CANCODER_ID,
       SWERVEMODULECONSTANTS.BL_MAGNET_OFFSET
-    ));
+    ), isInverted);
 
     module.getSteerController()
       .configPositionControlP(PIDGAINS.BL_STEER.kP)
@@ -137,13 +136,13 @@ public class SwerveModuleFactory {
     return module;
   }
 
-  public static final SwerveModule getBRModule() {
+  public static final SwerveModule getBRModule(boolean isInverted) {
     SwerveModule module = SwerveModuleFactory.buildDefaults(new SwerveModule(
       CANIDS.BR_STEER_ID,
       CANIDS.BR_DRIVE_ID,
       CANIDS.BR_CANCODER_ID,
       SWERVEMODULECONSTANTS.BR_MAGNET_OFFSET
-    ));
+    ), isInverted);
 
     module.getSteerController()
       .configPositionControlP(PIDGAINS.BR_STEER.kP)

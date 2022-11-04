@@ -60,10 +60,10 @@ public class DriveTrain extends SubsystemBase {
   public DriveTrain(Pigeon gyro) {
     this.gyro = gyro;
 
-    frontLeftModule = SwerveModuleFactory.getFLModule();
-    frontRightModule = SwerveModuleFactory.getFRModule();
-    backLeftModule = SwerveModuleFactory.getBLModule();
-    backRightModule = SwerveModuleFactory.getBRModule();
+    frontLeftModule = SwerveModuleFactory.getFLModule(false);
+    frontRightModule = SwerveModuleFactory.getFRModule(false);
+    backLeftModule = SwerveModuleFactory.getBLModule(false);
+    backRightModule = SwerveModuleFactory.getBRModule(false);
 
     kinematics = new SwerveDriveKinematics(
       DRIVETRAINCONSTANTS.FLM_POS,
