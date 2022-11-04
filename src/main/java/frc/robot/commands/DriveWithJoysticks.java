@@ -18,7 +18,7 @@ import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Pigeon;
 
 public class DriveWithJoysticks extends CommandBase {
-  // Subsystem requirements
+
   private DriveTrain driveTrain;
   private Pigeon gyro;
 
@@ -84,21 +84,30 @@ public class DriveWithJoysticks extends CommandBase {
     );
 
     // !Note: Normalization is handled by desaturateWheelSpeeds
+    // This means we can multiply each xy component by moduleMaxSpeed without issues
     double vx = xInput * SWERVEMODULECONSTANTS.MAX_SPEED;
     double vy = yInput * SWERVEMODULECONSTANTS.MAX_SPEED;
     double omega = steerInput * DRIVECONSTANTS.MAX_STEER_SPEED;
 
+    // Robot is receiving a turn command
     if (omega != 0) {
       timeSinceLastTurn.reset();
     }
 
+    double currentYaw = gyro.getYaw();
+
     if(timeSinceLastTurn.get() < DRIVECONSTANTS.KEEP_ANGLE_ENABLE_TIME) {
-      // Allow time for robot to finish rotation
-      keepAngle = gyro.getYaw();
+      // Allow some time for robot to finish rotation
+      keepAngle = currentYaw;
     } else {
-      if (vx != 0 || vy != 0) {
-        // Don't perform keep angle if there is no intention to move
-        omega = keepAnglePIDController.calculate(gyro.getYaw(), keepAngle);
+      // Don't perform keep angle if there is no intention to move
+      if (
+        vx == 0 && vy == 0 &&
+        // Only correct heading if it's off by certain threshold, helps with jittering
+        Math.abs(currentYaw - keepAngle) > DRIVECONSTANTS.KEEP_ANGLE_ENABLE_TOLERANCE
+      ) {
+        // Calculate omega in order to maintain the heading
+        omega = keepAnglePIDController.calculate(currentYaw, keepAngle);
       }
     }
 

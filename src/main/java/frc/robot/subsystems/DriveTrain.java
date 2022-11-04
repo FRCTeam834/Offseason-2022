@@ -4,14 +4,23 @@
 
 package frc.robot.subsystems;
 
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.DRIVECONSTANTS;
 import frc.robot.Constants.DRIVETRAINCONSTANTS;
+import frc.robot.Constants.PIDGAINS;
 import frc.robot.Constants.SWERVEMODULECONSTANTS;
 import frc.robot.utilities.SwerveModuleFactory;
 
@@ -53,10 +62,10 @@ public class DriveTrain extends SubsystemBase {
   public DriveTrain(Pigeon gyro) {
     this.gyro = gyro;
 
-    frontLeftModule = SwerveModuleFactory.getFLModule();
-    frontRightModule = SwerveModuleFactory.getFRModule();
-    backLeftModule = SwerveModuleFactory.getBLModule();
-    backRightModule = SwerveModuleFactory.getBRModule();
+    frontLeftModule = SwerveModuleFactory.getFLModule(false);
+    frontRightModule = SwerveModuleFactory.getFRModule(false);
+    backLeftModule = SwerveModuleFactory.getBLModule(false);
+    backRightModule = SwerveModuleFactory.getBRModule(false);
 
     kinematics = new SwerveDriveKinematics(
       DRIVETRAINCONSTANTS.FLM_POS,
@@ -66,15 +75,6 @@ public class DriveTrain extends SubsystemBase {
     );
 
     odometry = new SwerveDriveOdometry(kinematics, gyro.getYawAsRotation2d());
-  }
-
-  private SwerveModuleState[] getCurrentModuleStates() {
-    return new SwerveModuleState[] {
-      frontLeftModule.getCurrentState(),
-      frontRightModule.getCurrentState(),
-      backLeftModule.getCurrentState(),
-      backRightModule.getCurrentState()
-    };
   }
 
   /** Set module states to desired states; closed loop */
@@ -147,6 +147,10 @@ public class DriveTrain extends SubsystemBase {
 
   /** */
   public void setIdleModuleStates() {
+    if (DRIVETRAINCONSTANTS.IDLE_MODULE_CONFIGURATION == null) {
+      haltAllModules();
+      return;
+    }
     setDesiredModuleStatesOpenLoop(DRIVETRAINCONSTANTS.IDLE_MODULE_CONFIGURATION);
   }
 
@@ -158,8 +162,26 @@ public class DriveTrain extends SubsystemBase {
     backRightModule.halt();
   }
 
-  public void updateOdometryPose(Pose2d updatedPose) {
-    odometry.resetPosition(updatedPose, gyro.getYawAsRotation2d());
+  public Pose2d getCurrentPose() {
+    // Replace with currentPose variable later, it will be generated via vision
+    return odometry.getPoseMeters();
+  }
+
+  public void resetOdometryPose(Pose2d newPose) {
+    gyro.setYaw(newPose.getRotation().getDegrees());
+
+    odometry.resetPosition(newPose, gyro.getYawAsRotation2d());
+  }
+
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    if (Constants.telemetry == false) return;
+
+    builder.setSmartDashboardType("DriveTrain");
+    builder.addDoubleArrayProperty("FLM", frontLeftModule::telemetryGetState, null);
+    builder.addDoubleArrayProperty("FRM", frontRightModule::telemetryGetState, null);
+    builder.addDoubleArrayProperty("BLM", backLeftModule::telemetryGetState, null);
+    builder.addDoubleArrayProperty("BRM", backRightModule::telemetryGetState, null);
   }
 
   @Override
@@ -171,6 +193,36 @@ public class DriveTrain extends SubsystemBase {
       frontRightModule.getCurrentState(),
       backLeftModule.getCurrentState(),
       backRightModule.getCurrentState()
+    );
+  }
+
+  /**
+   * 
+   * Path following command
+   * @param trajectory path
+   * @param resetOdometry reset odometry - set as true if this is the first path
+   * @return
+   */
+  public Command getFollowPathCommand(
+    PathPlannerTrajectory trajectory,
+    boolean resetOdometry
+  ) {
+    return new SequentialCommandGroup(
+      new InstantCommand(() -> {
+        if (resetOdometry) {
+          resetOdometryPose(trajectory.getInitialHolonomicPose());
+        }
+      }),
+      new PPSwerveControllerCommand(
+        trajectory,
+        this::getCurrentPose,
+        kinematics,
+        PIDGAINS.AUTON_X.generateController(),
+        PIDGAINS.AUTON_Y.generateController(),
+        PIDGAINS.AUTON_STEER.generateController(),
+        this::setDesiredModuleStates,
+        // subsystem requirements
+        this)
     );
   }
 }

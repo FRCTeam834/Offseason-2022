@@ -124,12 +124,19 @@ public class SwerveModule extends SubsystemBase {
   public SwerveModuleState getCurrentState() {
     return new SwerveModuleState(
       getCurrentVelocity(),
-      Rotation2d.fromDegrees(steerController.getCurrentPosition())
+      Rotation2d.fromDegrees(getCurrentAngle())
     );
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+  }
+
+  public double[] telemetryGetState() {
+    return new double[] {
+      getCurrentVelocity(),
+      getCurrentAngle()
+    };
   }
 }

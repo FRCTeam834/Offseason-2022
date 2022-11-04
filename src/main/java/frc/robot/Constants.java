@@ -7,9 +7,9 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.robot.libs.PIDGains;
 import frc.robot.libs.UnitQuad;
+import frc.robot.libs.UnitScaleFunction;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -20,25 +20,29 @@ import frc.robot.libs.UnitQuad;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final boolean telemetry = true;
+
   public static final class DRIVECONSTANTS {
     public static final int LEFT_JOYSTICK_PORT = 0;
     public static final int RIGHT_JOYSTICK_PORT = 1;
 
     // m/s
-    public static final double MAX_TRANSLATIONAL_SPEED = 3;
+    public static final double MAX_TRANSLATIONAL_SPEED = 4;
     // degrees per second
-    public static final double MAX_STEER_SPEED = 180;
+    public static final double MAX_STEER_SPEED = 360;
 
     // Joystick deadzones
-    public static final double TRANSLATIONAL_DEADZONE = 0.1;
-    public static final double STEER_DEADZONE = 0.1;
+    public static final double TRANSLATIONAL_DEADZONE = 0.075;
+    public static final double STEER_DEADZONE = 0.075;
 
     public static final double TRANSLATIONAL_RATELIMIT = 2.0;
     public static final double STEER_RATELIMIT = 4.0;
-    public static final UnitQuad JOYSTICK_SCALING_FUNCTION = new UnitQuad();
+    public static final UnitScaleFunction JOYSTICK_SCALING_FUNCTION = new UnitQuad();
 
     // seconds
     public static final double KEEP_ANGLE_ENABLE_TIME = 0.2;
+    // degrees
+    public static final double KEEP_ANGLE_ENABLE_TOLERANCE = 0.5;
   }
 
   public static final class CANIDS {
@@ -58,31 +62,28 @@ public final class Constants {
   }
 
   public static final class PIDGAINS {
-    public static final PIDGains FL_STEER = new PIDGains(0.0);
-    public static final PIDGains FL_DRIVE = new PIDGains(0.0);
+    public static final PIDGains FL_STEER = new PIDGains(1.0);
+    public static final PIDGains FL_DRIVE = new PIDGains(1.0);
 
-    public static final PIDGains FR_STEER = new PIDGains(0.0);
-    public static final PIDGains FR_DRIVE = new PIDGains(0.0);
+    public static final PIDGains FR_STEER = new PIDGains(1.0);
+    public static final PIDGains FR_DRIVE = new PIDGains(1.0);
 
-    public static final PIDGains BL_STEER = new PIDGains(0.0);
-    public static final PIDGains BL_DRIVE = new PIDGains(0.0);
+    public static final PIDGains BL_STEER = new PIDGains(1.0);
+    public static final PIDGains BL_DRIVE = new PIDGains(1.0);
 
-    public static final PIDGains BR_STEER = new PIDGains(0.0);
-    public static final PIDGains BR_DRIVE = new PIDGains(0.0);
+    public static final PIDGains BR_STEER = new PIDGains(1.0);
+    public static final PIDGains BR_DRIVE = new PIDGains(1.0);
 
-    public static final PIDGains KEEP_ANGLE = new PIDGains(0.0);
+    public static final PIDGains KEEP_ANGLE = new PIDGains(1.0);
 
-    public static final PIDGains AUTON_X = new PIDGains(0.0);
-    public static final PIDGains AUTON_Y = new PIDGains(0.0);
-    public static final PIDGains AUTON_STEER = new PIDGains(0.0);
-    public static final TrapezoidProfile.Constraints AUTON_STEER_CONSTRAINTS = new TrapezoidProfile.Constraints(
-      0.0, 0.0
-    );
+    public static final PIDGains AUTON_X = new PIDGains(1.0);
+    public static final PIDGains AUTON_Y = new PIDGains(1.0);
+    public static final PIDGains AUTON_STEER = new PIDGains(1.0);
   }
 
   public static final class SWERVEMODULECONSTANTS {
     // meters per second
-    public static final double MAX_SPEED = 0.0;
+    public static final double MAX_SPEED = 4.5;
     public static final double WHEEL_DIAMETER = 0.0;
     public static final double GEAR_RATIO = 0.0;
     // degrees
@@ -102,6 +103,7 @@ public final class Constants {
     public static final Translation2d BLM_POS = new Translation2d(0.0, 0.0);
     public static final Translation2d BRM_POS = new Translation2d(0.0, 0.0);
 
+    // Set as null if no idle configuration is wanted
     public static final SwerveModuleState[] IDLE_MODULE_CONFIGURATION = {
       new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
       new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),

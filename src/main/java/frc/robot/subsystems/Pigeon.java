@@ -19,12 +19,18 @@ public class Pigeon extends SubsystemBase {
   }
 
   public void zeroYaw() {
-    gyro.setYaw(0);
+    setYaw(0);
+  }
+
+  public void setYaw(double yaw) {
+    gyro.setYaw(-yaw);
   }
 
   /** */
   public double getYaw() {
-    return gyro.getYaw();
+    // Negate the gyro yaw so that ccw is positive
+    // Gyros are cw positive by default
+    return -gyro.getYaw();
   }
 
   /** */

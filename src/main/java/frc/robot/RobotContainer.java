@@ -7,8 +7,11 @@ package frc.robot;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DRIVECONSTANTS;
+import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Pigeon;
 
@@ -26,10 +29,31 @@ public class RobotContainer {
   public static final Joystick leftJoystick = new Joystick(DRIVECONSTANTS.LEFT_JOYSTICK_PORT);
   public static final Joystick rightJoystick = new Joystick(DRIVECONSTANTS.RIGHT_JOYSTICK_PORT);
 
+  //
+  public static final SendableChooser<Command> autonChooser = new SendableChooser<>();
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    // Drive with joysticks by default
+    driveTrain.setDefaultCommand(new DriveWithJoysticks(
+      driveTrain,
+      gyro,
+      rightJoystick::getX,
+      rightJoystick::getY,
+      leftJoystick::getX
+    ));
+
+    autonChooser.setDefaultOption("Placeholder", null);
+    autonChooser.setDefaultOption("Placeholder", null);
+    SmartDashboard.putData(autonChooser);
+
     // Configure the button bindings
     configureButtonBindings();
+  }
+
+  /** Called when robot is disabled */
+  public static final void disable() {
+    driveTrain.haltAllModules();
   }
 
   /**
@@ -46,7 +70,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An ExampleCommand will run in autonomous
-    return null;
+    return autonChooser.getSelected();
   }
 }
