@@ -12,10 +12,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.DRIVECONSTANTS;
 import frc.robot.Constants.DRIVETRAINCONSTANTS;
 import frc.robot.Constants.PIDGAINS;
@@ -169,6 +171,17 @@ public class DriveTrain extends SubsystemBase {
     gyro.setYaw(newPose.getRotation().getDegrees());
 
     odometry.resetPosition(newPose, gyro.getYawAsRotation2d());
+  }
+
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    if (Constants.telemetry == false) return;
+
+    builder.setSmartDashboardType("DriveTrain");
+    builder.addDoubleArrayProperty("FLM", frontLeftModule::telemetryGetState, null);
+    builder.addDoubleArrayProperty("FRM", frontRightModule::telemetryGetState, null);
+    builder.addDoubleArrayProperty("BLM", backLeftModule::telemetryGetState, null);
+    builder.addDoubleArrayProperty("BRM", backRightModule::telemetryGetState, null);
   }
 
   @Override

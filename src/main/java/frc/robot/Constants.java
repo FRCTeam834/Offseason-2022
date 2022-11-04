@@ -20,6 +20,8 @@ import frc.robot.libs.UnitScaleFunction;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final boolean telemetry = true;
+
   public static final class DRIVECONSTANTS {
     public static final int LEFT_JOYSTICK_PORT = 0;
     public static final int RIGHT_JOYSTICK_PORT = 1;
