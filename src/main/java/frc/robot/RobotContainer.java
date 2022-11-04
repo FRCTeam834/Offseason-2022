@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.libs.CANMotorController;
+import frc.robot.libs.SparkMaxController;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -22,8 +22,8 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
 
   // One swerve module
-  CANMotorController steerController = new CANMotorController(1);
-  CANMotorController driveController = new CANMotorController(2);
+  SparkMaxController steerController = new SparkMaxController(1);
+  SparkMaxController driveController = new SparkMaxController(2);
 
   Joystick joystick = new Joystick(0);
 
@@ -36,7 +36,7 @@ public class RobotContainer {
     driveController.configIdleMode(CANSparkMax.IdleMode.kBrake);
     driveController.configVoltageCompensation(12);
     driveController.configSmartCurrentLimit(20);
-    driveController.configPeriodicFramePeriods(10, 20, 10);
+    driveController.configPeriodicFramePeriods(255, 255, 20);
 
     // units should be rpm I guess
     driveController.setDesiredVelocity(1);
