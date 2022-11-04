@@ -19,14 +19,16 @@ public class SwerveModuleFactory {
   private static final int driveSmartCurrentLimit = 20;
 
   private static final int steerControlFramePeriod = 10;
-  private static final int steerPeriodicFramek0 = 255;
-  private static final int steerPeriodicFramek1 = 255;
-  private static final int steerPeriodicFramek2 = 20;
+  private static final int steerPeriodicFramek0 = 65535;
+  private static final int steerPeriodicFramek1 = 65535;
+  private static final int steerPeriodicFramek2 = 10;
+  private static final int steerPeriodicFramek3 = 65535;
 
   private static final int driveControlFramePeriod = 10;
-  private static final int drivePeriodicFramek0 = 255;
-  private static final int drivePeriodicFramek1 = 255;
-  private static final int drivePeriodicFramek2 = 10;
+  private static final int drivePeriodicFramek0 = 65535;
+  private static final int drivePeriodicFramek1 = 65535;
+  private static final int drivePeriodicFramek2 = 20;
+  private static final int drivePeriodicFramek3 = 65535;
 
   private static final SwerveModule buildDefaults(SwerveModule module, boolean isInverted) {
     module.getSteerController()
@@ -37,7 +39,7 @@ public class SwerveModuleFactory {
       .configSmartCurrentLimit(steerSmartCurrentLimit)
       .configPositionConversionFactor(SWERVEMODULECONSTANTS.POSITION_CONVERSION_FACTOR)
       .configControlFramePeriod(steerControlFramePeriod)
-      .configPeriodicFramePeriods(steerPeriodicFramek0, steerPeriodicFramek1, steerPeriodicFramek2);
+      .configPeriodicFramePeriods(steerPeriodicFramek0, steerPeriodicFramek1, steerPeriodicFramek2, steerPeriodicFramek3);
 
     module.getDriveController()
       .configRestoreFactoryDefaults()
@@ -47,7 +49,7 @@ public class SwerveModuleFactory {
       .configSmartCurrentLimit(driveSmartCurrentLimit)
       .configVelocityConversionFactor(SWERVEMODULECONSTANTS.VELOCITY_CONVERSION_FACTOR)
       .configControlFramePeriod(driveControlFramePeriod)
-      .configPeriodicFramePeriods(drivePeriodicFramek0, drivePeriodicFramek1, drivePeriodicFramek2);
+      .configPeriodicFramePeriods(drivePeriodicFramek0, drivePeriodicFramek1, drivePeriodicFramek2, drivePeriodicFramek3);
 
     return module;
   }
