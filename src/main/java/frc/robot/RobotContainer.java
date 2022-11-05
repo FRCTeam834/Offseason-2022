@@ -14,6 +14,7 @@ import frc.robot.Constants.DRIVECONSTANTS;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Pigeon;
+import frc.robot.subsystems.Vision;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -25,6 +26,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public static final Pigeon gyro = new Pigeon();
   public static final DriveTrain driveTrain = new DriveTrain(gyro);
+  public static final Vision vision = new Vision();
 
   public static final Joystick leftJoystick = new Joystick(DRIVECONSTANTS.LEFT_JOYSTICK_PORT);
   public static final Joystick rightJoystick = new Joystick(DRIVECONSTANTS.RIGHT_JOYSTICK_PORT);

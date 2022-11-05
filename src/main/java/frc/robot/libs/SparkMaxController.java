@@ -111,6 +111,11 @@ public class SparkMaxController {
   private double velocityConversionFactor;
   private double positionConversionFactor;
 
+  // Velocity PIDF
+  private PIDController velocityPIDController = new PIDController(0.0, 0.0, 0.0);
+  private double velocityFeedforward; // kV
+  private double velocityArbFF; // kS
+
   // Custom velocity filtering
   // Inspired by 6328: https://github.com/Mechanical-Advantage/SwerveDevelopment/blob/main/src/main/java/frc/robot/util/SparkMaxDerivedVelocityController.java
   private final CAN deviceInterface; // Read CAN packets directly
@@ -118,10 +123,10 @@ public class SparkMaxController {
   private final Notifier updateNotifier;
   private boolean isFirstPacket = true;
 
-  // Velocity PIDF
-  private PIDController velocityPIDController = new PIDController(0.0, 0.0, 0.0);
-  private double velocityFeedforward; // kV
-  private double velocityArbFF; // kS
+  // Stall detection 
+  // !Important: A low k1 frame period is needed for accurate current readings
+  private LinearFilter currentFilter;
+  private double lastCurrent; // amps
 
   /**
    * 
@@ -129,7 +134,12 @@ public class SparkMaxController {
    * @param CANID
    */
   public SparkMaxController(int CANID) {
-    this(CANID, 20, 5);
+    this(CANID, 20, 5, 5);
+  }
+
+  /** */
+  public SparkMaxController(int CANID, int updateTimestep, int velocityFilterPoints) {
+    this(CANID, updateTimestep, velocityFilterPoints, 5);
   }
 
   /**
@@ -137,14 +147,16 @@ public class SparkMaxController {
    * @param CANID CAN ID of sparkmax controller
    * @param updateTimestep milliseconds per update (time delta) !Note: 10ms is the lowest recommended
    * @param velocityFilterPoints number of points on velocity filter
+   * @param currentFilterPoints number of points on current filter
    */
-  public SparkMaxController(int CANID, int updateTimestep, int velocityFilterPoints) {
+  public SparkMaxController(int CANID, int updateTimestep, int velocityFilterPoints, int currentFilterPoints) {
     this.sparkMax = new CANSparkMax(CANID, CANSparkMax.MotorType.kBrushless);
     this.sparkMaxPIDController = this.sparkMax.getPIDController();
     this.sparkMaxEncoder = this.sparkMax.getEncoder();
 
     this.deviceInterface = new CAN(this.sparkMax.getDeviceId(), SparkMaxController.manufacturerID, SparkMaxController.deviceTypeID);
     this.velocityFilter = LinearFilter.backwardFiniteDifference(1, velocityFilterPoints, updateTimestep / 1000.0);
+    this.currentFilter = LinearFilter.movingAverage(currentFilterPoints);
 
     this.updateNotifier = new Notifier(this::update);
     if (updateTimestep > 0) {
@@ -184,6 +196,9 @@ public class SparkMaxController {
     this.sparkMax.setSmartCurrentLimit(limit);
     return this;
   }
+  // Periodic Frame Documentation
+  // https://andymark-weblinc.netdna-ssl.com/media/W1siZiIsIjIwMjAvMDUvMTkvMTQvMDYvNDMvNDUyNGFkOTMtZjYwZi00ODgyLWFlNzQtNjAxMzU5MzQyMjBiL2FtLTQyNjEgU1BBUksgTUFYIC0gVXNlciBNYW51YWwuaHRtbCJdXQ/am-4261%20SPARK%20MAX%20-%20User%20Manual.html?sha=7c9ea7a1ed73eb42#section-3-3-2-1
+  // https://docs.revrobotics.com/sparkmax/operating-modes/control-interfaces
   public SparkMaxController configPeriodicFramePeriods(int k0, int k1, int k2) {
     this.sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus0, k0);
     this.sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus1, k1);
@@ -317,6 +332,16 @@ public class SparkMaxController {
     return SparkMaxController.inInclusiveRange(this.getCurrentVelocity(useEncoder) - velocity, tolerance);
   }
 
+  /**
+   * 
+   * Returns if motor is current is above stall current
+   * @param stallAmps amps considered to be stalling
+   * @return
+   */
+  public boolean isStalling(int stallAmps) {
+    return this.lastCurrent >= stallAmps;
+  }
+
   /** */
   public void set(double percent) {
     DesiredState desiredState = new DesiredState(percent, ControlType.PERCENT);
@@ -400,6 +425,9 @@ public class SparkMaxController {
 
   private void update() {
     this.updateVelocity();
+
+    this.lastCurrent = this.currentFilter.calculate(this.sparkMax.getOutputCurrent());
+
     // https://andymark-weblinc.netdna-ssl.com/media/W1siZiIsIjIwMjAvMDUvMTkvMTQvMDYvNDMvNDUyNGFkOTMtZjYwZi00ODgyLWFlNzQtNjAxMzU5MzQyMjBiL2FtLTQyNjEgU1BBUksgTUFYIC0gVXNlciBNYW51YWwuaHRtbCJdXQ/am-4261%20SPARK%20MAX%20-%20User%20Manual.html?sha=7c9ea7a1ed73eb42#section-3-3-2-1
     // Packet contains motor position in rotations
     // as 32-bit (4 byte) IEEE float
