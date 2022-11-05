@@ -28,6 +28,8 @@ public class RobotContainer {
   public static final DriveTrain driveTrain = new DriveTrain(gyro);
   public static final Vision vision = new Vision();
 
+  public static final Superstructure superstructure = new Superstructure(driveTrain);
+
   public static final Joystick leftJoystick = new Joystick(DRIVECONSTANTS.LEFT_JOYSTICK_PORT);
   public static final Joystick rightJoystick = new Joystick(DRIVECONSTANTS.RIGHT_JOYSTICK_PORT);
 
@@ -53,9 +55,9 @@ public class RobotContainer {
     configureButtonBindings();
   }
 
-  /** Called when robot is disabled */
-  public static final void disable() {
-    driveTrain.haltAllModules();
+  /** This function is called once each time the robot enters Disabled mode. */
+  public static final void disabledInit() {
+    superstructure.haltEverything();
   }
 
   /**

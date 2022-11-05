@@ -440,7 +440,7 @@ public class SparkMaxController {
       .order(ByteOrder.LITTLE_ENDIAN)
       .getFloat();
     // double packetTime = buffer.timestamp;
-    lastPosition = position;
+    lastPosition = position; 
 
     if (isFirstPacket) {
       isFirstPacket = false;
