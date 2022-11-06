@@ -24,20 +24,29 @@ public class Superstructure extends SubsystemBase {
     this.vision = vision;
   }
 
+  /**
+   * 
+   * Resets gyro and drivetrain odometry (whole "Pose")
+   * @param newPose
+   */
   public void resetOdometryPose(Pose2d newPose) {
     gyro.setYaw(newPose.getRotation().getDegrees());
     driveTrain.resetOdometry(newPose);
   }
 
+  /** */
   public Pose2d getRobotPose() {
     return robotPose;
   }
 
+  /**
+   * Updates current robot pose using vision, and odometry as fallback
+   */
   public void updateRobotPose() {
     driveTrain.updateOdometry(gyro.getYaw());
     Pose2d poseFromVision = vision.getPoseFromVision();
     Pose2d poseFromOdometry = driveTrain.getPoseFromOdometry();
-    
+
     if (poseFromVision == null) {
       robotPose = poseFromOdometry;
     } else {

@@ -22,6 +22,11 @@ public class Vision extends SubsystemBase {
     camera = new PhotonCamera(name);
   }
 
+  /**
+   * 
+   * Get robot position based on vision results
+   * @return
+   */
   public Pose2d getPoseFromVision() {
     // temporary
     Map<Integer, Transform3d> lookup = new HashMap<>();

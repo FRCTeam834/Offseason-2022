@@ -201,6 +201,7 @@ public class DriveTrain extends SubsystemBase {
    * 
    * Path following command
    * @param trajectory path
+   * @param robotPoseSupplier supplier to robot's pose
    * @param resetOdometry reset odometry - set as true if this is the first path
    * @return
    */
