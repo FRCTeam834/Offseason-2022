@@ -40,7 +40,8 @@ public class RobotContainer {
   public RobotContainer() {
     // Drive with joysticks by default
     driveTrain.setDefaultCommand(new DriveWithJoysticks(
-      superstructure,
+      driveTrain,
+      gyro,
       rightJoystick::getX,
       rightJoystick::getY,
       leftJoystick::getX

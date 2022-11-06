@@ -10,7 +10,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Superstructure;
 import frc.robot.Constants.DRIVECONSTANTS;
 import frc.robot.Constants.PIDGAINS;
 import frc.robot.Constants.SWERVEMODULECONSTANTS;
@@ -38,14 +37,15 @@ public class DriveWithJoysticks extends CommandBase {
 
   /** Creates a new DriveWithJoysticks. */
   public DriveWithJoysticks(
-    Superstructure superstructure,
+    DriveTrain driveTrain,
+    Pigeon gyro,
     DoubleSupplier xRaw,
     DoubleSupplier yRaw,
     DoubleSupplier steerRaw
   ) {
     // Use addRequirements() here to declare subsystem dependencies.
-    this.driveTrain = superstructure.driveTrain;
-    this.gyro = superstructure.gyro;
+    this.driveTrain = driveTrain;
+    this.gyro = gyro;
 
     this.xRaw = xRaw;
     this.yRaw = yRaw;
