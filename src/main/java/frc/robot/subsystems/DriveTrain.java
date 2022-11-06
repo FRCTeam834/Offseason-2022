@@ -177,7 +177,7 @@ public class DriveTrain extends SubsystemBase {
     );
   }
 
-  public void resetOdometryPose(Pose2d newPose) {
+  public void resetOdometry(Pose2d newPose) {
     odometry.resetPosition(newPose, newPose.getRotation());
   }
 
@@ -212,7 +212,7 @@ public class DriveTrain extends SubsystemBase {
     return new SequentialCommandGroup(
       new InstantCommand(() -> {
         if (resetOdometry) {
-          resetOdometryPose(trajectory.getInitialHolonomicPose());
+          resetOdometry(trajectory.getInitialHolonomicPose());
         }
       }),
       new PPSwerveControllerCommand(

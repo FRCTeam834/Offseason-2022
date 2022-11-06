@@ -24,9 +24,9 @@ public class Superstructure extends SubsystemBase {
     this.vision = vision;
   }
 
-  public void resetRobotPose(Pose2d newPose) {
+  public void resetOdometryPose(Pose2d newPose) {
     gyro.setYaw(newPose.getRotation().getDegrees());
-    driveTrain.resetOdometryPose(newPose);
+    driveTrain.resetOdometry(newPose);
   }
 
   public Pose2d getRobotPose() {
@@ -34,17 +34,16 @@ public class Superstructure extends SubsystemBase {
   }
 
   public void updateRobotPose() {
-    /* !psuedocode for now
-    driveTrain.updateOdometry(gyro::getYaw);
+    driveTrain.updateOdometry(gyro.getYaw());
     Pose2d poseFromVision = vision.getPoseFromVision();
     Pose2d poseFromOdometry = driveTrain.getPoseFromOdometry();
+    
     if (poseFromVision == null) {
-      return poseFromOdometry;
+      robotPose = poseFromOdometry;
     } else {
-      resetRobotPose(poseFromVision);
-      return poseFromVision;
+      resetOdometryPose(poseFromVision);
+      robotPose = poseFromVision;
     }
-    */
   }
 
   public void haltEverything() {
