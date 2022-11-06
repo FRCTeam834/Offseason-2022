@@ -12,14 +12,23 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class Vision extends SubsystemBase {
   // String name of network table
+  private final String cameraName;
   private final PhotonCamera camera;
   /** Creates a new Vision. */
-  public Vision(String name) {
-    camera = new PhotonCamera(name);
+  public Vision(String cameraName) {
+    this.cameraName = cameraName;
+    camera = new PhotonCamera(this.cameraName);
+  }
+
+  /** */
+  public boolean hasTarget() {
+    return camera.getLatestResult().hasTargets();
   }
 
   /**
@@ -42,6 +51,14 @@ public class Vision extends SubsystemBase {
       transform.getTranslation().toTranslation2d(),
       transform.getRotation().toRotation2d()
     );
+  }
+
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    if (Constants.telemetry == false) return;
+
+    builder.setSmartDashboardType("Vision" + cameraName);
+    builder.addBooleanProperty("hasTarget", this::hasTarget, null);
   }
 
   @Override
