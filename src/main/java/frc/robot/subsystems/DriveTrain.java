@@ -74,7 +74,7 @@ public class DriveTrain extends SubsystemBase {
       DRIVETRAINCONSTANTS.BRM_POS
     );
 
-    odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(0.0));
+    odometry = new SwerveDriveOdometry(kinematics, new Rotation2d());
   }
 
   /** Set module states to desired states; closed loop */
