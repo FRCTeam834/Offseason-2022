@@ -66,17 +66,17 @@ public class DriveWithJoysticks extends CommandBase {
   public void execute() {
     // raw value -> deadzone -> scaling -> ratelimit
     double xInput = xRateLimiter.calculate(
-      DRIVECONSTANTS.JOYSTICK_SCALING_FUNCTION.calculate(
+      DRIVECONSTANTS.DRIVE_JOYSTICK_SCALING_FUNCTION.calculate(
         MathPlus.applyDeadzone(xRaw.getAsDouble(), DRIVECONSTANTS.TRANSLATIONAL_DEADZONE)
     ));
 
     double yInput = yRateLimiter.calculate(
-      DRIVECONSTANTS.JOYSTICK_SCALING_FUNCTION.calculate(
+      DRIVECONSTANTS.DRIVE_JOYSTICK_SCALING_FUNCTION.calculate(
         MathPlus.applyDeadzone(yRaw.getAsDouble(), DRIVECONSTANTS.TRANSLATIONAL_DEADZONE)
     ));
 
     double steerInput = steerRateLimiter.calculate(
-      DRIVECONSTANTS.JOYSTICK_SCALING_FUNCTION.calculate(
+      DRIVECONSTANTS.STEER_JOYSTICK_SCALING_FUNCTION.calculate(
         MathPlus.applyDeadzone(steerRaw.getAsDouble(), DRIVECONSTANTS.STEER_DEADZONE)
       )
     );
