@@ -1,11 +1,12 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Pigeon;
 import frc.robot.subsystems.Vision;
 
-public class Superstructure {
+public class Superstructure extends SubsystemBase {
   
   public final DriveTrain driveTrain;
   public final Pigeon gyro;
@@ -23,7 +24,7 @@ public class Superstructure {
     this.vision = vision;
   }
 
-  public void resetOdometryPose(Pose2d newPose) {
+  public void resetRobotPose(Pose2d newPose) {
     gyro.setYaw(newPose.getRotation().getDegrees());
     driveTrain.resetOdometryPose(newPose);
   }
@@ -40,7 +41,7 @@ public class Superstructure {
     if (poseFromVision == null) {
       return poseFromOdometry;
     } else {
-      driveTrain.resetOdometry(poseFromVision);
+      resetRobotPose(poseFromVision);
       return poseFromVision;
     }
     */
@@ -49,5 +50,10 @@ public class Superstructure {
   public void haltEverything() {
     driveTrain.haltAllModules();
     // ...
+  }
+
+  @Override
+  public void periodic() {
+    updateRobotPose();
   }
 }
