@@ -25,10 +25,10 @@ import frc.robot.subsystems.Vision;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public static final Pigeon gyro = new Pigeon();
-  public static final DriveTrain driveTrain = new DriveTrain(gyro);
+  public static final DriveTrain driveTrain = new DriveTrain();
   public static final Vision vision = new Vision("photoncamera1");
 
-  public static final Superstructure superstructure = new Superstructure(driveTrain);
+  public static final Superstructure superstructure = new Superstructure(driveTrain, gyro, vision);
 
   public static final Joystick leftJoystick = new Joystick(DRIVECONSTANTS.LEFT_JOYSTICK_PORT);
   public static final Joystick rightJoystick = new Joystick(DRIVECONSTANTS.RIGHT_JOYSTICK_PORT);
@@ -40,8 +40,7 @@ public class RobotContainer {
   public RobotContainer() {
     // Drive with joysticks by default
     driveTrain.setDefaultCommand(new DriveWithJoysticks(
-      driveTrain,
-      gyro,
+      superstructure,
       rightJoystick::getX,
       rightJoystick::getY,
       leftJoystick::getX

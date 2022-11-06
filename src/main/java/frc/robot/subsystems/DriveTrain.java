@@ -4,10 +4,14 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
@@ -48,8 +52,6 @@ public class DriveTrain extends SubsystemBase {
     }
   }
 
-  private final Pigeon gyro;
-
   private final SwerveModule frontLeftModule;
   private final SwerveModule frontRightModule;
   private final SwerveModule backLeftModule;
@@ -59,9 +61,7 @@ public class DriveTrain extends SubsystemBase {
   private final SwerveDriveOdometry odometry;
 
   /** Creates a new DriveTrain. */
-  public DriveTrain(Pigeon gyro) {
-    this.gyro = gyro;
-
+  public DriveTrain() {
     frontLeftModule = SwerveModuleFactory.getFLModule(false);
     frontRightModule = SwerveModuleFactory.getFRModule(false);
     backLeftModule = SwerveModuleFactory.getBLModule(false);
@@ -74,7 +74,7 @@ public class DriveTrain extends SubsystemBase {
       DRIVETRAINCONSTANTS.BRM_POS
     );
 
-    odometry = new SwerveDriveOdometry(kinematics, gyro.getYawAsRotation2d());
+    odometry = new SwerveDriveOdometry(kinematics, new Rotation2d(0.0));
   }
 
   /** Set module states to desired states; closed loop */
@@ -136,12 +136,13 @@ public class DriveTrain extends SubsystemBase {
     double vx,
     double vy,
     double omega,
+    DoubleSupplier robotYaw,
     boolean openLoopDrive
   ) {
     if (openLoopDrive) {
-      setDesiredSpeedsOpenLoop(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, gyro.getYawAsRotation2d()));
+      setDesiredSpeedsOpenLoop(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, Rotation2d.fromDegrees(robotYaw.getAsDouble())));
     } else {
-      setDesiredSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, gyro.getYawAsRotation2d()));
+      setDesiredSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, Rotation2d.fromDegrees(robotYaw.getAsDouble())));
     }
   }
 
@@ -162,15 +163,22 @@ public class DriveTrain extends SubsystemBase {
     backRightModule.halt();
   }
 
-  public Pose2d getCurrentPose() {
-    // Replace with currentPose variable later, it will be generated via vision
+  public Pose2d getPoseFromOdometry() {
     return odometry.getPoseMeters();
   }
 
-  public void resetOdometryPose(Pose2d newPose) {
-    gyro.setYaw(newPose.getRotation().getDegrees());
+  public void updateOdometry(double robotYaw) {
+    odometry.update(
+      Rotation2d.fromDegrees(robotYaw),
+      frontLeftModule.getCurrentState(),
+      frontRightModule.getCurrentState(),
+      backLeftModule.getCurrentState(),
+      backRightModule.getCurrentState()
+    );
+  }
 
-    odometry.resetPosition(newPose, gyro.getYawAsRotation2d());
+  public void resetOdometryPose(Pose2d newPose) {
+    odometry.resetPosition(newPose, newPose.getRotation());
   }
 
   @Override
@@ -187,13 +195,6 @@ public class DriveTrain extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    odometry.update(
-      gyro.getYawAsRotation2d(),
-      frontLeftModule.getCurrentState(),
-      frontRightModule.getCurrentState(),
-      backLeftModule.getCurrentState(),
-      backRightModule.getCurrentState()
-    );
   }
 
   /**
@@ -205,6 +206,7 @@ public class DriveTrain extends SubsystemBase {
    */
   public Command getFollowPathCommand(
     PathPlannerTrajectory trajectory,
+    Supplier<Pose2d> robotPoseSupplier,
     boolean resetOdometry
   ) {
     return new SequentialCommandGroup(
@@ -215,7 +217,7 @@ public class DriveTrain extends SubsystemBase {
       }),
       new PPSwerveControllerCommand(
         trajectory,
-        this::getCurrentPose,
+        robotPoseSupplier,
         kinematics,
         PIDGAINS.AUTON_X.generateController(),
         PIDGAINS.AUTON_Y.generateController(),
