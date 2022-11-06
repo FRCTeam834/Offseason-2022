@@ -14,6 +14,7 @@ import frc.robot.Constants.DRIVECONSTANTS;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Pigeon;
+import frc.robot.subsystems.Vision;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -24,7 +25,10 @@ import frc.robot.subsystems.Pigeon;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public static final Pigeon gyro = new Pigeon();
-  public static final DriveTrain driveTrain = new DriveTrain(gyro);
+  public static final DriveTrain driveTrain = new DriveTrain();
+  public static final Vision vision = new Vision("photoncamera1");
+
+  public static final Superstructure superstructure = new Superstructure(driveTrain, gyro, vision);
 
   public static final Joystick leftJoystick = new Joystick(DRIVECONSTANTS.LEFT_JOYSTICK_PORT);
   public static final Joystick rightJoystick = new Joystick(DRIVECONSTANTS.RIGHT_JOYSTICK_PORT);
@@ -37,7 +41,7 @@ public class RobotContainer {
     // Drive with joysticks by default
     driveTrain.setDefaultCommand(new DriveWithJoysticks(
       driveTrain,
-      gyro,
+      gyro::getYaw,
       rightJoystick::getX,
       rightJoystick::getY,
       leftJoystick::getX
@@ -51,9 +55,9 @@ public class RobotContainer {
     configureButtonBindings();
   }
 
-  /** Called when robot is disabled */
-  public static final void disable() {
-    driveTrain.haltAllModules();
+  /** This function is called once each time the robot enters Disabled mode. */
+  public static final void disabledInit() {
+    superstructure.haltEverything();
   }
 
   /**

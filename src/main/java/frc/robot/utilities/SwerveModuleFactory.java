@@ -21,13 +21,13 @@ public class SwerveModuleFactory {
   private static final int steerControlFramePeriod = 10;
   private static final int steerPeriodicFramek0 = 65535;
   private static final int steerPeriodicFramek1 = 65535;
-  private static final int steerPeriodicFramek2 = 10;
+  private static final int steerPeriodicFramek2 = 20;
   private static final int steerPeriodicFramek3 = 65535;
 
   private static final int driveControlFramePeriod = 10;
   private static final int drivePeriodicFramek0 = 65535;
   private static final int drivePeriodicFramek1 = 65535;
-  private static final int drivePeriodicFramek2 = 20;
+  private static final int drivePeriodicFramek2 = 19;
   private static final int drivePeriodicFramek3 = 65535;
 
   private static final SwerveModule buildDefaults(SwerveModule module, boolean isInverted) {

@@ -37,7 +37,8 @@ public final class Constants {
 
     public static final double TRANSLATIONAL_RATELIMIT = 2.0;
     public static final double STEER_RATELIMIT = 4.0;
-    public static final UnitScaleFunction JOYSTICK_SCALING_FUNCTION = new UnitQuad();
+    public static final UnitScaleFunction STEER_JOYSTICK_SCALING_FUNCTION = new UnitQuad();
+    public static final UnitScaleFunction DRIVE_JOYSTICK_SCALING_FUNCTION = new UnitQuad();
 
     // seconds
     public static final double KEEP_ANGLE_ENABLE_TIME = 0.2;

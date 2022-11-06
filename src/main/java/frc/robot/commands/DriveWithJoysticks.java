@@ -15,13 +15,11 @@ import frc.robot.Constants.PIDGAINS;
 import frc.robot.Constants.SWERVEMODULECONSTANTS;
 import frc.robot.libs.MathPlus;
 import frc.robot.subsystems.DriveTrain;
-import frc.robot.subsystems.Pigeon;
 
 public class DriveWithJoysticks extends CommandBase {
 
   private DriveTrain driveTrain;
-  private Pigeon gyro;
-
+  private DoubleSupplier robotYaw;
   private DoubleSupplier xRaw;
   private DoubleSupplier yRaw;
   private DoubleSupplier steerRaw;
@@ -38,14 +36,14 @@ public class DriveWithJoysticks extends CommandBase {
   /** Creates a new DriveWithJoysticks. */
   public DriveWithJoysticks(
     DriveTrain driveTrain,
-    Pigeon gyro,
+    DoubleSupplier robotYaw,
     DoubleSupplier xRaw,
     DoubleSupplier yRaw,
     DoubleSupplier steerRaw
   ) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.driveTrain = driveTrain;
-    this.gyro = gyro;
+    this.robotYaw = robotYaw;
 
     this.xRaw = xRaw;
     this.yRaw = yRaw;
@@ -68,17 +66,17 @@ public class DriveWithJoysticks extends CommandBase {
   public void execute() {
     // raw value -> deadzone -> scaling -> ratelimit
     double xInput = xRateLimiter.calculate(
-      DRIVECONSTANTS.JOYSTICK_SCALING_FUNCTION.calculate(
+      DRIVECONSTANTS.DRIVE_JOYSTICK_SCALING_FUNCTION.calculate(
         MathPlus.applyDeadzone(xRaw.getAsDouble(), DRIVECONSTANTS.TRANSLATIONAL_DEADZONE)
     ));
 
     double yInput = yRateLimiter.calculate(
-      DRIVECONSTANTS.JOYSTICK_SCALING_FUNCTION.calculate(
+      DRIVECONSTANTS.DRIVE_JOYSTICK_SCALING_FUNCTION.calculate(
         MathPlus.applyDeadzone(yRaw.getAsDouble(), DRIVECONSTANTS.TRANSLATIONAL_DEADZONE)
     ));
 
     double steerInput = steerRateLimiter.calculate(
-      DRIVECONSTANTS.JOYSTICK_SCALING_FUNCTION.calculate(
+      DRIVECONSTANTS.STEER_JOYSTICK_SCALING_FUNCTION.calculate(
         MathPlus.applyDeadzone(steerRaw.getAsDouble(), DRIVECONSTANTS.STEER_DEADZONE)
       )
     );
@@ -94,7 +92,7 @@ public class DriveWithJoysticks extends CommandBase {
       timeSinceLastTurn.reset();
     }
 
-    double currentYaw = gyro.getYaw();
+    double currentYaw = robotYaw.getAsDouble();
 
     if(timeSinceLastTurn.get() < DRIVECONSTANTS.KEEP_ANGLE_ENABLE_TIME) {
       // Allow some time for robot to finish rotation
@@ -114,7 +112,7 @@ public class DriveWithJoysticks extends CommandBase {
     if (vx == 0 && vy == 0 && omega == 0) {
       driveTrain.setIdleModuleStates();
     } else {
-      driveTrain.driveFieldCentric(vx, vy, omega, true);
+      driveTrain.driveFieldCentric(vx, vy, omega, robotYaw, true);
     }
   }
 
