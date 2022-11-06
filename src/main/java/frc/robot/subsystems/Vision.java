@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.VISIONCONSTANTS;
 
 public class Vision extends SubsystemBase {
   // String name of network table
@@ -44,12 +45,15 @@ public class Vision extends SubsystemBase {
     PhotonTrackedTarget target = camera.getLatestResult().getBestTarget();
     int id = target.getFiducialId();
 
-    // Currently assumes camera at center of robot
-    Transform3d transform = lookup.get(id).plus(target.getBestCameraToTarget().inverse());
+    Transform3d fiducialTransform = lookup.get(id);
+    Transform3d cameraToTarget = target.getBestCameraToTarget().inverse();
+    Transform3d cameraToRobot = VISIONCONSTANTS.CAMERA_POS;
+
+    Transform3d robotTransform = fiducialTransform.plus(cameraToTarget).plus(cameraToRobot);
 
     return new Pose2d(
-      transform.getTranslation().toTranslation2d(),
-      transform.getRotation().toRotation2d()
+      robotTransform.getTranslation().toTranslation2d(),
+      robotTransform.getRotation().toRotation2d()
     );
   }
 

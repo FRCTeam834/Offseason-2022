@@ -5,7 +5,10 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.libs.PIDGains;
 import frc.robot.libs.UnitQuad;
@@ -111,5 +114,13 @@ public final class Constants {
       new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
       new SwerveModuleState(0, Rotation2d.fromDegrees(45))
     };
+  }
+
+  public static final class VISIONCONSTANTS {
+    // Transform from camera to robot center (center at base of robot)
+    public static final Transform3d CAMERA_POS = new Transform3d(
+      new Translation3d(0.0, 0.0, 0.0),
+      new Rotation3d(0.0, 0.0, 0.0)
+    );
   }
 }
