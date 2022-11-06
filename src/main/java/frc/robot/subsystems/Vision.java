@@ -12,8 +12,8 @@ public class Vision extends SubsystemBase {
   // String name of network table
   private final PhotonCamera camera;
   /** Creates a new Vision. */
-  public Vision() {
-    camera = new PhotonCamera("photonvision");
+  public Vision(String name) {
+    camera = new PhotonCamera(name);
   }
 
   @Override

@@ -26,7 +26,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public static final Pigeon gyro = new Pigeon();
   public static final DriveTrain driveTrain = new DriveTrain(gyro);
-  public static final Vision vision = new Vision();
+  public static final Vision vision = new Vision("photoncamera1");
 
   public static final Superstructure superstructure = new Superstructure(driveTrain);
 
