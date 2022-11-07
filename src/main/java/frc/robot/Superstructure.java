@@ -56,7 +56,10 @@ public class Superstructure extends SubsystemBase {
       driveTrain.getBackRightModule().getCurrentState()
     );
 
-    poseEstimator.addVisionMeasurement(vision.getPose2dFromVision(), Timer.getFPGATimestamp() / 1e-6);
+    Pose2d poseFromVision = vision.getPose2dFromVision();
+    if (poseFromVision != null) {
+      poseEstimator.addVisionMeasurement(vision.getPose2dFromVision(), Timer.getFPGATimestamp() / 1e-6);
+    }
   }
 
   /** */
