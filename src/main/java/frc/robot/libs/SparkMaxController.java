@@ -103,7 +103,7 @@ public class SparkMaxController {
 
   private double lastPosition; // Unit: Rotations
   private double lastVelocity; // Unit: RPM
-  private DesiredState lastDesiredState;
+  private DesiredState lastDesiredState = new DesiredState(0.0, ControlType.PERCENT);
   // private double lastDesiredPosition; // Unit: Rotations
   // private double lastDesiredVelocity; // Unit: RPM
   // private double lastDesiredVoltage; // Unit: Volts
