@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.DriveTrain;
@@ -15,7 +16,7 @@ public class Superstructure extends SubsystemBase {
   public final Pigeon gyro;
   public final Vision vision;
 
-  private SwerveDrivePoseEstimator poseEstimator;
+  private SwerveDriveOdometry poseEstimator;
 
   public Superstructure(
     DriveTrain driveTrain,
@@ -26,7 +27,13 @@ public class Superstructure extends SubsystemBase {
     this.gyro = gyro;
     this.vision = vision;
 
-    poseEstimator = new SwerveDrivePoseEstimator(
+    poseEstimator = new SwerveDriveOdometry(
+      driveTrain.getKinematics(),
+      gyro.getYawAsRotation2d(),
+      new Pose2d()
+    );
+
+    /*poseEstimator = new SwerveDrivePoseEstimator(
       new Rotation2d(),
       new Pose2d(),
       driveTrain.getKinematics(),
@@ -34,12 +41,13 @@ public class Superstructure extends SubsystemBase {
       Constants.LOCAL_STDDEVS,
       Constants.VISION_STDDEVS,
       0.02 // 20ms per loop
-    );
+    );*/
   }
 
   /** */
   public Pose2d getRobotPose() {
-    return poseEstimator.getEstimatedPosition();
+    return poseEstimator.getPoseMeters();
+    // return poseEstimator.getEstimatedPosition();
   }
 
   /**
@@ -53,6 +61,14 @@ public class Superstructure extends SubsystemBase {
       driveTrain.getBackLeftModule().getCurrentState(),
       driveTrain.getBackRightModule().getCurrentState()
     );
+    
+    /*poseEstimator.update(
+      gyro.getYawAsRotation2d(),
+      driveTrain.getFrontLeftModule().getCurrentState(),
+      driveTrain.getFrontRightModule().getCurrentState(),
+      driveTrain.getBackLeftModule().getCurrentState(),
+      driveTrain.getBackRightModule().getCurrentState()
+    );
 
     Pose2d poseFromVision = vision.getPose2dFromVision();
     if (poseFromVision != null) {
@@ -60,18 +76,21 @@ public class Superstructure extends SubsystemBase {
         vision.getPose2dFromVision(),
         Timer.getFPGATimestamp() / 1e-6 - vision.getCameraLatencyInSeconds()
       );
-    }
+    }*/
   }
 
   /** */
   public void resetRobotPose(Pose2d newPose) {
     poseEstimator.resetPosition(newPose, gyro.getYawAsRotation2d());
+    // poseEstimator.resetPosition(newPose, gyro.getYawAsRotation2d());
   }
 
   /** Should only be used once at start of auton */
   public void resetRobotPoseAndGyro(Pose2d newPose) {
     gyro.setYaw(newPose.getRotation().getDegrees());
     poseEstimator.resetPosition(newPose, newPose.getRotation());
+
+    // poseEstimator.resetPosition(newPose, newPose.getRotation());
   }
 
   /** */
