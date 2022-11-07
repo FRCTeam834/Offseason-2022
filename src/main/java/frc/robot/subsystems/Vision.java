@@ -46,7 +46,7 @@ public class Vision extends SubsystemBase {
     int id = target.getFiducialId();
 
     Transform3d fiducialTransform = lookup.get(id);
-    Transform3d cameraToTarget = target.getBestCameraToTarget().inverse();
+    Transform3d cameraToTarget = target.getBestCameraToTarget().inverse(); // Take inverse to find "targetToCamera"
     Transform3d cameraToRobot = VISIONCONSTANTS.CAMERA_POS;
 
     Transform3d robotTransform = fiducialTransform.plus(cameraToTarget).plus(cameraToRobot);
