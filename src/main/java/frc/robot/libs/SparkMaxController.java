@@ -121,7 +121,6 @@ public class SparkMaxController {
   private final CAN deviceInterface; // Read CAN packets directly
   private final LinearFilter velocityFilter; // Rolling derivative
   private final Notifier updateNotifier;
-  private boolean isFirstPacket = true;
 
   // Stall detection 
   // !Important: A low k1 frame period is needed for accurate current readings
@@ -440,13 +439,7 @@ public class SparkMaxController {
       .order(ByteOrder.LITTLE_ENDIAN)
       .getFloat();
     // double packetTime = buffer.timestamp;
-    lastPosition = position; 
-
-    if (isFirstPacket) {
-      isFirstPacket = false;
-      // Velocity needs 2 data points to be calculated, so return
-      return;
-    }
+    lastPosition = position;
     lastVelocity = velocityFilter.calculate(position);
   }
 }
