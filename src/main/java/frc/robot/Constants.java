@@ -4,12 +4,17 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.MatBuilder;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import frc.robot.libs.PIDGains;
 import frc.robot.libs.UnitQuad;
 import frc.robot.libs.UnitScaleFunction;
@@ -24,6 +29,11 @@ import frc.robot.libs.UnitScaleFunction;
  */
 public final class Constants {
   public static final boolean telemetry = true;
+
+  // Standard deviations for swerve pose estimator
+  public static final Matrix<N3, N1> STATE_STDDEVS  = new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.0, 0.0, 0.0); // [x, y, theta]
+  public static final Matrix<N1, N1> LOCAL_STDDEVS  = new MatBuilder<>(Nat.N1(), Nat.N1()).fill(0.0); // [theta]
+  public static final Matrix<N3, N1> VISION_STDDEVS = new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.0, 0.0, 0.0); // [x, y, theta]
 
   public static final class DRIVECONSTANTS {
     public static final int LEFT_JOYSTICK_PORT = 0;
@@ -118,6 +128,7 @@ public final class Constants {
   }
 
   public static final class VISIONCONSTANTS {
+    public static final String CAMERA_NAME = "Einstein2023";
     // Transform from camera to robot center (center at base of robot)
     public static final Transform3d CAMERA_POS = new Transform3d(
       new Translation3d(0.0, 0.0, 0.0),

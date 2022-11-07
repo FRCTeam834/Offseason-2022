@@ -58,7 +58,6 @@ public class DriveTrain extends SubsystemBase {
   private final SwerveModule backRightModule;
 
   private final SwerveDriveKinematics kinematics;
-  private final SwerveDriveOdometry odometry;
 
   /** Creates a new DriveTrain. */
   public DriveTrain() {
@@ -73,8 +72,31 @@ public class DriveTrain extends SubsystemBase {
       DRIVETRAINCONSTANTS.BLM_POS,
       DRIVETRAINCONSTANTS.BRM_POS
     );
+  }
 
-    odometry = new SwerveDriveOdometry(kinematics, new Rotation2d());
+  /** */
+  public SwerveDriveKinematics getKinematics() {
+    return kinematics;
+  }
+
+  /** */
+  public SwerveModule getFrontLeftModule() {
+    return frontLeftModule;
+  }
+
+  /** */
+  public SwerveModule getFrontRightModule() {
+    return frontRightModule;
+  }
+
+  /** */
+  public SwerveModule getBackLeftModule() {
+    return backLeftModule;
+  }
+
+  /** */
+  public SwerveModule getBackRightModule() {
+    return backRightModule;
   }
 
   /** Set module states to desired states; closed loop */
@@ -163,24 +185,6 @@ public class DriveTrain extends SubsystemBase {
     backRightModule.halt();
   }
 
-  public Pose2d getPoseFromOdometry() {
-    return odometry.getPoseMeters();
-  }
-
-  public void updateOdometry(double robotYaw) {
-    odometry.update(
-      Rotation2d.fromDegrees(robotYaw),
-      frontLeftModule.getCurrentState(),
-      frontRightModule.getCurrentState(),
-      backLeftModule.getCurrentState(),
-      backRightModule.getCurrentState()
-    );
-  }
-
-  public void resetOdometry(Pose2d newPose) {
-    odometry.resetPosition(newPose, newPose.getRotation());
-  }
-
   @Override
   public void initSendable(SendableBuilder builder) {
     if (Constants.telemetry == false) return;
@@ -205,6 +209,7 @@ public class DriveTrain extends SubsystemBase {
    * @param resetOdometry reset odometry - set as true if this is the first path
    * @return
    */
+  /* !TODO move this to a command
   public Command getFollowPathCommand(
     PathPlannerTrajectory trajectory,
     Supplier<Pose2d> robotPoseSupplier,
@@ -227,5 +232,5 @@ public class DriveTrain extends SubsystemBase {
         // subsystem requirements
         this)
     );
-  }
+  }*/
 }
