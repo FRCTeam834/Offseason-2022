@@ -58,13 +58,22 @@ public class Superstructure extends SubsystemBase {
 
     Pose2d poseFromVision = vision.getPose2dFromVision();
     if (poseFromVision != null) {
-      poseEstimator.addVisionMeasurement(vision.getPose2dFromVision(), Timer.getFPGATimestamp() / 1e-6);
+      poseEstimator.addVisionMeasurement(
+        vision.getPose2dFromVision(),
+        Timer.getFPGATimestamp() / 1e-6 - vision.getCameraLatencyInSeconds()
+      );
     }
   }
 
   /** */
   public void resetRobotPose(Pose2d newPose) {
     poseEstimator.resetPosition(newPose, gyro.getYawAsRotation2d());
+  }
+
+  /** Should only be used once at start of auton */
+  public void resetRobotPoseAndGyro(Pose2d newPose) {
+    gyro.setYaw(newPose.getRotation().getDegrees());
+    poseEstimator.resetPosition(newPose, newPose.getRotation());
   }
 
   /** */

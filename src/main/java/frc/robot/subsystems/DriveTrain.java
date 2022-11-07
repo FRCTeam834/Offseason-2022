@@ -5,26 +5,16 @@
 package frc.robot.subsystems;
 
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 
-import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.commands.PPSwerveControllerCommand;
-
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.DRIVECONSTANTS;
 import frc.robot.Constants.DRIVETRAINCONSTANTS;
-import frc.robot.Constants.PIDGAINS;
 import frc.robot.Constants.SWERVEMODULECONSTANTS;
 import frc.robot.utilities.SwerveModuleFactory;
 
@@ -100,7 +90,7 @@ public class DriveTrain extends SubsystemBase {
   }
 
   /** Set module states to desired states; closed loop */
-  private void setDesiredModuleStates(SwerveModuleState[] desiredStates) {
+  public void setDesiredModuleStates(SwerveModuleState[] desiredStates) {
     frontLeftModule.setDesiredState(desiredStates[0]);
     frontRightModule.setDesiredState(desiredStates[1]);
     backLeftModule.setDesiredState(desiredStates[2]);
@@ -108,7 +98,7 @@ public class DriveTrain extends SubsystemBase {
   }
 
   /** Set module states to desired states; open loop */
-  private void setDesiredModuleStatesOpenLoop(SwerveModuleState[] desiredStates) {
+  public void setDesiredModuleStatesOpenLoop(SwerveModuleState[] desiredStates) {
     frontLeftModule.setDesiredStateOpenLoop(desiredStates[0]);
     frontRightModule.setDesiredStateOpenLoop(desiredStates[1]);
     backLeftModule.setDesiredStateOpenLoop(desiredStates[2]);
@@ -200,37 +190,4 @@ public class DriveTrain extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
   }
-
-  /**
-   * 
-   * Path following command
-   * @param trajectory path
-   * @param robotPoseSupplier supplier to robot's pose
-   * @param resetOdometry reset odometry - set as true if this is the first path
-   * @return
-   */
-  /* !TODO move this to a command
-  public Command getFollowPathCommand(
-    PathPlannerTrajectory trajectory,
-    Supplier<Pose2d> robotPoseSupplier,
-    boolean resetOdometry
-  ) {
-    return new SequentialCommandGroup(
-      new InstantCommand(() -> {
-        if (resetOdometry) {
-          resetOdometry(trajectory.getInitialHolonomicPose());
-        }
-      }),
-      new PPSwerveControllerCommand(
-        trajectory,
-        robotPoseSupplier,
-        kinematics,
-        PIDGAINS.AUTON_X.generateController(),
-        PIDGAINS.AUTON_Y.generateController(),
-        PIDGAINS.AUTON_STEER.generateController(),
-        this::setDesiredModuleStates,
-        // subsystem requirements
-        this)
-    );
-  }*/
 }

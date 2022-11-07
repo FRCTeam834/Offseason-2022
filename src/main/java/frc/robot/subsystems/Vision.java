@@ -38,6 +38,16 @@ public class Vision extends SubsystemBase {
     return camera.getLatestResult().hasTargets();
   }
 
+  /** */
+  public double getCameraLatencyInSeconds() {
+    return camera.getLatestResult().getLatencyMillis() / 1000.0;
+  }
+
+  /** */
+  public double getCameraLatency() {
+    return camera.getLatestResult().getLatencyMillis();
+  }
+
   /**
    * 
    * Get robot position based on vision results
