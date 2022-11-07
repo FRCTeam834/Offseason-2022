@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DRIVECONSTANTS;
+import frc.robot.Constants.VISIONCONSTANTS;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Pigeon;
@@ -26,7 +27,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public static final Pigeon gyro = new Pigeon();
   public static final DriveTrain driveTrain = new DriveTrain();
-  public static final Vision vision = new Vision("photoncamera1");
+  public static final Vision vision = new Vision(VISIONCONSTANTS.CAMERA_NAME);
 
   public static final Superstructure superstructure = new Superstructure(driveTrain, gyro, vision);
 

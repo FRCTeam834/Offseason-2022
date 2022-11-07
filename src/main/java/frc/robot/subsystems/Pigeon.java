@@ -7,7 +7,9 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.sensors.Pigeon2;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.CANIDS;
 
 public class Pigeon extends SubsystemBase {
@@ -38,6 +40,14 @@ public class Pigeon extends SubsystemBase {
     return Rotation2d.fromDegrees(getYaw());
   }
 
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    if (Constants.telemetry == false) return;
+
+    builder.setSmartDashboardType("Pigeon");
+    builder.addDoubleProperty("Yaw", this::getYaw, null);
+  }
+  
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

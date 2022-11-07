@@ -1,6 +1,11 @@
 package frc.robot;
 
+import edu.wpi.first.math.MatBuilder;
+import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Pigeon;
@@ -12,7 +17,7 @@ public class Superstructure extends SubsystemBase {
   public final Pigeon gyro;
   public final Vision vision;
 
-  private Pose2d robotPose;
+  private SwerveDrivePoseEstimator poseEstimator;
 
   public Superstructure(
     DriveTrain driveTrain,
@@ -22,39 +27,56 @@ public class Superstructure extends SubsystemBase {
     this.driveTrain = driveTrain;
     this.gyro = gyro;
     this.vision = vision;
-  }
 
-  /**
-   * 
-   * Resets gyro and drivetrain odometry (whole "Pose")
-   * @param newPose
-   */
-  public void resetOdometryPose(Pose2d newPose) {
-    gyro.setYaw(newPose.getRotation().getDegrees());
-    driveTrain.resetOdometry(newPose);
+    poseEstimator = new SwerveDrivePoseEstimator(
+      new Rotation2d(),
+      new Pose2d(),
+      driveTrain.getKinematics(),
+      Constants.STATE_STDDEVS,
+      Constants.LOCAL_STDDEVS,
+      Constants.VISION_STDDEVS,
+      0.02 // 20ms per loop
+    );
   }
 
   /** */
   public Pose2d getRobotPose() {
-    return robotPose;
+    return poseEstimator.getEstimatedPosition();
   }
 
   /**
    * Updates current robot pose using vision, and odometry as fallback
    */
   public void updateRobotPose() {
-    driveTrain.updateOdometry(gyro.getYaw());
-    Pose2d poseFromVision = vision.getPoseFromVision();
-    Pose2d poseFromOdometry = driveTrain.getPoseFromOdometry();
+    poseEstimator.update(
+      gyro.getYawAsRotation2d(),
+      driveTrain.getFrontLeftModule().getCurrentState(),
+      driveTrain.getFrontRightModule().getCurrentState(),
+      driveTrain.getBackLeftModule().getCurrentState(),
+      driveTrain.getBackRightModule().getCurrentState()
+    );
 
-    if (poseFromVision == null) {
-      robotPose = poseFromOdometry;
-    } else {
-      resetOdometryPose(poseFromVision);
-      robotPose = poseFromVision;
+    Pose2d poseFromVision = vision.getPose2dFromVision();
+    if (poseFromVision != null) {
+      poseEstimator.addVisionMeasurement(
+        vision.getPose2dFromVision(),
+        Timer.getFPGATimestamp() / 1e-6 - vision.getCameraLatencyInSeconds()
+      );
     }
   }
 
+  /** */
+  public void resetRobotPose(Pose2d newPose) {
+    poseEstimator.resetPosition(newPose, gyro.getYawAsRotation2d());
+  }
+
+  /** Should only be used once at start of auton */
+  public void resetRobotPoseAndGyro(Pose2d newPose) {
+    gyro.setYaw(newPose.getRotation().getDegrees());
+    poseEstimator.resetPosition(newPose, newPose.getRotation());
+  }
+
+  /** */
   public void haltEverything() {
     driveTrain.haltAllModules();
     // ...
