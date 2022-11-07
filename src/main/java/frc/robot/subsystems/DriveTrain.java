@@ -62,10 +62,10 @@ public class DriveTrain extends SubsystemBase {
 
   /** Creates a new DriveTrain. */
   public DriveTrain() {
-    frontLeftModule = SwerveModuleFactory.getFLModule(false);
-    frontRightModule = SwerveModuleFactory.getFRModule(false);
-    backLeftModule = SwerveModuleFactory.getBLModule(false);
-    backRightModule = SwerveModuleFactory.getBRModule(false);
+    frontLeftModule = SwerveModuleFactory.getFLModule();
+    frontRightModule = SwerveModuleFactory.getFRModule();
+    backLeftModule = SwerveModuleFactory.getBLModule();
+    backRightModule = SwerveModuleFactory.getBRModule();
 
     kinematics = new SwerveDriveKinematics(
       DRIVETRAINCONSTANTS.FLM_POS,

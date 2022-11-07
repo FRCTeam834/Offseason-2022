@@ -95,10 +95,11 @@ public final class Constants {
     // meters per second
     public static final double VELOCITY_CONVERSION_FACTOR = 60 * Math.PI * WHEEL_DIAMETER;
 
-    public static final double FL_MAGNET_OFFSET = 0.0;
+    // Some modules are inverted, add 180 offset to artifically invert
+    public static final double FL_MAGNET_OFFSET = 0.0 + 180.0;
     public static final double FR_MAGNET_OFFSET = 0.0;
     public static final double BL_MAGNET_OFFSET = 0.0;
-    public static final double BR_MAGNET_OFFSET = 0.0;
+    public static final double BR_MAGNET_OFFSET = 0.0 + 180.0;
   }
 
   public static final class DRIVETRAINCONSTANTS {
