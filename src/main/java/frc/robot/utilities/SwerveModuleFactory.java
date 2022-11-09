@@ -1,8 +1,7 @@
 package frc.robot.utilities;
 
-import com.revrobotics.CANSparkMax;
-
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.Constants;
 import frc.robot.Constants.CANIDS;
 import frc.robot.Constants.PIDGAINS;
 import frc.robot.Constants.SWERVEMODULECONSTANTS;
@@ -12,44 +11,34 @@ import frc.robot.subsystems.SwerveModule;
  * "Factory" class
  */
 public class SwerveModuleFactory {
-
-  private static final CANSparkMax.IdleMode idleMode = CANSparkMax.IdleMode.kBrake;
-  private static final double nominalVoltage = 12;
-  private static final int steerSmartCurrentLimit = 20;
-  private static final int driveSmartCurrentLimit = 20;
-
-  private static final int steerControlFramePeriod = 10;
-  private static final int steerPeriodicFramek0 = 65535;
-  private static final int steerPeriodicFramek1 = 65535;
-  private static final int steerPeriodicFramek2 = 20;
-  private static final int steerPeriodicFramek3 = 65535;
-
-  private static final int driveControlFramePeriod = 10;
-  private static final int drivePeriodicFramek0 = 65535;
-  private static final int drivePeriodicFramek1 = 65535;
-  private static final int drivePeriodicFramek2 = 19;
-  private static final int drivePeriodicFramek3 = 65535;
-
   private static final SwerveModule buildDefaults(SwerveModule module) {
     module.getSteerController()
       .configRestoreFactoryDefaults()
-      .configIdleMode(idleMode)
+      .configIdleMode(SWERVEMODULECONSTANTS.STEERMOTOR.IDLEMODE)
       .configInverted(false)
-      .configVoltageCompensation(nominalVoltage)
-      .configSmartCurrentLimit(steerSmartCurrentLimit)
+      .configVoltageCompensation(SWERVEMODULECONSTANTS.STEERMOTOR.NOMINALVOLTAGE)
+      .configSmartCurrentLimit(SWERVEMODULECONSTANTS.STEERMOTOR.SMARTCURRENTLIMIT)
       .configPositionConversionFactor(SWERVEMODULECONSTANTS.POSITION_CONVERSION_FACTOR)
-      .configControlFramePeriod(steerControlFramePeriod)
-      .configPeriodicFramePeriods(steerPeriodicFramek0, steerPeriodicFramek1, steerPeriodicFramek2, steerPeriodicFramek3);
+      .configControlFramePeriod(SWERVEMODULECONSTANTS.STEERMOTOR.CONTROLFRAMEPERIOD)
+      .configPeriodicFramePeriods(
+        SWERVEMODULECONSTANTS.STEERMOTOR.PERIODICFRAMEk0,
+        SWERVEMODULECONSTANTS.STEERMOTOR.PERIODICFRAMEk1,
+        SWERVEMODULECONSTANTS.STEERMOTOR.PERIODICFRAMEk2,
+        SWERVEMODULECONSTANTS.STEERMOTOR.PERIODICFRAMEk3);
 
     module.getDriveController()
-      .configRestoreFactoryDefaults()
-      .configIdleMode(idleMode)
-      .configInverted(false)
-      .configVoltageCompensation(nominalVoltage)
-      .configSmartCurrentLimit(driveSmartCurrentLimit)
-      .configVelocityConversionFactor(SWERVEMODULECONSTANTS.VELOCITY_CONVERSION_FACTOR)
-      .configControlFramePeriod(driveControlFramePeriod)
-      .configPeriodicFramePeriods(drivePeriodicFramek0, drivePeriodicFramek1, drivePeriodicFramek2, drivePeriodicFramek3);
+    .configRestoreFactoryDefaults()
+    .configIdleMode(SWERVEMODULECONSTANTS.DRIVEMOTOR.IDLEMODE)
+    .configInverted(false)
+    .configVoltageCompensation(SWERVEMODULECONSTANTS.DRIVEMOTOR.NOMINALVOLTAGE)
+    .configSmartCurrentLimit(SWERVEMODULECONSTANTS.DRIVEMOTOR.SMARTCURRENTLIMIT)
+    .configPositionConversionFactor(SWERVEMODULECONSTANTS.VELOCITY_CONVERSION_FACTOR)
+    .configControlFramePeriod(SWERVEMODULECONSTANTS.DRIVEMOTOR.CONTROLFRAMEPERIOD)
+    .configPeriodicFramePeriods(
+      SWERVEMODULECONSTANTS.DRIVEMOTOR.PERIODICFRAMEk0,
+      SWERVEMODULECONSTANTS.DRIVEMOTOR.PERIODICFRAMEk1,
+      SWERVEMODULECONSTANTS.DRIVEMOTOR.PERIODICFRAMEk2,
+      SWERVEMODULECONSTANTS.DRIVEMOTOR.PERIODICFRAMEk3);
 
     return module;
   }
@@ -74,7 +63,7 @@ public class SwerveModuleFactory {
       .configVelocityControlD(PIDGAINS.FL_DRIVE.kD)
       .configVelocityControlFF(PIDGAINS.FL_DRIVE.kFF);
 
-    if (DriverStation.isFMSAttached()) {
+    if (DriverStation.isFMSAttached() || Constants.BURNFLASHES) {
       module.getSteerController().burnFlash();
       module.getDriveController().burnFlash();
     }
@@ -102,7 +91,7 @@ public class SwerveModuleFactory {
       .configVelocityControlD(PIDGAINS.FR_DRIVE.kD)
       .configVelocityControlFF(PIDGAINS.FR_DRIVE.kFF);
 
-    if (DriverStation.isFMSAttached()) {
+    if (DriverStation.isFMSAttached() || Constants.BURNFLASHES) {
       module.getSteerController().burnFlash();
       module.getDriveController().burnFlash();
     }
@@ -130,7 +119,7 @@ public class SwerveModuleFactory {
       .configVelocityControlD(PIDGAINS.BL_DRIVE.kD)
       .configVelocityControlFF(PIDGAINS.BL_DRIVE.kFF);
 
-    if (DriverStation.isFMSAttached()) {
+    if (DriverStation.isFMSAttached() || Constants.BURNFLASHES) {
       module.getSteerController().burnFlash();
       module.getDriveController().burnFlash();
     }
@@ -158,7 +147,7 @@ public class SwerveModuleFactory {
       .configVelocityControlD(PIDGAINS.BR_DRIVE.kD)
       .configVelocityControlFF(PIDGAINS.BR_DRIVE.kFF);
 
-    if (DriverStation.isFMSAttached()) {
+    if (DriverStation.isFMSAttached() || Constants.BURNFLASHES) {
       module.getSteerController().burnFlash();
       module.getDriveController().burnFlash();
     }

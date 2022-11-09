@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.revrobotics.CANSparkMax;
+
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -29,6 +31,9 @@ import frc.robot.libs.UnitScaleFunction;
  */
 public final class Constants {
   public static final boolean telemetry = true;
+
+  // Burn spark max flash? Note: Done automatically at competition, only use for home situations
+  public static final boolean BURNFLASHES = false;
 
   // Standard deviations for swerve pose estimator
   public static final Matrix<N3, N1> STATE_STDDEVS  = new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.0, 0.0, 0.0); // [x, y, theta]
@@ -96,6 +101,30 @@ public final class Constants {
   }
 
   public static final class SWERVEMODULECONSTANTS {
+    public static final class STEERMOTOR {
+      public static final CANSparkMax.IdleMode IDLEMODE = CANSparkMax.IdleMode.kBrake;
+      public static final double NOMINALVOLTAGE = 12;
+      public static final int SMARTCURRENTLIMIT = 20;
+      public static final int driveSmartCurrentLimit = 20;
+
+      public static final int CONTROLFRAMEPERIOD = 10;
+      public static final int PERIODICFRAMEk0 = 65535;
+      public static final int PERIODICFRAMEk1 = 65535;
+      public static final int PERIODICFRAMEk2 = 20;
+      public static final int PERIODICFRAMEk3 = 65535;
+    }
+    public static final class DRIVEMOTOR {
+      public static final CANSparkMax.IdleMode IDLEMODE = CANSparkMax.IdleMode.kBrake;
+      public static final double NOMINALVOLTAGE = 12;
+      public static final int SMARTCURRENTLIMIT = 20;
+      public static final int driveSmartCurrentLimit = 20;
+
+      public static final int CONTROLFRAMEPERIOD = 10;
+      public static final int PERIODICFRAMEk0 = 65535;
+      public static final int PERIODICFRAMEk1 = 65535;
+      public static final int PERIODICFRAMEk2 = 20;
+      public static final int PERIODICFRAMEk3 = 65535;
+    }
     // meters per second
     public static final double MAX_SPEED = 4.5;
     public static final double WHEEL_DIAMETER = 0.0;

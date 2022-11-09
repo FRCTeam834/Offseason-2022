@@ -24,75 +24,6 @@ import edu.wpi.first.wpilibj.Notifier;
  * @author Keller
  */
 public class SparkMaxController {
-  /**
-   * Stores a SparkMaxPIDController reference state
-   * (Replaced by DesiredState)
-   */
-  @Deprecated (forRemoval = true)
-  private static final class SparkMaxPIDState {
-    public final double setpoint;
-    public final CANSparkMax.ControlType controlType;
-
-    public SparkMaxPIDState(double setpoint, CANSparkMax.ControlType controlType) {
-      this.setpoint = setpoint;
-      this.controlType = controlType;
-    }
-
-    public boolean equals(SparkMaxPIDState expected) {
-      if (expected == null) return false;
-      return (
-        this.setpoint == expected.setpoint &&
-        this.controlType.equals(expected.controlType)
-      );
-    }
-  }
-
-  /** */
-  private enum ControlType {
-    POSITION, VELOCITY, VOLTAGE, PERCENT
-  }
-
-  /**
-   * Stores the last desired state
-   */
-  private static final class DesiredState {
-    public final double setpoint;
-    public final ControlType controlType;
-
-    public DesiredState(double setpoint, ControlType controlType) {
-      this.setpoint = setpoint;
-      this.controlType = controlType;
-    }
-
-    public boolean equals(DesiredState expected) {
-      if (expected == null) return false;
-      return (
-        this.setpoint == expected.setpoint &&
-        this.controlType.equals(expected.controlType)
-      );
-    }
-  }
-
-  /**
-   * 
-   * Is value in the given interval [-range, range]
-   * @param value tested value
-   * @param range interval bounds
-   * @return
-   */
-  private static final boolean inInclusiveRange(double value, double range) {
-    return (
-      value <= Math.abs(range) &&
-      value >= -Math.abs(range)
-    );
-  }
-  
-  /**
-   * 
-   * 
-   * 
-   */
-
   // https://docs.wpilib.org/en/stable/docs/software/can-devices/can-addressing.html
   private static final int manufacturerID = 5;
   private static final int deviceTypeID = 2;
@@ -441,5 +372,70 @@ public class SparkMaxController {
     // double packetTime = buffer.timestamp;
     lastPosition = position;
     lastVelocity = velocityFilter.calculate(position);
+  }
+
+  /** */
+
+  /**
+   * Stores a SparkMaxPIDController reference state
+   * (Replaced by DesiredState)
+   */
+  @Deprecated (forRemoval = true)
+  private static final class SparkMaxPIDState {
+    public final double setpoint;
+    public final CANSparkMax.ControlType controlType;
+
+    public SparkMaxPIDState(double setpoint, CANSparkMax.ControlType controlType) {
+      this.setpoint = setpoint;
+      this.controlType = controlType;
+    }
+
+    public boolean equals(SparkMaxPIDState expected) {
+      if (expected == null) return false;
+      return (
+        this.setpoint == expected.setpoint &&
+        this.controlType.equals(expected.controlType)
+      );
+    }
+  }
+
+  /** */
+  private enum ControlType {
+    POSITION, VELOCITY, VOLTAGE, PERCENT
+  }
+
+  /**
+   * Stores the last desired state
+   */
+  private static final class DesiredState {
+    public final double setpoint;
+    public final ControlType controlType;
+
+    public DesiredState(double setpoint, ControlType controlType) {
+      this.setpoint = setpoint;
+      this.controlType = controlType;
+    }
+
+    public boolean equals(DesiredState expected) {
+      if (expected == null) return false;
+      return (
+        this.setpoint == expected.setpoint &&
+        this.controlType.equals(expected.controlType)
+      );
+    }
+  }
+
+  /**
+   * 
+   * Is value in the given interval [-range, range]
+   * @param value tested value
+   * @param range interval bounds
+   * @return
+   */
+  private static final boolean inInclusiveRange(double value, double range) {
+    return (
+      value <= Math.abs(range) &&
+      value >= -Math.abs(range)
+    );
   }
 }

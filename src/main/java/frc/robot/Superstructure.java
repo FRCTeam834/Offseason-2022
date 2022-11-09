@@ -58,7 +58,7 @@ public class Superstructure extends SubsystemBase {
     if (poseFromVision != null) {
       poseEstimator.addVisionMeasurement(
         vision.getPose2dFromVision(),
-        Timer.getFPGATimestamp() / 1e-6 - vision.getCameraLatencyInSeconds()
+        (Timer.getFPGATimestamp() / 1e-6) - (vision.getCameraLatencyMs() / 1000.0)
       );
     }
   }

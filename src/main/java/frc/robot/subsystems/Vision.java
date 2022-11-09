@@ -39,12 +39,7 @@ public class Vision extends SubsystemBase {
   }
 
   /** */
-  public double getCameraLatencyInSeconds() {
-    return getCameraLatency() / 1000.0;
-  }
-
-  /** */
-  public double getCameraLatency() {
+  public double getCameraLatencyMs() {
     return camera.getLatestResult().getLatencyMillis();
   }
 

@@ -16,29 +16,6 @@ import frc.robot.libs.MathPlus;
 import frc.robot.libs.SparkMaxController;
 
 public class SwerveModule extends SubsystemBase {
-  /** Less aggressive 120 degree module optimization compared to wpilib 90 deg */
-  public static final SwerveModuleState optimizeModuleState(SwerveModuleState state, double currentAngle) {
-    return SwerveModule.optimizeModuleState(state, currentAngle, 120.0);
-  }
-
-  /**
-   * Module state optimization
-   * @param state
-   * @param currentAngle
-   */
-  public static final SwerveModuleState optimizeModuleState(SwerveModuleState state, double currentAngle, double threshold) {
-    if (MathPlus.absRealAngleDiff(currentAngle, state.angle.getDegrees()) <= threshold) {
-      return new SwerveModuleState(
-        state.speedMetersPerSecond,
-        Rotation2d.fromDegrees(MathPlus.optimizeSwerveAngle(state.angle.getDegrees(), currentAngle, 120))
-      );
-    }
-    return new SwerveModuleState(
-      -state.speedMetersPerSecond,
-      Rotation2d.fromDegrees(MathPlus.optimizeSwerveAngle(state.angle.getDegrees() + 180, currentAngle, 120))
-    );
-  }
-
   private final SparkMaxController steerController;
   private final SparkMaxController driveController;
   private final CANCoder canCoder;
@@ -128,15 +105,38 @@ public class SwerveModule extends SubsystemBase {
     );
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-  }
-
   public double[] telemetryGetState() {
     return new double[] {
       getCurrentVelocity(),
       getCurrentAngle()
     };
+  }
+
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run
+  }
+  
+  /** Less aggressive 120 degree module optimization compared to wpilib 90 deg */
+  public static final SwerveModuleState optimizeModuleState(SwerveModuleState state, double currentAngle) {
+    return SwerveModule.optimizeModuleState(state, currentAngle, 120.0);
+  }
+
+  /**
+   * Module state optimization
+   * @param state
+   * @param currentAngle
+   */
+  public static final SwerveModuleState optimizeModuleState(SwerveModuleState state, double currentAngle, double threshold) {
+    if (MathPlus.absRealAngleDiff(currentAngle, state.angle.getDegrees()) <= threshold) {
+      return new SwerveModuleState(
+        state.speedMetersPerSecond,
+        Rotation2d.fromDegrees(MathPlus.optimizeSwerveAngle(state.angle.getDegrees(), currentAngle, 120))
+      );
+    }
+    return new SwerveModuleState(
+      -state.speedMetersPerSecond,
+      Rotation2d.fromDegrees(MathPlus.optimizeSwerveAngle(state.angle.getDegrees() + 180, currentAngle, 120))
+    );
   }
 }
