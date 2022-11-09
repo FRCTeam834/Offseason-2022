@@ -45,7 +45,7 @@ public class Vision extends SubsystemBase {
 
   /**
    * 
-   * Get robot position based on vision results
+   * Get robot 2d position based on vision results
    * @return
    */
   public Pose2d getPose2dFromVision() {
@@ -57,7 +57,7 @@ public class Vision extends SubsystemBase {
    * @return
    */
   public Pose3d getPoseFromVision() {
-    // temporary; will be provided by wpilib later
+    // placeholder; will be provided by wpilib later
     Map<Integer, Pose3d> AprilTagLookup = new HashMap<>();
 
     // Currently Simple filtering strategy
@@ -80,7 +80,7 @@ public class Vision extends SubsystemBase {
       Transform3d targetToCamera = target.getBestCameraToTarget().inverse(); // Take inverse to find "targetToCamera"
       Transform3d cameraToRobot = VISIONCONSTANTS.CAMERA_POS;
 
-      bestPose = Vision.getPoseFromTarget(tagPose, fiducialTransform, targetToCamera, cameraToRobot);
+      bestPose = Vision.getPoseFromTransforms(fiducialTransform, targetToCamera, cameraToRobot);
       break;
     }
 
@@ -88,8 +88,7 @@ public class Vision extends SubsystemBase {
   }
 
   /** */
-  public static final Pose3d getPoseFromTarget(
-    Pose3d tagPose,
+  public static final Pose3d getPoseFromTransforms(
     Transform3d fiducialTransform,
     Transform3d targetToCamera,
     Transform3d cameraToRobot
