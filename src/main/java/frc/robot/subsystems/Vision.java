@@ -106,7 +106,7 @@ public class Vision extends SubsystemBase {
   public void initSendable(SendableBuilder builder) {
     if (Constants.telemetry == false) return;
 
-    builder.setSmartDashboardType("Vision" + cameraName);
+    builder.setSmartDashboardType("Vision " + cameraName);
     builder.addBooleanProperty("hasTarget", this::hasTarget, null);
     builder.addStringProperty("pose", this::telemetryGetPose, null);
   }

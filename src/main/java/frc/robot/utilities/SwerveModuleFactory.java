@@ -45,6 +45,7 @@ public class SwerveModuleFactory {
 
   public static final SwerveModule getFLModule() {
     SwerveModule module = SwerveModuleFactory.buildDefaults(new SwerveModule(
+      "FrontLeft",
       CANIDS.FL_STEER_ID,
       CANIDS.FL_DRIVE_ID,
       CANIDS.FL_CANCODER_ID,
@@ -73,6 +74,7 @@ public class SwerveModuleFactory {
 
   public static final SwerveModule getFRModule() {
     SwerveModule module = SwerveModuleFactory.buildDefaults(new SwerveModule(
+      "FrontRight",
       CANIDS.FR_STEER_ID,
       CANIDS.FR_DRIVE_ID,
       CANIDS.FR_CANCODER_ID,
@@ -101,6 +103,7 @@ public class SwerveModuleFactory {
 
   public static final SwerveModule getBLModule() {
     SwerveModule module = SwerveModuleFactory.buildDefaults(new SwerveModule(
+      "BackLeft",
       CANIDS.BL_STEER_ID,
       CANIDS.BL_DRIVE_ID,
       CANIDS.BL_CANCODER_ID,
@@ -129,6 +132,7 @@ public class SwerveModuleFactory {
 
   public static final SwerveModule getBRModule() {
     SwerveModule module = SwerveModuleFactory.buildDefaults(new SwerveModule(
+      "BackRight",
       CANIDS.BR_STEER_ID,
       CANIDS.BR_DRIVE_ID,
       CANIDS.BR_CANCODER_ID,

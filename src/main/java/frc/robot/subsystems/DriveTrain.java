@@ -172,22 +172,6 @@ public class DriveTrain extends SubsystemBase {
   }
 
   @Override
-  public void initSendable(SendableBuilder builder) {
-    if (Constants.telemetry == false) return;
-
-    builder.setSmartDashboardType("DriveTrain");
-    builder.addDoubleArrayProperty("FLM", frontLeftModule::telemetryGetState, null);
-    builder.addDoubleArrayProperty("FRM", frontRightModule::telemetryGetState, null);
-    builder.addDoubleArrayProperty("BLM", backLeftModule::telemetryGetState, null);
-    builder.addDoubleArrayProperty("BRM", backRightModule::telemetryGetState, null);
-
-    builder.addDoubleProperty("FLCANCoder", frontLeftModule::getCanCoderAngle, null);
-    builder.addDoubleProperty("FRCANCoder", frontRightModule::getCanCoderAngle, null);
-    builder.addDoubleProperty("BLCANCoder", backLeftModule::getCanCoderAngle, null);
-    builder.addDoubleProperty("BRCANCoder", backRightModule::getCanCoderAngle, null);
-  }
-
-  @Override
   public void periodic() {
     // This method will be called once per scheduler run
   }

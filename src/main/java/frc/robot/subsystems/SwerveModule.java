@@ -10,12 +10,15 @@ import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.SWERVEMODULECONSTANTS;
 import frc.robot.libs.MathPlus;
 import frc.robot.libs.SparkMaxController;
 
 public class SwerveModule extends SubsystemBase {
+  private final String name;
   private final SparkMaxController steerController;
   private final SparkMaxController driveController;
   private final CANCoder canCoder;
@@ -27,11 +30,14 @@ public class SwerveModule extends SubsystemBase {
    * @param CANCoderID
    */
   public SwerveModule(
+    String name,
     int steerCANID,
     int driveCANID,
     int CANCoderID,
     double magnetOffset
   ) {
+    this.name = name;
+
     steerController = new SparkMaxController(steerCANID, 0, 5);
     driveController = new SparkMaxController(driveCANID, 20, 5);
     canCoder = new CANCoder(CANCoderID);
@@ -115,6 +121,15 @@ public class SwerveModule extends SubsystemBase {
       getCurrentVelocity(),
       getCurrentAngle()
     };
+  }
+
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    if (Constants.telemetry == false) return;
+
+    builder.setSmartDashboardType("Swerve Module " + name);
+    builder.addDoubleArrayProperty("State", this::telemetryGetState, null);
+    builder.addDoubleProperty("CANCoder", this::getCanCoderAngle, null);
   }
 
   @Override
