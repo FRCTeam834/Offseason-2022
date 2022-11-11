@@ -180,6 +180,11 @@ public class DriveTrain extends SubsystemBase {
     builder.addDoubleArrayProperty("FRM", frontRightModule::telemetryGetState, null);
     builder.addDoubleArrayProperty("BLM", backLeftModule::telemetryGetState, null);
     builder.addDoubleArrayProperty("BRM", backRightModule::telemetryGetState, null);
+
+    builder.addDoubleProperty("FLCANCoder", frontLeftModule::getCanCoderAngle, null);
+    builder.addDoubleProperty("FRCANCoder", frontRightModule::getCanCoderAngle, null);
+    builder.addDoubleProperty("BLCANCoder", backLeftModule::getCanCoderAngle, null);
+    builder.addDoubleProperty("BRCANCoder", backRightModule::getCanCoderAngle, null);
   }
 
   @Override

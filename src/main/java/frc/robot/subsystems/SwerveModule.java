@@ -53,6 +53,11 @@ public class SwerveModule extends SubsystemBase {
     return driveController;
   }
 
+  /** */
+  public double getCanCoderAngle() {
+    return canCoder.getAbsolutePosition();
+  }
+
   /**
    * Get current angle of module
    * @return

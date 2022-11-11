@@ -108,6 +108,12 @@ public class Vision extends SubsystemBase {
 
     builder.setSmartDashboardType("Vision" + cameraName);
     builder.addBooleanProperty("hasTarget", this::hasTarget, null);
+    builder.addStringProperty("pose", this::telemetryGetPose, null);
+  }
+
+  public String telemetryGetPose() {
+    Pose2d pose = this.getPose2dFromVision();
+    return pose.toString();
   }
 
   @Override
