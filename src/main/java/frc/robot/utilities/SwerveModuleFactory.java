@@ -29,7 +29,7 @@ public class SwerveModuleFactory {
   public static final class DRIVEDEFAULTS {
     public static final CANSparkMax.IdleMode IDLEMODE = CANSparkMax.IdleMode.kBrake;
     public static final double NOMINALVOLTAGE = 12;
-    public static final int SMARTCURRENTLIMIT = 20;
+    public static final int SMARTCURRENTLIMIT = 40;
     public static final int driveSmartCurrentLimit = 20;
 
     public static final int CONTROLFRAMEPERIOD = 10;
