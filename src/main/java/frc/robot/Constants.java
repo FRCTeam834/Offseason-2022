@@ -101,30 +101,6 @@ public final class Constants {
   }
 
   public static final class SWERVEMODULECONSTANTS {
-    public static final class STEERMOTOR {
-      public static final CANSparkMax.IdleMode IDLEMODE = CANSparkMax.IdleMode.kBrake;
-      public static final double NOMINALVOLTAGE = 12;
-      public static final int SMARTCURRENTLIMIT = 20;
-      public static final int driveSmartCurrentLimit = 20;
-
-      public static final int CONTROLFRAMEPERIOD = 10;
-      public static final int PERIODICFRAMEk0 = 65535;
-      public static final int PERIODICFRAMEk1 = 65535;
-      public static final int PERIODICFRAMEk2 = 20;
-      public static final int PERIODICFRAMEk3 = 65535;
-    }
-    public static final class DRIVEMOTOR {
-      public static final CANSparkMax.IdleMode IDLEMODE = CANSparkMax.IdleMode.kBrake;
-      public static final double NOMINALVOLTAGE = 12;
-      public static final int SMARTCURRENTLIMIT = 20;
-      public static final int driveSmartCurrentLimit = 20;
-
-      public static final int CONTROLFRAMEPERIOD = 10;
-      public static final int PERIODICFRAMEk0 = 65535;
-      public static final int PERIODICFRAMEk1 = 65535;
-      public static final int PERIODICFRAMEk2 = 20;
-      public static final int PERIODICFRAMEk3 = 65535;
-    }
     // meters per second
     public static final double MAX_SPEED = 4.5;
     public static final double WHEEL_DIAMETER = 0.0;

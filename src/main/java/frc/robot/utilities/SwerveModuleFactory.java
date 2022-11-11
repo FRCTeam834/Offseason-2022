@@ -1,5 +1,7 @@
 package frc.robot.utilities;
 
+import com.revrobotics.CANSparkMax;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
 import frc.robot.Constants.CANIDS;
@@ -11,34 +13,60 @@ import frc.robot.subsystems.SwerveModule;
  * "Factory" class
  */
 public class SwerveModuleFactory {
+  /** Controller defaults */
+  public static final class STEERDEFAULTS {
+    public static final CANSparkMax.IdleMode IDLEMODE = CANSparkMax.IdleMode.kBrake;
+    public static final double NOMINALVOLTAGE = 12;
+    public static final int SMARTCURRENTLIMIT = 20;
+    public static final int driveSmartCurrentLimit = 20;
+
+    public static final int CONTROLFRAMEPERIOD = 10;
+    public static final int PERIODICFRAMEk0 = 65535;
+    public static final int PERIODICFRAMEk1 = 65535;
+    public static final int PERIODICFRAMEk2 = 20;
+    public static final int PERIODICFRAMEk3 = 65535;
+  }
+  public static final class DRIVEDEFAULTS {
+    public static final CANSparkMax.IdleMode IDLEMODE = CANSparkMax.IdleMode.kBrake;
+    public static final double NOMINALVOLTAGE = 12;
+    public static final int SMARTCURRENTLIMIT = 20;
+    public static final int driveSmartCurrentLimit = 20;
+
+    public static final int CONTROLFRAMEPERIOD = 10;
+    public static final int PERIODICFRAMEk0 = 65535;
+    public static final int PERIODICFRAMEk1 = 65535;
+    public static final int PERIODICFRAMEk2 = 20;
+    public static final int PERIODICFRAMEk3 = 65535;
+  }
+  
   private static final SwerveModule buildDefaults(SwerveModule module) {
     module.getSteerController()
       .configRestoreFactoryDefaults()
-      .configIdleMode(SWERVEMODULECONSTANTS.STEERMOTOR.IDLEMODE)
+      .configIdleMode(STEERDEFAULTS.IDLEMODE)
       .configInverted(false)
-      .configVoltageCompensation(SWERVEMODULECONSTANTS.STEERMOTOR.NOMINALVOLTAGE)
-      .configSmartCurrentLimit(SWERVEMODULECONSTANTS.STEERMOTOR.SMARTCURRENTLIMIT)
+      .configVoltageCompensation(STEERDEFAULTS.NOMINALVOLTAGE)
+      .configSmartCurrentLimit(STEERDEFAULTS.SMARTCURRENTLIMIT)
       .configPositionConversionFactor(SWERVEMODULECONSTANTS.POSITION_CONVERSION_FACTOR)
-      .configControlFramePeriod(SWERVEMODULECONSTANTS.STEERMOTOR.CONTROLFRAMEPERIOD)
+      .configControlFramePeriod(STEERDEFAULTS.CONTROLFRAMEPERIOD)
       .configPeriodicFramePeriods(
-        SWERVEMODULECONSTANTS.STEERMOTOR.PERIODICFRAMEk0,
-        SWERVEMODULECONSTANTS.STEERMOTOR.PERIODICFRAMEk1,
-        SWERVEMODULECONSTANTS.STEERMOTOR.PERIODICFRAMEk2,
-        SWERVEMODULECONSTANTS.STEERMOTOR.PERIODICFRAMEk3);
+        STEERDEFAULTS.PERIODICFRAMEk0,
+        STEERDEFAULTS.PERIODICFRAMEk1,
+        STEERDEFAULTS.PERIODICFRAMEk2,
+        STEERDEFAULTS.PERIODICFRAMEk3);
 
     module.getDriveController()
     .configRestoreFactoryDefaults()
-    .configIdleMode(SWERVEMODULECONSTANTS.DRIVEMOTOR.IDLEMODE)
+    .configIdleMode(DRIVEDEFAULTS.IDLEMODE)
     .configInverted(false)
-    .configVoltageCompensation(SWERVEMODULECONSTANTS.DRIVEMOTOR.NOMINALVOLTAGE)
-    .configSmartCurrentLimit(SWERVEMODULECONSTANTS.DRIVEMOTOR.SMARTCURRENTLIMIT)
+    .configVoltageCompensation(DRIVEDEFAULTS.NOMINALVOLTAGE)
+    .configSmartCurrentLimit(DRIVEDEFAULTS.SMARTCURRENTLIMIT)
     .configPositionConversionFactor(SWERVEMODULECONSTANTS.VELOCITY_CONVERSION_FACTOR)
-    .configControlFramePeriod(SWERVEMODULECONSTANTS.DRIVEMOTOR.CONTROLFRAMEPERIOD)
+    .configControlFramePeriod(DRIVEDEFAULTS.CONTROLFRAMEPERIOD)
     .configPeriodicFramePeriods(
-      SWERVEMODULECONSTANTS.DRIVEMOTOR.PERIODICFRAMEk0,
-      SWERVEMODULECONSTANTS.DRIVEMOTOR.PERIODICFRAMEk1,
-      SWERVEMODULECONSTANTS.DRIVEMOTOR.PERIODICFRAMEk2,
-      SWERVEMODULECONSTANTS.DRIVEMOTOR.PERIODICFRAMEk3);
+      DRIVEDEFAULTS.PERIODICFRAMEk0,
+      DRIVEDEFAULTS.PERIODICFRAMEk1,
+      DRIVEDEFAULTS.PERIODICFRAMEk2,
+      DRIVEDEFAULTS.PERIODICFRAMEk3);
 
     return module;
   }
