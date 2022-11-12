@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.Supplier;
+
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
@@ -22,6 +24,10 @@ public class SwerveModule extends SubsystemBase {
   private final SparkMaxController steerController;
   private final SparkMaxController driveController;
   private final CANCoder canCoder;
+
+  // Tuning
+  private Supplier<double[]> steerPIDFSupplier;
+  private Supplier<double[]> drivePIDFSupplier;
 
   /**
    * 
@@ -123,6 +129,14 @@ public class SwerveModule extends SubsystemBase {
     };
   }
 
+  public void setSteerPIDFSupplier(Supplier<double[]> supplier) {
+    steerPIDFSupplier = supplier;
+  }
+
+  public void setDrivePIDFSupplier(Supplier<double[]> supplier) {
+    drivePIDFSupplier = supplier;
+  }
+
   @Override
   public void initSendable(SendableBuilder builder) {
     if (Constants.telemetry == false) return;
@@ -135,6 +149,10 @@ public class SwerveModule extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    if (Constants.tuningMode) {
+      this.steerController.configPositionControlPIDF(steerPIDFSupplier.get());
+      this.driveController.configVelocityControlPIDF(drivePIDFSupplier.get());
+    }
   }
   
   /** Less aggressive 120 degree module optimization compared to wpilib 90 deg */

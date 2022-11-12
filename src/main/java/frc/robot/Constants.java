@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import com.revrobotics.CANSparkMax;
-
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -20,6 +18,7 @@ import edu.wpi.first.math.numbers.N3;
 import frc.robot.libs.PIDGains;
 import frc.robot.libs.UnitQuad;
 import frc.robot.libs.UnitScaleFunction;
+import frc.robot.utilities.TuneablePIDGains;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -31,8 +30,13 @@ import frc.robot.libs.UnitScaleFunction;
  */
 public final class Constants {
   public static final boolean telemetry = true;
+  public static final boolean tuningMode = true;
 
-  // Burn spark max flash? Note: Done automatically at competition, only use for home situations
+  /**
+   * vvvvvvvvvvvvvvvvvvvvvvvvvv
+   * >> !Set to true precomp <<
+   * vvvvvvvvvvvvvvvvvvvvvvvvvv
+   */
   public static final boolean BURNFLASHES = false;
 
   // Standard deviations for swerve pose estimator
@@ -81,7 +85,7 @@ public final class Constants {
   }
 
   public static final class PIDGAINS {
-    public static final PIDGains FL_STEER = new PIDGains(1.0);
+    public static final PIDGains FL_STEER = new TuneablePIDGains("FL_STEER", 1.0);
     public static final PIDGains FL_DRIVE = new PIDGains(1.0);
 
     public static final PIDGains FR_STEER = new PIDGains(1.0);

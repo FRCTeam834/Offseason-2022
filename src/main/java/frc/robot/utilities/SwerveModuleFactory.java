@@ -55,18 +55,18 @@ public class SwerveModuleFactory {
         STEERDEFAULTS.PERIODICFRAMEk3);
 
     module.getDriveController()
-    .configRestoreFactoryDefaults()
-    .configIdleMode(DRIVEDEFAULTS.IDLEMODE)
-    .configInverted(false)
-    .configVoltageCompensation(DRIVEDEFAULTS.NOMINALVOLTAGE)
-    .configSmartCurrentLimit(DRIVEDEFAULTS.SMARTCURRENTLIMIT)
-    .configPositionConversionFactor(SWERVEMODULECONSTANTS.VELOCITY_CONVERSION_FACTOR)
-    .configControlFramePeriod(DRIVEDEFAULTS.CONTROLFRAMEPERIOD)
-    .configPeriodicFramePeriods(
-      DRIVEDEFAULTS.PERIODICFRAMEk0,
-      DRIVEDEFAULTS.PERIODICFRAMEk1,
-      DRIVEDEFAULTS.PERIODICFRAMEk2,
-      DRIVEDEFAULTS.PERIODICFRAMEk3);
+      .configRestoreFactoryDefaults()
+      .configIdleMode(DRIVEDEFAULTS.IDLEMODE)
+      .configInverted(false)
+      .configVoltageCompensation(DRIVEDEFAULTS.NOMINALVOLTAGE)
+      .configSmartCurrentLimit(DRIVEDEFAULTS.SMARTCURRENTLIMIT)
+      .configPositionConversionFactor(SWERVEMODULECONSTANTS.VELOCITY_CONVERSION_FACTOR)
+      .configControlFramePeriod(DRIVEDEFAULTS.CONTROLFRAMEPERIOD)
+      .configPeriodicFramePeriods(
+        DRIVEDEFAULTS.PERIODICFRAMEk0,
+        DRIVEDEFAULTS.PERIODICFRAMEk1,
+        DRIVEDEFAULTS.PERIODICFRAMEk2,
+        DRIVEDEFAULTS.PERIODICFRAMEk3);
 
     return module;
   }
@@ -81,16 +81,21 @@ public class SwerveModuleFactory {
     ));
 
     module.getSteerController()
-      .configPositionControlP(PIDGAINS.FL_STEER.kP)
-      .configPositionControlI(PIDGAINS.FL_STEER.kI)
-      .configPositionControlD(PIDGAINS.FL_STEER.kD)
-      .configPositionControlFF(PIDGAINS.FL_STEER.kFF);
+      .configPositionControlP(PIDGAINS.FL_STEER.getP())
+      .configPositionControlI(PIDGAINS.FL_STEER.getI())
+      .configPositionControlD(PIDGAINS.FL_STEER.getD())
+      .configPositionControlFF(PIDGAINS.FL_STEER.getFF());
 
     module.getDriveController()
-      .configVelocityControlP(PIDGAINS.FL_DRIVE.kP)
-      .configVelocityControlI(PIDGAINS.FL_DRIVE.kI)
-      .configVelocityControlD(PIDGAINS.FL_DRIVE.kD)
-      .configVelocityControlFF(PIDGAINS.FL_DRIVE.kFF);
+      .configVelocityControlP(PIDGAINS.FL_DRIVE.getP())
+      .configVelocityControlI(PIDGAINS.FL_DRIVE.getI())
+      .configVelocityControlD(PIDGAINS.FL_DRIVE.getD())
+      .configVelocityControlFF(PIDGAINS.FL_DRIVE.getFF());
+
+    if (Constants.tuningMode) {
+      module.setSteerPIDFSupplier(PIDGAINS.FL_STEER::getGains);
+      module.setDrivePIDFSupplier(PIDGAINS.FL_DRIVE::getGains);
+    }
 
     if (DriverStation.isFMSAttached() || Constants.BURNFLASHES) {
       module.getSteerController().burnFlash();
@@ -110,16 +115,21 @@ public class SwerveModuleFactory {
     ));
 
     module.getSteerController()
-      .configPositionControlP(PIDGAINS.FR_STEER.kP)
-      .configPositionControlI(PIDGAINS.FR_STEER.kI)
-      .configPositionControlD(PIDGAINS.FR_STEER.kD)
-      .configPositionControlFF(PIDGAINS.FR_STEER.kFF);
+      .configPositionControlP(PIDGAINS.FR_STEER.getP())
+      .configPositionControlI(PIDGAINS.FR_STEER.getI())
+      .configPositionControlD(PIDGAINS.FR_STEER.getD())
+      .configPositionControlFF(PIDGAINS.FR_STEER.getFF());
 
     module.getDriveController()
-      .configVelocityControlP(PIDGAINS.FR_DRIVE.kP)
-      .configVelocityControlI(PIDGAINS.FR_DRIVE.kI)
-      .configVelocityControlD(PIDGAINS.FR_DRIVE.kD)
-      .configVelocityControlFF(PIDGAINS.FR_DRIVE.kFF);
+      .configVelocityControlP(PIDGAINS.FR_DRIVE.getP())
+      .configVelocityControlI(PIDGAINS.FR_DRIVE.getI())
+      .configVelocityControlD(PIDGAINS.FR_DRIVE.getD())
+      .configVelocityControlFF(PIDGAINS.FR_DRIVE.getFF());
+
+    if (Constants.tuningMode) {
+      module.setSteerPIDFSupplier(PIDGAINS.FR_STEER::getGains);
+      module.setDrivePIDFSupplier(PIDGAINS.FR_DRIVE::getGains);
+    }
 
     if (DriverStation.isFMSAttached() || Constants.BURNFLASHES) {
       module.getSteerController().burnFlash();
@@ -139,16 +149,21 @@ public class SwerveModuleFactory {
     ));
 
     module.getSteerController()
-      .configPositionControlP(PIDGAINS.BL_STEER.kP)
-      .configPositionControlI(PIDGAINS.BL_STEER.kI)
-      .configPositionControlD(PIDGAINS.BL_STEER.kD)
-      .configPositionControlFF(PIDGAINS.BL_STEER.kFF);
+      .configPositionControlP(PIDGAINS.BL_STEER.getP())
+      .configPositionControlI(PIDGAINS.BL_STEER.getI())
+      .configPositionControlD(PIDGAINS.BL_STEER.getD())
+      .configPositionControlFF(PIDGAINS.BL_STEER.getFF());
 
     module.getDriveController()
-      .configVelocityControlP(PIDGAINS.BL_DRIVE.kP)
-      .configVelocityControlI(PIDGAINS.BL_DRIVE.kI)
-      .configVelocityControlD(PIDGAINS.BL_DRIVE.kD)
-      .configVelocityControlFF(PIDGAINS.BL_DRIVE.kFF);
+      .configVelocityControlP(PIDGAINS.BL_DRIVE.getP())
+      .configVelocityControlI(PIDGAINS.BL_DRIVE.getI())
+      .configVelocityControlD(PIDGAINS.BL_DRIVE.getD())
+      .configVelocityControlFF(PIDGAINS.BL_DRIVE.getFF());
+
+    if (Constants.tuningMode) {
+      module.setSteerPIDFSupplier(PIDGAINS.BL_STEER::getGains);
+      module.setDrivePIDFSupplier(PIDGAINS.BL_DRIVE::getGains);
+    }
 
     if (DriverStation.isFMSAttached() || Constants.BURNFLASHES) {
       module.getSteerController().burnFlash();
@@ -168,16 +183,21 @@ public class SwerveModuleFactory {
     ));
 
     module.getSteerController()
-      .configPositionControlP(PIDGAINS.BR_STEER.kP)
-      .configPositionControlI(PIDGAINS.BR_STEER.kI)
-      .configPositionControlD(PIDGAINS.BR_STEER.kD)
-      .configPositionControlFF(PIDGAINS.BR_STEER.kFF);
+      .configPositionControlP(PIDGAINS.BR_STEER.getP())
+      .configPositionControlI(PIDGAINS.BR_STEER.getI())
+      .configPositionControlD(PIDGAINS.BR_STEER.getD())
+      .configPositionControlFF(PIDGAINS.BR_STEER.getFF());
 
     module.getDriveController()
-      .configVelocityControlP(PIDGAINS.BR_DRIVE.kP)
-      .configVelocityControlI(PIDGAINS.BR_DRIVE.kI)
-      .configVelocityControlD(PIDGAINS.BR_DRIVE.kD)
-      .configVelocityControlFF(PIDGAINS.BR_DRIVE.kFF);
+      .configVelocityControlP(PIDGAINS.BR_DRIVE.getP())
+      .configVelocityControlI(PIDGAINS.BR_DRIVE.getI())
+      .configVelocityControlD(PIDGAINS.BR_DRIVE.getD())
+      .configVelocityControlFF(PIDGAINS.BR_DRIVE.getFF());
+
+    if (Constants.tuningMode) {
+      module.setSteerPIDFSupplier(PIDGAINS.BR_STEER::getGains);
+      module.setDrivePIDFSupplier(PIDGAINS.BR_DRIVE::getGains);
+    }
 
     if (DriverStation.isFMSAttached() || Constants.BURNFLASHES) {
       module.getSteerController().burnFlash();

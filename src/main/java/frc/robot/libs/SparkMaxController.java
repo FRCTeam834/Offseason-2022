@@ -171,6 +171,13 @@ public class SparkMaxController {
     this.sparkMaxPIDController.setFF(kFF, 0);
     return this;
   }
+  public SparkMaxController configPositionControlPIDF(double[] gains) {
+    configPositionControlP(gains[0]);
+    configPositionControlI(gains[1]);
+    configPositionControlD(gains[2]);
+    configPositionControlFF(gains[3]);
+    return this;
+  }
 
   public SparkMaxController configVelocityControlP(double kP) {
     this.velocityPIDController.setP(kP);
@@ -186,6 +193,13 @@ public class SparkMaxController {
   }
   public SparkMaxController configVelocityControlFF(double kFF) {
     this.velocityFeedforward = kFF;
+    return this;
+  }
+  public SparkMaxController configVelocityControlPIDF(double[] gains) {
+    configVelocityControlP(gains[0]);
+    configVelocityControlI(gains[1]);
+    configVelocityControlD(gains[2]);
+    configVelocityControlFF(gains[3]);
     return this;
   }
 

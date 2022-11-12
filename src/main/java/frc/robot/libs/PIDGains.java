@@ -6,10 +6,10 @@ import edu.wpi.first.math.controller.PIDController;
  * Helper class that stores PIDF gains
  */
 public class PIDGains {
-  public double kP;
-  public double kI;
-  public double kD;
-  public double kFF;
+  protected double kP;
+  protected double kI;
+  protected double kD;
+  protected double kFF;
 
   public PIDGains(double kP) {
     this(kP, 0.0, 0.0, 0.0);
@@ -31,6 +31,26 @@ public class PIDGains {
     this.kI = kI;
     this.kD = kD;
     this.kFF = kFF;
+  }
+
+  public double getP() {
+    return kP;
+  }
+
+  public double getI() {
+    return kI;
+  }
+
+  public double getD() {
+    return kD;
+  }
+
+  public double getFF() {
+    return kFF;
+  }
+
+  public double[] getGains() {
+    return new double[] { getP(), getI(), getD(), getFF() };
   }
 
   public PIDController generateController() {
