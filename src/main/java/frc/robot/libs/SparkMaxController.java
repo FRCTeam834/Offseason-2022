@@ -44,8 +44,11 @@ public class SparkMaxController {
 
   // Velocity PIDF
   private PIDController velocityPIDController = new PIDController(0.0, 0.0, 0.0);
-  private double velocityFeedforward; // kV
-  private double velocityArbFF; // kS
+  private double velocityArbFF;
+
+  // Position PIDF
+  private PIDController positionPIDController = new PIDController(0.0, 0.0, 0.0);
+  private double positionArbFF;
 
   // Custom velocity filtering
   // Inspired by 6328: https://github.com/Mechanical-Advantage/SwerveDevelopment/blob/main/src/main/java/frc/robot/util/SparkMaxDerivedVelocityController.java
@@ -156,26 +159,21 @@ public class SparkMaxController {
   }
 
   public SparkMaxController configPositionControlP(double kP) {
-    this.sparkMaxPIDController.setP(kP, 0);
+    this.positionPIDController.setP(kP);
     return this;
   }
   public SparkMaxController configPositionControlI(double kI) {
-    this.sparkMaxPIDController.setI(kI, 0);
+    this.positionPIDController.setI(kI);
     return this;
   }
   public SparkMaxController configPositionControlD(double kD) {
-    this.sparkMaxPIDController.setD(kD, 0);
-    return this;
-  }
-  public SparkMaxController configPositionControlFF(double kFF) {
-    this.sparkMaxPIDController.setFF(kFF, 0);
+    this.positionPIDController.setD(kD);
     return this;
   }
   public SparkMaxController configPositionControlPIDF(double[] gains) {
     configPositionControlP(gains[0]);
     configPositionControlI(gains[1]);
     configPositionControlD(gains[2]);
-    configPositionControlFF(gains[3]);
     return this;
   }
 
@@ -191,15 +189,10 @@ public class SparkMaxController {
     this.velocityPIDController.setD(kD);
     return this;
   }
-  public SparkMaxController configVelocityControlFF(double kFF) {
-    this.velocityFeedforward = kFF;
-    return this;
-  }
   public SparkMaxController configVelocityControlPIDF(double[] gains) {
     configVelocityControlP(gains[0]);
     configVelocityControlI(gains[1]);
     configVelocityControlD(gains[2]);
-    configVelocityControlFF(gains[3]);
     return this;
   }
 
@@ -348,12 +341,8 @@ public class SparkMaxController {
     // Apply conversion factor
     position *= this.positionConversionFactor;
 
-    DesiredState desiredState = new DesiredState(position, ControlType.POSITION);
-
-    if (this.lastDesiredState.equals(desiredState)) return;
-    this.lastDesiredState = desiredState;
-
-    this.sparkMaxPIDController.setReference(position, CANSparkMax.ControlType.kPosition, 0, arbFF);
+    this.lastDesiredState = new DesiredState(position, ControlType.POSITION);
+    this.positionArbFF = arbFF;
   }
 
   /** */
@@ -362,14 +351,23 @@ public class SparkMaxController {
 
     double desiredVelocity = this.lastDesiredState.setpoint;
     this.setVoltage(
-      this.velocityPIDController.calculate(desiredVelocity, this.getCurrentVelocity()) +
-      (this.velocityArbFF * Math.signum(desiredVelocity) + this.velocityFeedforward * desiredVelocity) // feedforward calculation ks * signum(vel) + kv * vel
+      this.velocityPIDController.calculate(desiredVelocity, this.getCurrentVelocity())
+      + this.velocityArbFF
+    );
+  }
+
+  /** */
+  private void updatePosition() {
+    if (!this.lastDesiredState.controlType.equals(ControlType.POSITION)) return;
+
+    double desiredPosition = this.lastDesiredState.setpoint;
+    this.setVoltage(
+      this.positionPIDController.calculate(desiredPosition, this.getCurrentPosition())
+      + this.positionArbFF
     );
   }
 
   private void update() {
-    this.updateVelocity();
-
     this.lastCurrent = this.currentFilter.calculate(this.sparkMax.getOutputCurrent());
 
     // https://andymark-weblinc.netdna-ssl.com/media/W1siZiIsIjIwMjAvMDUvMTkvMTQvMDYvNDMvNDUyNGFkOTMtZjYwZi00ODgyLWFlNzQtNjAxMzU5MzQyMjBiL2FtLTQyNjEgU1BBUksgTUFYIC0gVXNlciBNYW51YWwuaHRtbCJdXQ/am-4261%20SPARK%20MAX%20-%20User%20Manual.html?sha=7c9ea7a1ed73eb42#section-3-3-2-1
@@ -386,6 +384,9 @@ public class SparkMaxController {
     // double packetTime = buffer.timestamp;
     lastPosition = position;
     lastVelocity = velocityFilter.calculate(position);
+
+    this.updateVelocity();
+    this.updatePosition();
   }
 
   /** */

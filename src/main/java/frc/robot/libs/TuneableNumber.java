@@ -4,6 +4,8 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 
 // Taken from:
+// https://github.com/FRCTeam834/Robot-2022/blob/dev/src/main/java/frc/robot/utilityClasses/TuneableNumber.java
+// Which took it from:
 // https://github.com/Mechanical-Advantage/RobotCode2020/blob/master/src/main/java/frc/robot/util/TunableNumber.java
 
 public class TuneableNumber {

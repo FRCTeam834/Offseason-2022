@@ -10,6 +10,7 @@ import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -21,9 +22,13 @@ import frc.robot.libs.SparkMaxController;
 
 public class SwerveModule extends SubsystemBase {
   private final String name;
+  private final CANCoder canCoder;
+
   private final SparkMaxController steerController;
   private final SparkMaxController driveController;
-  private final CANCoder canCoder;
+
+  private SimpleMotorFeedforward steerFeedforward = new SimpleMotorFeedforward(0.0, 0.0);
+  private SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(0.0, 0.0);
 
   // Tuning
   private Supplier<double[]> steerPIDFSupplier;
@@ -86,6 +91,24 @@ public class SwerveModule extends SubsystemBase {
     return driveController.getCurrentVelocity();
   }
 
+  public void setSteerFeedforward(SimpleMotorFeedforward ff) {
+    steerFeedforward = ff;
+  }
+
+  public void setDriveFeedforward(SimpleMotorFeedforward ff) {
+    driveFeedforward = ff;
+  }
+
+  /** */
+  public void setDesiredAngle(double angle) {
+    steerController.setDesiredPosition(angle, steerFeedforward.calculate(angle));
+  }
+
+  /** */
+  public void setDesiredSpeed(double speed) {
+    driveController.setDesiredVelocity(speed, driveFeedforward.calculate(speed));
+  }
+
   /**
    * Set desired module state; closed loop
    * @param desiredState
@@ -93,8 +116,8 @@ public class SwerveModule extends SubsystemBase {
   public void setDesiredState(SwerveModuleState desiredState) {
     desiredState = SwerveModule.optimizeModuleState(desiredState, steerController.getCurrentPosition());
 
-    driveController.setDesiredVelocity(desiredState.speedMetersPerSecond);
-    steerController.setDesiredPosition(desiredState.angle.getDegrees());
+    setDesiredSpeed(desiredState.speedMetersPerSecond);
+    setDesiredAngle(desiredState.angle.getDegrees());
   }
 
   /**
@@ -105,7 +128,7 @@ public class SwerveModule extends SubsystemBase {
     desiredState = SwerveModule.optimizeModuleState(desiredState, steerController.getCurrentPosition());
 
     driveController.set(desiredState.speedMetersPerSecond / SWERVEMODULECONSTANTS.MAX_SPEED);
-    steerController.setDesiredPosition(desiredState.angle.getDegrees());
+    setDesiredAngle(desiredState.angle.getDegrees());
   }
 
   /** */

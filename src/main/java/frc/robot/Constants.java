@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -102,6 +103,20 @@ public final class Constants {
     public static final PIDGains AUTON_X = new PIDGains(1.0);
     public static final PIDGains AUTON_Y = new PIDGains(1.0);
     public static final PIDGains AUTON_STEER = new PIDGains(1.0);
+  }
+
+  public static final class FFGAINS {
+    public static final SimpleMotorFeedforward FL_STEER_FF = new SimpleMotorFeedforward(0.0, 0.0);
+    public static final SimpleMotorFeedforward FL_DRIVE_FF = new SimpleMotorFeedforward(0.0, 0.0);
+
+    public static final SimpleMotorFeedforward FR_STEER_FF = new SimpleMotorFeedforward(0.0, 0.0);
+    public static final SimpleMotorFeedforward FR_DRIVE_FF = new SimpleMotorFeedforward(0.0, 0.0);
+
+    public static final SimpleMotorFeedforward BL_STEER_FF = new SimpleMotorFeedforward(0.0, 0.0);
+    public static final SimpleMotorFeedforward BL_DRIVE_FF = new SimpleMotorFeedforward(0.0, 0.0);
+
+    public static final SimpleMotorFeedforward BR_STEER_FF = new SimpleMotorFeedforward(0.0, 0.0);
+    public static final SimpleMotorFeedforward BR_DRIVE_FF = new SimpleMotorFeedforward(0.0, 0.0);
   }
 
   public static final class SWERVEMODULECONSTANTS {

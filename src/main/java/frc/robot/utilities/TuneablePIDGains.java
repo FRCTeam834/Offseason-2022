@@ -13,7 +13,6 @@ public class TuneablePIDGains extends PIDGains {
   private TuneableNumber tuneableP = null;
   private TuneableNumber tuneableI = null;
   private TuneableNumber tuneableD = null;
-  private TuneableNumber tuneableFF = null;
 
   // TuneableNumber builder
   private TuneableNumber tnBuilder(String type, double defaultValue) {
@@ -21,22 +20,22 @@ public class TuneablePIDGains extends PIDGains {
   }
 
   public TuneablePIDGains(String name, double kP) {
-    this(kP, 0.0, 0.0, 0.0);
+    this(kP, 0.0, 0.0);
 
     this.name = name;
     tuneableP = tnBuilder("P_GAIN", kP);
   }
 
   public TuneablePIDGains(String name, double kP, double kD) {
-    this(kP, 0.0, kD, 0.0);
+    this(kP, 0.0, kD);
 
     this.name = name;
     tuneableP = tnBuilder("P_GAIN", kP);
     tuneableD = tnBuilder("D_GAIN", kD);
   }
-  
+
   public TuneablePIDGains(String name, double kP, double kI, double kD) {
-    this(kP, kI, kD, 0.0);
+    this(kP, kI, kD);
 
     this.name = name;
     tuneableP = tnBuilder("P_GAIN", kP);
@@ -44,18 +43,8 @@ public class TuneablePIDGains extends PIDGains {
     tuneableD = tnBuilder("D_GAIN", kD);
   }
 
-  public TuneablePIDGains(String name, double kP, double kI, double kD, double kFF) {
-    this(kP, kI, kD, kFF);
-
-    this.name = name;
-    tuneableP = tnBuilder("P_GAIN", kP);
-    tuneableI = tnBuilder("I_GAIN", kI);
-    tuneableD = tnBuilder("D_GAIN", kD);
-    tuneableFF = tnBuilder("FF_GAIN", kFF);
-  }
-
-  private TuneablePIDGains(double kP, double kI, double kD, double kFF) {
-    super(kP, kI, kD, kFF);
+  private TuneablePIDGains(double kP, double kI, double kD) {
+    super(kP, kI, kD);
   }
 
   @Override
@@ -74,11 +63,5 @@ public class TuneablePIDGains extends PIDGains {
   public double getD() {
     return 
       Constants.tuningMode ? (tuneableD == null? kD : tuneableD.get()) : kD;
-  }
-
-  @Override
-  public double getFF() {
-    return 
-      Constants.tuningMode ? (tuneableFF == null? kFF : tuneableFF.get()) : kFF;
   }
 }

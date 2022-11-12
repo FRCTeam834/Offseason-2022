@@ -5,6 +5,7 @@ import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
 import frc.robot.Constants.CANIDS;
+import frc.robot.Constants.FFGAINS;
 import frc.robot.Constants.PIDGAINS;
 import frc.robot.Constants.SWERVEMODULECONSTANTS;
 import frc.robot.subsystems.SwerveModule;
@@ -83,14 +84,16 @@ public class SwerveModuleFactory {
     module.getSteerController()
       .configPositionControlP(PIDGAINS.FL_STEER.getP())
       .configPositionControlI(PIDGAINS.FL_STEER.getI())
-      .configPositionControlD(PIDGAINS.FL_STEER.getD())
-      .configPositionControlFF(PIDGAINS.FL_STEER.getFF());
+      .configPositionControlD(PIDGAINS.FL_STEER.getD());
 
     module.getDriveController()
       .configVelocityControlP(PIDGAINS.FL_DRIVE.getP())
       .configVelocityControlI(PIDGAINS.FL_DRIVE.getI())
-      .configVelocityControlD(PIDGAINS.FL_DRIVE.getD())
-      .configVelocityControlFF(PIDGAINS.FL_DRIVE.getFF());
+      .configVelocityControlD(PIDGAINS.FL_DRIVE.getD());
+
+    module.setSteerFeedforward(FFGAINS.FL_STEER_FF);
+    module.setDriveFeedforward(FFGAINS.FL_DRIVE_FF);
+    
 
     if (Constants.tuningMode) {
       module.setSteerPIDFSupplier(PIDGAINS.FL_STEER::getGains);
@@ -117,14 +120,15 @@ public class SwerveModuleFactory {
     module.getSteerController()
       .configPositionControlP(PIDGAINS.FR_STEER.getP())
       .configPositionControlI(PIDGAINS.FR_STEER.getI())
-      .configPositionControlD(PIDGAINS.FR_STEER.getD())
-      .configPositionControlFF(PIDGAINS.FR_STEER.getFF());
+      .configPositionControlD(PIDGAINS.FR_STEER.getD());
 
     module.getDriveController()
       .configVelocityControlP(PIDGAINS.FR_DRIVE.getP())
       .configVelocityControlI(PIDGAINS.FR_DRIVE.getI())
-      .configVelocityControlD(PIDGAINS.FR_DRIVE.getD())
-      .configVelocityControlFF(PIDGAINS.FR_DRIVE.getFF());
+      .configVelocityControlD(PIDGAINS.FR_DRIVE.getD());
+
+    module.setSteerFeedforward(FFGAINS.FR_STEER_FF);
+    module.setDriveFeedforward(FFGAINS.FR_DRIVE_FF);
 
     if (Constants.tuningMode) {
       module.setSteerPIDFSupplier(PIDGAINS.FR_STEER::getGains);
@@ -151,14 +155,15 @@ public class SwerveModuleFactory {
     module.getSteerController()
       .configPositionControlP(PIDGAINS.BL_STEER.getP())
       .configPositionControlI(PIDGAINS.BL_STEER.getI())
-      .configPositionControlD(PIDGAINS.BL_STEER.getD())
-      .configPositionControlFF(PIDGAINS.BL_STEER.getFF());
+      .configPositionControlD(PIDGAINS.BL_STEER.getD());
 
     module.getDriveController()
       .configVelocityControlP(PIDGAINS.BL_DRIVE.getP())
       .configVelocityControlI(PIDGAINS.BL_DRIVE.getI())
-      .configVelocityControlD(PIDGAINS.BL_DRIVE.getD())
-      .configVelocityControlFF(PIDGAINS.BL_DRIVE.getFF());
+      .configVelocityControlD(PIDGAINS.BL_DRIVE.getD());
+
+    module.setSteerFeedforward(FFGAINS.BL_STEER_FF);
+    module.setDriveFeedforward(FFGAINS.BL_DRIVE_FF);
 
     if (Constants.tuningMode) {
       module.setSteerPIDFSupplier(PIDGAINS.BL_STEER::getGains);
@@ -185,14 +190,15 @@ public class SwerveModuleFactory {
     module.getSteerController()
       .configPositionControlP(PIDGAINS.BR_STEER.getP())
       .configPositionControlI(PIDGAINS.BR_STEER.getI())
-      .configPositionControlD(PIDGAINS.BR_STEER.getD())
-      .configPositionControlFF(PIDGAINS.BR_STEER.getFF());
+      .configPositionControlD(PIDGAINS.BR_STEER.getD());
 
     module.getDriveController()
       .configVelocityControlP(PIDGAINS.BR_DRIVE.getP())
       .configVelocityControlI(PIDGAINS.BR_DRIVE.getI())
-      .configVelocityControlD(PIDGAINS.BR_DRIVE.getD())
-      .configVelocityControlFF(PIDGAINS.BR_DRIVE.getFF());
+      .configVelocityControlD(PIDGAINS.BR_DRIVE.getD());
+
+    module.setSteerFeedforward(FFGAINS.BR_STEER_FF);
+    module.setDriveFeedforward(FFGAINS.BR_DRIVE_FF);
 
     if (Constants.tuningMode) {
       module.setSteerPIDFSupplier(PIDGAINS.BR_STEER::getGains);
