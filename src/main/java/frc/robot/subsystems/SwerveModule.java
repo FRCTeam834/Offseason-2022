@@ -145,6 +145,16 @@ public class SwerveModule extends SubsystemBase {
     );
   }
 
+  /*
+  public SwerveModulePosition getCurrentPositionState() {
+    return new SwerveModulePosition(
+      driveController.getCurrentPosition(),
+      Rotation2d.fromDegrees(getCurrentAngle())
+    );
+  }
+  */
+
+
   public double[] telemetryGetState() {
     return new double[] {
       getCurrentVelocity(),
