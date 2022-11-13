@@ -31,8 +31,8 @@ public class SwerveModule extends SubsystemBase {
   private SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(0.0, 0.0);
 
   // Tuning
-  private Supplier<double[]> steerPIDFSupplier;
-  private Supplier<double[]> drivePIDFSupplier;
+  private Supplier<double[]> steerPIDSupplier;
+  private Supplier<double[]> drivePIDSupplier;
 
   /**
    * 
@@ -152,12 +152,12 @@ public class SwerveModule extends SubsystemBase {
     };
   }
 
-  public void setSteerPIDFSupplier(Supplier<double[]> supplier) {
-    steerPIDFSupplier = supplier;
+  public void setSteerPIDSupplier(Supplier<double[]> supplier) {
+    steerPIDSupplier = supplier;
   }
 
-  public void setDrivePIDFSupplier(Supplier<double[]> supplier) {
-    drivePIDFSupplier = supplier;
+  public void setDrivePIDSupplier(Supplier<double[]> supplier) {
+    drivePIDSupplier = supplier;
   }
 
   @Override
@@ -173,8 +173,8 @@ public class SwerveModule extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     if (Constants.tuningMode) {
-      this.steerController.configPositionControlPIDF(steerPIDFSupplier.get());
-      this.driveController.configVelocityControlPIDF(drivePIDFSupplier.get());
+      this.steerController.configPositionControlPID(steerPIDSupplier.get());
+      this.driveController.configVelocityControlPID(drivePIDSupplier.get());
     }
   }
   

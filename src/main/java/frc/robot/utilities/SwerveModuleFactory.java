@@ -96,8 +96,8 @@ public class SwerveModuleFactory {
     
 
     if (Constants.tuningMode) {
-      module.setSteerPIDFSupplier(PIDGAINS.FL_STEER::getGains);
-      module.setDrivePIDFSupplier(PIDGAINS.FL_DRIVE::getGains);
+      module.setSteerPIDSupplier(PIDGAINS.FL_STEER::getGains);
+      module.setDrivePIDSupplier(PIDGAINS.FL_DRIVE::getGains);
     }
 
     if (DriverStation.isFMSAttached() || Constants.BURNFLASHES) {
@@ -131,8 +131,8 @@ public class SwerveModuleFactory {
     module.setDriveFeedforward(FFGAINS.FR_DRIVE_FF);
 
     if (Constants.tuningMode) {
-      module.setSteerPIDFSupplier(PIDGAINS.FR_STEER::getGains);
-      module.setDrivePIDFSupplier(PIDGAINS.FR_DRIVE::getGains);
+      module.setSteerPIDSupplier(PIDGAINS.FR_STEER::getGains);
+      module.setDrivePIDSupplier(PIDGAINS.FR_DRIVE::getGains);
     }
 
     if (DriverStation.isFMSAttached() || Constants.BURNFLASHES) {
@@ -166,8 +166,8 @@ public class SwerveModuleFactory {
     module.setDriveFeedforward(FFGAINS.BL_DRIVE_FF);
 
     if (Constants.tuningMode) {
-      module.setSteerPIDFSupplier(PIDGAINS.BL_STEER::getGains);
-      module.setDrivePIDFSupplier(PIDGAINS.BL_DRIVE::getGains);
+      module.setSteerPIDSupplier(PIDGAINS.BL_STEER::getGains);
+      module.setDrivePIDSupplier(PIDGAINS.BL_DRIVE::getGains);
     }
 
     if (DriverStation.isFMSAttached() || Constants.BURNFLASHES) {
@@ -201,8 +201,8 @@ public class SwerveModuleFactory {
     module.setDriveFeedforward(FFGAINS.BR_DRIVE_FF);
 
     if (Constants.tuningMode) {
-      module.setSteerPIDFSupplier(PIDGAINS.BR_STEER::getGains);
-      module.setDrivePIDFSupplier(PIDGAINS.BR_DRIVE::getGains);
+      module.setSteerPIDSupplier(PIDGAINS.BR_STEER::getGains);
+      module.setDrivePIDSupplier(PIDGAINS.BR_DRIVE::getGains);
     }
 
     if (DriverStation.isFMSAttached() || Constants.BURNFLASHES) {

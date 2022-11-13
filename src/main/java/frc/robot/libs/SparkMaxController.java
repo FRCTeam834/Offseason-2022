@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.Notifier;
  * CANSparkMax wrapper class
  * 
  * Positional control on spark maxes
- * Velocity control on rio -- mimics sparkmax api !Note: PIDF gains will be different
+ * Velocity control on rio -- mimics sparkmax api !Note: PID gains will be different
  * 
  * @author Keller
  */
@@ -42,11 +42,11 @@ public class SparkMaxController {
   private double velocityConversionFactor;
   private double positionConversionFactor;
 
-  // Velocity PIDF
+  // Velocity PID
   private PIDController velocityPIDController = new PIDController(0.0, 0.0, 0.0);
   private double velocityArbFF;
 
-  // Position PIDF
+  // Position PID
   private PIDController positionPIDController = new PIDController(0.0, 0.0, 0.0);
   private double positionArbFF;
 
@@ -170,7 +170,7 @@ public class SparkMaxController {
     this.positionPIDController.setD(kD);
     return this;
   }
-  public SparkMaxController configPositionControlPIDF(double[] gains) {
+  public SparkMaxController configPositionControlPID(double[] gains) {
     configPositionControlP(gains[0]);
     configPositionControlI(gains[1]);
     configPositionControlD(gains[2]);
@@ -189,7 +189,7 @@ public class SparkMaxController {
     this.velocityPIDController.setD(kD);
     return this;
   }
-  public SparkMaxController configVelocityControlPIDF(double[] gains) {
+  public SparkMaxController configVelocityControlPID(double[] gains) {
     configVelocityControlP(gains[0]);
     configVelocityControlI(gains[1]);
     configVelocityControlD(gains[2]);
@@ -313,10 +313,8 @@ public class SparkMaxController {
 
   /**
    * 
-   * Run on RIO - structured to mimic sparkMax integrated PIDF
-   * Note: No caching needed here since it is rio run
    * @param velocity
-   * @param arbFF
+   * @param arbFF - feedforward value
    */
   public void setDesiredVelocity(double velocity, double arbFF) {
     // Apply conversion factor
