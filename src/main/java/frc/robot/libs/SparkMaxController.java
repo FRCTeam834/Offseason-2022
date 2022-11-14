@@ -19,80 +19,11 @@ import edu.wpi.first.wpilibj.Notifier;
  * CANSparkMax wrapper class
  * 
  * Positional control on spark maxes
- * Velocity control on rio -- mimics sparkmax api !Note: PIDF gains will be different
+ * Velocity control on rio -- mimics sparkmax api !Note: PID gains will be different
  * 
  * @author Keller
  */
 public class SparkMaxController {
-  /**
-   * Stores a SparkMaxPIDController reference state
-   * (Replaced by DesiredState)
-   */
-  @Deprecated (forRemoval = true)
-  private static final class SparkMaxPIDState {
-    public final double setpoint;
-    public final CANSparkMax.ControlType controlType;
-
-    public SparkMaxPIDState(double setpoint, CANSparkMax.ControlType controlType) {
-      this.setpoint = setpoint;
-      this.controlType = controlType;
-    }
-
-    public boolean equals(SparkMaxPIDState expected) {
-      if (expected == null) return false;
-      return (
-        this.setpoint == expected.setpoint &&
-        this.controlType.equals(expected.controlType)
-      );
-    }
-  }
-
-  /** */
-  private enum ControlType {
-    POSITION, VELOCITY, VOLTAGE, PERCENT
-  }
-
-  /**
-   * Stores the last desired state
-   */
-  private static final class DesiredState {
-    public final double setpoint;
-    public final ControlType controlType;
-
-    public DesiredState(double setpoint, ControlType controlType) {
-      this.setpoint = setpoint;
-      this.controlType = controlType;
-    }
-
-    public boolean equals(DesiredState expected) {
-      if (expected == null) return false;
-      return (
-        this.setpoint == expected.setpoint &&
-        this.controlType.equals(expected.controlType)
-      );
-    }
-  }
-
-  /**
-   * 
-   * Is value in the given interval [-range, range]
-   * @param value tested value
-   * @param range interval bounds
-   * @return
-   */
-  private static final boolean inInclusiveRange(double value, double range) {
-    return (
-      value <= Math.abs(range) &&
-      value >= -Math.abs(range)
-    );
-  }
-  
-  /**
-   * 
-   * 
-   * 
-   */
-
   // https://docs.wpilib.org/en/stable/docs/software/can-devices/can-addressing.html
   private static final int manufacturerID = 5;
   private static final int deviceTypeID = 2;
@@ -103,7 +34,7 @@ public class SparkMaxController {
 
   private double lastPosition; // Unit: Rotations
   private double lastVelocity; // Unit: RPM
-  private DesiredState lastDesiredState;
+  private DesiredState lastDesiredState = new DesiredState(0.0, ControlType.PERCENT);
   // private double lastDesiredPosition; // Unit: Rotations
   // private double lastDesiredVelocity; // Unit: RPM
   // private double lastDesiredVoltage; // Unit: Volts
@@ -111,17 +42,24 @@ public class SparkMaxController {
   private double velocityConversionFactor;
   private double positionConversionFactor;
 
+  // Velocity PID
+  private PIDController velocityPIDController = new PIDController(0.0, 0.0, 0.0);
+  private double velocityArbFF;
+
+  // Position PID
+  private PIDController positionPIDController = new PIDController(0.0, 0.0, 0.0);
+  private double positionArbFF;
+
   // Custom velocity filtering
   // Inspired by 6328: https://github.com/Mechanical-Advantage/SwerveDevelopment/blob/main/src/main/java/frc/robot/util/SparkMaxDerivedVelocityController.java
   private final CAN deviceInterface; // Read CAN packets directly
   private final LinearFilter velocityFilter; // Rolling derivative
   private final Notifier updateNotifier;
-  private boolean isFirstPacket = true;
 
-  // Velocity PIDF
-  private PIDController velocityPIDController = new PIDController(0.0, 0.0, 0.0);
-  private double velocityFeedforward; // kV
-  private double velocityArbFF; // kS
+  // Stall detection 
+  // !Important: A low k1 frame period is needed for accurate current readings
+  private LinearFilter currentFilter;
+  private double lastCurrent; // amps
 
   /**
    * 
@@ -129,7 +67,12 @@ public class SparkMaxController {
    * @param CANID
    */
   public SparkMaxController(int CANID) {
-    this(CANID, 20, 5);
+    this(CANID, 20, 5, 5);
+  }
+
+  /** */
+  public SparkMaxController(int CANID, int updateTimestep, int velocityFilterPoints) {
+    this(CANID, updateTimestep, velocityFilterPoints, 5);
   }
 
   /**
@@ -137,14 +80,16 @@ public class SparkMaxController {
    * @param CANID CAN ID of sparkmax controller
    * @param updateTimestep milliseconds per update (time delta) !Note: 10ms is the lowest recommended
    * @param velocityFilterPoints number of points on velocity filter
+   * @param currentFilterPoints number of points on current filter
    */
-  public SparkMaxController(int CANID, int updateTimestep, int velocityFilterPoints) {
+  public SparkMaxController(int CANID, int updateTimestep, int velocityFilterPoints, int currentFilterPoints) {
     this.sparkMax = new CANSparkMax(CANID, CANSparkMax.MotorType.kBrushless);
     this.sparkMaxPIDController = this.sparkMax.getPIDController();
     this.sparkMaxEncoder = this.sparkMax.getEncoder();
 
     this.deviceInterface = new CAN(this.sparkMax.getDeviceId(), SparkMaxController.manufacturerID, SparkMaxController.deviceTypeID);
     this.velocityFilter = LinearFilter.backwardFiniteDifference(1, velocityFilterPoints, updateTimestep / 1000.0);
+    this.currentFilter = LinearFilter.movingAverage(currentFilterPoints);
 
     this.updateNotifier = new Notifier(this::update);
     if (updateTimestep > 0) {
@@ -184,10 +129,20 @@ public class SparkMaxController {
     this.sparkMax.setSmartCurrentLimit(limit);
     return this;
   }
+  // Periodic Frame Documentation
+  // https://andymark-weblinc.netdna-ssl.com/media/W1siZiIsIjIwMjAvMDUvMTkvMTQvMDYvNDMvNDUyNGFkOTMtZjYwZi00ODgyLWFlNzQtNjAxMzU5MzQyMjBiL2FtLTQyNjEgU1BBUksgTUFYIC0gVXNlciBNYW51YWwuaHRtbCJdXQ/am-4261%20SPARK%20MAX%20-%20User%20Manual.html?sha=7c9ea7a1ed73eb42#section-3-3-2-1
+  // https://docs.revrobotics.com/sparkmax/operating-modes/control-interfaces
   public SparkMaxController configPeriodicFramePeriods(int k0, int k1, int k2) {
     this.sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus0, k0);
     this.sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus1, k1);
     this.sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus2, k2);
+    return this;
+  }
+  public SparkMaxController configPeriodicFramePeriods(int k0, int k1, int k2, int k3) {
+    this.sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus0, k0);
+    this.sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus1, k1);
+    this.sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus2, k2);
+    this.sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus3, k3);
     return this;
   }
   public SparkMaxController configControlFramePeriod(int ms) {
@@ -204,19 +159,21 @@ public class SparkMaxController {
   }
 
   public SparkMaxController configPositionControlP(double kP) {
-    this.sparkMaxPIDController.setP(kP, 0);
+    this.positionPIDController.setP(kP);
     return this;
   }
   public SparkMaxController configPositionControlI(double kI) {
-    this.sparkMaxPIDController.setI(kI, 0);
+    this.positionPIDController.setI(kI);
     return this;
   }
   public SparkMaxController configPositionControlD(double kD) {
-    this.sparkMaxPIDController.setD(kD, 0);
+    this.positionPIDController.setD(kD);
     return this;
   }
-  public SparkMaxController configPositionControlFF(double kFF) {
-    this.sparkMaxPIDController.setFF(kFF, 0);
+  public SparkMaxController configPositionControlPID(double[] gains) {
+    configPositionControlP(gains[0]);
+    configPositionControlI(gains[1]);
+    configPositionControlD(gains[2]);
     return this;
   }
 
@@ -232,8 +189,10 @@ public class SparkMaxController {
     this.velocityPIDController.setD(kD);
     return this;
   }
-  public SparkMaxController configVelocityControlFF(double kFF) {
-    this.velocityFeedforward = kFF;
+  public SparkMaxController configVelocityControlPID(double[] gains) {
+    configVelocityControlP(gains[0]);
+    configVelocityControlI(gains[1]);
+    configVelocityControlD(gains[2]);
     return this;
   }
 
@@ -310,6 +269,16 @@ public class SparkMaxController {
     return SparkMaxController.inInclusiveRange(this.getCurrentVelocity(useEncoder) - velocity, tolerance);
   }
 
+  /**
+   * 
+   * Returns if motor is current is above stall current
+   * @param stallAmps amps considered to be stalling
+   * @return
+   */
+  public boolean isStalling(int stallAmps) {
+    return this.lastCurrent >= stallAmps;
+  }
+
   /** */
   public void set(double percent) {
     DesiredState desiredState = new DesiredState(percent, ControlType.PERCENT);
@@ -344,10 +313,8 @@ public class SparkMaxController {
 
   /**
    * 
-   * Run on RIO - structured to mimic sparkMax integrated PIDF
-   * Note: No caching needed here since it is rio run
    * @param velocity
-   * @param arbFF
+   * @param arbFF - feedforward value
    */
   public void setDesiredVelocity(double velocity, double arbFF) {
     // Apply conversion factor
@@ -372,12 +339,8 @@ public class SparkMaxController {
     // Apply conversion factor
     position *= this.positionConversionFactor;
 
-    DesiredState desiredState = new DesiredState(position, ControlType.POSITION);
-
-    if (this.lastDesiredState.equals(desiredState)) return;
-    this.lastDesiredState = desiredState;
-
-    this.sparkMaxPIDController.setReference(position, CANSparkMax.ControlType.kPosition, 0, arbFF);
+    this.lastDesiredState = new DesiredState(position, ControlType.POSITION);
+    this.positionArbFF = arbFF;
   }
 
   /** */
@@ -386,13 +349,25 @@ public class SparkMaxController {
 
     double desiredVelocity = this.lastDesiredState.setpoint;
     this.setVoltage(
-      this.velocityPIDController.calculate(desiredVelocity, this.getCurrentVelocity()) +
-      (this.velocityArbFF * Math.signum(desiredVelocity) + this.velocityFeedforward * desiredVelocity) // feedforward calculation ks * signum(vel) + kv * vel
+      this.velocityPIDController.calculate(desiredVelocity, this.getCurrentVelocity())
+      + this.velocityArbFF
+    );
+  }
+
+  /** */
+  private void updatePosition() {
+    if (!this.lastDesiredState.controlType.equals(ControlType.POSITION)) return;
+
+    double desiredPosition = this.lastDesiredState.setpoint;
+    this.setVoltage(
+      this.positionPIDController.calculate(desiredPosition, this.getCurrentPosition())
+      + this.positionArbFF
     );
   }
 
   private void update() {
-    this.updateVelocity();
+    this.lastCurrent = this.currentFilter.calculate(this.sparkMax.getOutputCurrent());
+
     // https://andymark-weblinc.netdna-ssl.com/media/W1siZiIsIjIwMjAvMDUvMTkvMTQvMDYvNDMvNDUyNGFkOTMtZjYwZi00ODgyLWFlNzQtNjAxMzU5MzQyMjBiL2FtLTQyNjEgU1BBUksgTUFYIC0gVXNlciBNYW51YWwuaHRtbCJdXQ/am-4261%20SPARK%20MAX%20-%20User%20Manual.html?sha=7c9ea7a1ed73eb42#section-3-3-2-1
     // Packet contains motor position in rotations
     // as 32-bit (4 byte) IEEE float
@@ -406,12 +381,74 @@ public class SparkMaxController {
       .getFloat();
     // double packetTime = buffer.timestamp;
     lastPosition = position;
-
-    if (isFirstPacket) {
-      isFirstPacket = false;
-      // Velocity needs 2 data points to be calculated, so return
-      return;
-    }
     lastVelocity = velocityFilter.calculate(position);
+
+    this.updateVelocity();
+    this.updatePosition();
+  }
+
+  /** */
+
+  /**
+   * Stores a SparkMaxPIDController reference state
+   * (Replaced by DesiredState)
+   */
+  @Deprecated (forRemoval = true)
+  private static final class SparkMaxPIDState {
+    public final double setpoint;
+    public final CANSparkMax.ControlType controlType;
+
+    public SparkMaxPIDState(double setpoint, CANSparkMax.ControlType controlType) {
+      this.setpoint = setpoint;
+      this.controlType = controlType;
+    }
+
+    public boolean equals(SparkMaxPIDState expected) {
+      if (expected == null) return false;
+      return (
+        this.setpoint == expected.setpoint &&
+        this.controlType.equals(expected.controlType)
+      );
+    }
+  }
+
+  /** */
+  private enum ControlType {
+    POSITION, VELOCITY, VOLTAGE, PERCENT
+  }
+
+  /**
+   * Stores the last desired state
+   */
+  private static final class DesiredState {
+    public final double setpoint;
+    public final ControlType controlType;
+
+    public DesiredState(double setpoint, ControlType controlType) {
+      this.setpoint = setpoint;
+      this.controlType = controlType;
+    }
+
+    public boolean equals(DesiredState expected) {
+      if (expected == null) return false;
+      return (
+        this.setpoint == expected.setpoint &&
+        this.controlType.equals(expected.controlType)
+      );
+    }
+  }
+
+  /**
+   * 
+   * Is value in the given interval [-range, range]
+   * @param value tested value
+   * @param range interval bounds
+   * @return
+   */
+  private static final boolean inInclusiveRange(double value, double range) {
+    return (
+      value <= Math.abs(range) &&
+      value >= -Math.abs(range)
+    );
   }
 }

@@ -23,7 +23,7 @@ public class RobotContainer {
 
   // One swerve module
   SparkMaxController steerController = new SparkMaxController(1);
-  SparkMaxController driveController = new SparkMaxController(2);
+  SparkMaxController driveController = new SparkMaxController(4);
 
   Joystick joystick = new Joystick(0);
 
@@ -36,10 +36,15 @@ public class RobotContainer {
     driveController.configIdleMode(CANSparkMax.IdleMode.kBrake);
     driveController.configVoltageCompensation(12);
     driveController.configSmartCurrentLimit(20);
-    driveController.configPeriodicFramePeriods(255, 255, 20);
+    driveController.configPeriodicFramePeriods(20, 20, 20);
 
-    // units should be rpm I guess
-    driveController.setDesiredVelocity(1);
+    driveController.configVelocityControlP(1.0);
+    driveController.configVelocityControlI(0.0);
+    driveController.configVelocityControlD(0.0);
+
+    driveController.setDesiredVelocity(5);
+    // IF THE ABOVE DOESN"T WORK, COMMENT IT OUT AND UNCOMMENT THE LINE BELOW THIS
+    // driveController.set(0.1);
   }
 
   /**
