@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.commands.auton.test;
 import frc.robot.libs.SparkMaxController;
 
 /**
@@ -22,8 +23,6 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
 
   // One swerve module
-  SparkMaxController steerController = new SparkMaxController(1);
-  SparkMaxController driveController = new SparkMaxController(4);
 
   Joystick joystick = new Joystick(0);
 
@@ -31,20 +30,6 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
-
-    driveController.configInverted(false);
-    driveController.configIdleMode(CANSparkMax.IdleMode.kBrake);
-    driveController.configVoltageCompensation(12);
-    driveController.configSmartCurrentLimit(20);
-    driveController.configPeriodicFramePeriods(20, 20, 20);
-
-    driveController.configVelocityControlP(1.0);
-    driveController.configVelocityControlI(0.0);
-    driveController.configVelocityControlD(0.0);
-
-    driveController.setDesiredVelocity(5);
-    // IF THE ABOVE DOESN"T WORK, COMMENT IT OUT AND UNCOMMENT THE LINE BELOW THIS
-    // driveController.set(0.1);
   }
 
   /**
@@ -64,6 +49,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return null;
+    return new test();
   }
 }
