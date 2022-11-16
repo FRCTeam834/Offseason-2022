@@ -120,14 +120,14 @@ public final class Constants {
   }
 
   public static final class SWERVEMODULECONSTANTS {
-    // meters per second
-    public static final double MAX_SPEED = 4.5;
-    public static final double WHEEL_DIAMETER = 0.0;
-    public static final double GEAR_RATIO = 0.0;
+    public static final double MAX_SPEED = 4.5; // m/s
+    public static final double WHEEL_DIAMETER = 0.1; // m
+    public static final double DRIVE_GEAR_RATIO = 12.8;
+    public static final double STEER_GEAR_RATIO = 8.14;
     // degrees
-    public static final double POSITION_CONVERSION_FACTOR = 360 * Math.PI * WHEEL_DIAMETER / GEAR_RATIO;
+    public static final double POSITION_CONVERSION_FACTOR = STEER_GEAR_RATIO / 360;
     // meters per second
-    public static final double VELOCITY_CONVERSION_FACTOR = 60 * Math.PI * WHEEL_DIAMETER;
+    public static final double VELOCITY_CONVERSION_FACTOR = Math.PI * WHEEL_DIAMETER / DRIVE_GEAR_RATIO;
 
     // Some modules are inverted, add 180 offset to artifically invert
     public static final double FL_MAGNET_OFFSET = 0.0 + 180.0;

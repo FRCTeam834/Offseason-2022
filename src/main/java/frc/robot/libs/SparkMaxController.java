@@ -220,7 +220,7 @@ public class SparkMaxController {
     if (useEncoder) {
       return this.sparkMaxEncoder.getVelocity();
     }
-    return this.lastVelocity * this.velocityConversionFactor;
+    return this.lastVelocity / this.velocityConversionFactor;
   }
 
   /** */
@@ -237,7 +237,7 @@ public class SparkMaxController {
     if (useEncoder) {
       return this.sparkMaxEncoder.getPosition();
     }
-    return this.lastPosition * this.positionConversionFactor;
+    return this.lastPosition / this.positionConversionFactor;
   }
 
   /** */
@@ -346,7 +346,7 @@ public class SparkMaxController {
 
     double desiredVelocity = this.lastDesiredState.setpoint;
     this.setVoltage(
-      this.velocityPIDController.calculate(desiredVelocity, this.getCurrentVelocity())
+      this.velocityPIDController.calculate(this.getCurrentVelocity(), desiredVelocity)
       + this.velocityArbFF
     );
   }
@@ -357,7 +357,7 @@ public class SparkMaxController {
 
     double desiredPosition = this.lastDesiredState.setpoint;
     this.setVoltage(
-      this.positionPIDController.calculate(desiredPosition, this.getCurrentPosition())
+      this.positionPIDController.calculate(this.getCurrentPosition(), desiredPosition)
       + this.positionArbFF
     );
   }
@@ -381,15 +381,13 @@ public class SparkMaxController {
 
     double velocity = (position - lastPosition) / (double)(packetTime - lastPacketTime);
 
-    // First packet, return since velocity calculation can't be done with only 1 data point
-    if (lastPacketTime == 0) {
-      lastPacketTime = packetTime;
-      return;
-    }
-
     lastPosition = position;
     lastPacketTime = packetTime;
-    lastVelocity = velocityFilter.calculate(velocity);
+
+    // Make sure it's not the first packet
+    if (lastPacketTime != 0) {
+      lastVelocity = velocityFilter.calculate(velocity);
+    }
 
     this.updateVelocity();
     this.updatePosition();
