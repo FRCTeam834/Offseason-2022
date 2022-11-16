@@ -31,15 +31,15 @@ public class SparkMaxController {
 
   private final CANSparkMax sparkMax;
   private final SparkMaxPIDController sparkMaxPIDController; // PID controller on the spark max
-  private final RelativeEncoder sparkMaxEncoder; // NEO internal encoder
+  private final RelativeEncoder sparkMaxEncoder; // NEO integrated encoder
 
   private double lastPosition = 0.0; // Rotations
   private double lastVelocity = 0.0; // RPM
   private long lastPacketTime = 0; // ms
   private DesiredState lastDesiredState = new DesiredState(0.0, ControlType.PERCENT);
-  // private double lastDesiredPosition; // Unit: Rotations
-  // private double lastDesiredVelocity; // Unit: RPM
-  // private double lastDesiredVoltage; // Unit: Volts
+  // private double lastDesiredPosition; // Rotations
+  // private double lastDesiredVelocity; // RPM
+  // private double lastDesiredVoltage; // Volts
 
   private double velocityConversionFactor;
   private double positionConversionFactor;
@@ -360,7 +360,7 @@ public class SparkMaxController {
 
     double desiredPosition = this.lastDesiredState.setpoint;
     this.setVoltage(
-      this.positionPIDController.calculate(this.getCurrentPosition() - desiredPosition, 0)
+      this.positionPIDController.calculate(desiredPosition, this.getCurrentPosition())
       + this.positionArbFF
     );
   }
@@ -381,7 +381,7 @@ public class SparkMaxController {
       .getFloat();
 
     long packetTime = buffer.timestamp;
-
+    
     double velocity = (position - lastPosition) / (double)(packetTime - lastPacketTime);
 
     // First packet, return since velocity calculation can't be done with only 1 data point
