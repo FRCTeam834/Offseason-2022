@@ -4,6 +4,7 @@
 
 package frc.robot.commands.auton;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.libs.SparkMaxController;
 
@@ -17,12 +18,19 @@ public class test extends CommandBase {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    driveController.configVelocityControlP(1.0);
+    driveController.configVelocityConversionFactor(1);
+    steerController.configPositionControlP(1.0);
+    steerController.configPositionConversionFactor(360.0 / 12.8);
+    //steerController.setDesiredPosition(0);
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    driveController.set(0.5);
+    driveController.setDesiredVelocity(2);
+    //DriverStation.reportWarning(String.format("%f", driveController.getCurrentVelocity()), false);
   }
 
   // Called once the command ends or is interrupted.

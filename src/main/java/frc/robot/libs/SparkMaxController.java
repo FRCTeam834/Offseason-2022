@@ -12,6 +12,7 @@ import edu.wpi.first.hal.CANData;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.CAN;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 
 /**
@@ -34,6 +35,7 @@ public class SparkMaxController {
 
   private double lastPosition; // Unit: Rotations
   private double lastVelocity; // Unit: RPM
+  private double lastTime = 0.0;
   private DesiredState lastDesiredState = new DesiredState(0.0, ControlType.PERCENT);
   // private double lastDesiredPosition; // Unit: Rotations
   // private double lastDesiredVelocity; // Unit: RPM
@@ -88,7 +90,7 @@ public class SparkMaxController {
     this.sparkMaxEncoder = this.sparkMax.getEncoder();
 
     this.deviceInterface = new CAN(this.sparkMax.getDeviceId(), SparkMaxController.manufacturerID, SparkMaxController.deviceTypeID);
-    this.velocityFilter = LinearFilter.backwardFiniteDifference(1, velocityFilterPoints, updateTimestep / 1000.0);
+    this.velocityFilter = LinearFilter.movingAverage(velocityFilterPoints);
     this.currentFilter = LinearFilter.movingAverage(currentFilterPoints);
 
     this.updateNotifier = new Notifier(this::update);
@@ -348,6 +350,9 @@ public class SparkMaxController {
     if (!this.lastDesiredState.controlType.equals(ControlType.VELOCITY)) return;
 
     double desiredVelocity = this.lastDesiredState.setpoint;
+    
+    DriverStation.reportWarning(String.format("%f", this.velocityPIDController.calculate(desiredVelocity, this.getCurrentVelocity())
+    + this.velocityArbFF), false);
     this.setVoltage(
       this.velocityPIDController.calculate(desiredVelocity, this.getCurrentVelocity())
       + this.velocityArbFF
@@ -372,16 +377,23 @@ public class SparkMaxController {
     // Packet contains motor position in rotations
     // as 32-bit (4 byte) IEEE float
     CANData buffer = new CANData();
-    this.deviceInterface.readPacketLatest(PeriodicFrame.kStatus2.value, buffer);
+    this.deviceInterface.readPacketLatest(98, buffer);
 
     // Extract position data from bytes
     double position = ByteBuffer
       .wrap(buffer.data)
       .order(ByteOrder.LITTLE_ENDIAN)
-      .getFloat();
-    // double packetTime = buffer.timestamp;
+      .asFloatBuffer()
+      .get(0);
+    double packetTime = buffer.timestamp;
+    if (lastTime == 0.0) {
+      lastTime = packetTime;
+      return;
+    }
+    double velocity = (position - lastPosition) / (packetTime - lastTime) * 1000;
     lastPosition = position;
-    lastVelocity = velocityFilter.calculate(position);
+    lastTime = packetTime;
+    lastVelocity = velocityFilter.calculate(velocity);
 
     this.updateVelocity();
     this.updatePosition();
