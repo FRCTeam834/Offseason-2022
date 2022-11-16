@@ -122,8 +122,8 @@ public final class Constants {
   public static final class SWERVEMODULECONSTANTS {
     public static final double MAX_SPEED = 4.5; // m/s
     public static final double WHEEL_DIAMETER = 0.1; // m
-    public static final double DRIVE_GEAR_RATIO = 12.8;
-    public static final double STEER_GEAR_RATIO = 8.14;
+    public static final double DRIVE_GEAR_RATIO = 8.14;
+    public static final double STEER_GEAR_RATIO = 12.8;
     // degrees
     public static final double POSITION_CONVERSION_FACTOR = STEER_GEAR_RATIO / 360;
     // meters per second
