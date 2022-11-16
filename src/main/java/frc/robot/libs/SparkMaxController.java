@@ -18,10 +18,6 @@ import edu.wpi.first.wpilibj.Notifier;
  * 
  * CANSparkMax wrapper class
  * 
- * Positional control on spark maxes
- * Velocity control on rio -- mimics sparkmax api !Note: PID gains will be different
- * 
- * @author Keller
  */
 public class SparkMaxController {
   // https://docs.wpilib.org/en/stable/docs/software/can-devices/can-addressing.html
@@ -54,6 +50,7 @@ public class SparkMaxController {
 
   // Custom velocity filtering
   // Inspired by 6328: https://github.com/Mechanical-Advantage/SwerveDevelopment/blob/main/src/main/java/frc/robot/util/SparkMaxDerivedVelocityController.java
+  // Tried coding it myself but alas ended up becoming the exact same as 6328
   private final CAN deviceInterface; // Read CAN packets directly
   private final LinearFilter velocityFilter; // Rolling derivative
   private final Notifier updateNotifier;
@@ -381,7 +378,7 @@ public class SparkMaxController {
       .getFloat();
 
     long packetTime = buffer.timestamp;
-    
+
     double velocity = (position - lastPosition) / (double)(packetTime - lastPacketTime);
 
     // First packet, return since velocity calculation can't be done with only 1 data point
