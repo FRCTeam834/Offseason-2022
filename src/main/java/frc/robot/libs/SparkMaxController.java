@@ -27,13 +27,15 @@ public class SparkMaxController {
   // https://docs.wpilib.org/en/stable/docs/software/can-devices/can-addressing.html
   private static final int manufacturerID = 5;
   private static final int deviceTypeID = 2;
+  private static final int apiIdStatus2 = 98;
 
   private final CANSparkMax sparkMax;
   private final SparkMaxPIDController sparkMaxPIDController; // PID controller on the spark max
   private final RelativeEncoder sparkMaxEncoder; // NEO internal encoder
 
-  private double lastPosition; // Unit: Rotations
-  private double lastVelocity; // Unit: RPM
+  private double lastPosition = 0.0; // Rotations
+  private double lastVelocity = 0.0; // RPM
+  private long lastPacketTime = 0; // ms
   private DesiredState lastDesiredState = new DesiredState(0.0, ControlType.PERCENT);
   // private double lastDesiredPosition; // Unit: Rotations
   // private double lastDesiredVelocity; // Unit: RPM
@@ -88,7 +90,9 @@ public class SparkMaxController {
     this.sparkMaxEncoder = this.sparkMax.getEncoder();
 
     this.deviceInterface = new CAN(this.sparkMax.getDeviceId(), SparkMaxController.manufacturerID, SparkMaxController.deviceTypeID);
-    this.velocityFilter = LinearFilter.backwardFiniteDifference(1, velocityFilterPoints, updateTimestep / 1000.0);
+    // !Note: backwardFiniteDifference is too noisy to be effective
+    // this.velocityFilter = LinearFilter.backwardFiniteDifference(1, velocityFilterPoints, updateTimestep / 1000.0);
+    this.velocityFilter = LinearFilter.movingAverage(velocityFilterPoints);
     this.currentFilter = LinearFilter.movingAverage(currentFilterPoints);
 
     this.updateNotifier = new Notifier(this::update);
@@ -151,10 +155,12 @@ public class SparkMaxController {
   }
   public SparkMaxController configPositionConversionFactor(double factor) {
     this.positionConversionFactor = factor;
+    this.sparkMaxEncoder.setPositionConversionFactor(factor);
     return this;
   }
   public SparkMaxController configVelocityConversionFactor(double factor) {
     this.velocityConversionFactor = factor;
+    this.sparkMaxEncoder.setVelocityConversionFactor(factor);
     return this;
   }
 
@@ -217,7 +223,7 @@ public class SparkMaxController {
     if (useEncoder) {
       return this.sparkMaxEncoder.getVelocity();
     }
-    return this.lastVelocity;
+    return this.lastVelocity * this.velocityConversionFactor;
   }
 
   /** */
@@ -234,7 +240,7 @@ public class SparkMaxController {
     if (useEncoder) {
       return this.sparkMaxEncoder.getPosition();
     }
-    return this.lastPosition;
+    return this.lastPosition * this.positionConversionFactor;
   }
 
   /** */
@@ -294,12 +300,6 @@ public class SparkMaxController {
    * @param voltage
    */
   public void setVoltage(double voltage) {
-    // Caching can be used as sparkMax.setVoltage is a set-and-forget call
-    DesiredState desiredState = new DesiredState(voltage, ControlType.VOLTAGE);
-
-    if (lastDesiredState.equals(desiredState)) return;
-    this.lastDesiredState = desiredState;
-
     this.sparkMax.setVoltage(voltage);
   }
 
@@ -360,7 +360,7 @@ public class SparkMaxController {
 
     double desiredPosition = this.lastDesiredState.setpoint;
     this.setVoltage(
-      this.positionPIDController.calculate(desiredPosition, this.getCurrentPosition())
+      this.positionPIDController.calculate(this.getCurrentPosition() - desiredPosition, 0)
       + this.positionArbFF
     );
   }
@@ -372,16 +372,27 @@ public class SparkMaxController {
     // Packet contains motor position in rotations
     // as 32-bit (4 byte) IEEE float
     CANData buffer = new CANData();
-    this.deviceInterface.readPacketLatest(PeriodicFrame.kStatus2.value, buffer);
+    this.deviceInterface.readPacketLatest(apiIdStatus2, buffer);
 
     // Extract position data from bytes
     double position = ByteBuffer
       .wrap(buffer.data)
       .order(ByteOrder.LITTLE_ENDIAN)
       .getFloat();
-    // double packetTime = buffer.timestamp;
+
+    long packetTime = buffer.timestamp;
+
+    double velocity = (position - lastPosition) / (double)(packetTime - lastPacketTime);
+
+    // First packet, return since velocity calculation can't be done with only 1 data point
+    if (lastPacketTime == 0) {
+      lastPacketTime = packetTime;
+      return;
+    }
+
     lastPosition = position;
-    lastVelocity = velocityFilter.calculate(position);
+    lastPacketTime = packetTime;
+    lastVelocity = velocityFilter.calculate(velocity);
 
     this.updateVelocity();
     this.updatePosition();
@@ -414,7 +425,7 @@ public class SparkMaxController {
 
   /** */
   private enum ControlType {
-    POSITION, VELOCITY, VOLTAGE, PERCENT
+    POSITION, VELOCITY, PERCENT
   }
 
   /**
