@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -18,6 +19,7 @@ import edu.wpi.first.math.numbers.N3;
 import frc.robot.libs.PIDGains;
 import frc.robot.libs.UnitQuad;
 import frc.robot.libs.UnitScaleFunction;
+import frc.robot.utilities.TuneablePIDGains;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -29,6 +31,14 @@ import frc.robot.libs.UnitScaleFunction;
  */
 public final class Constants {
   public static final boolean telemetry = true;
+  public static final boolean tuningMode = true;
+
+  /**
+   * vvvvvvvvvvvvvvvvvvvvvvvvvv
+   * >> !Set to true precomp <<
+   * vvvvvvvvvvvvvvvvvvvvvvvvvv
+   */
+  public static final boolean BURNFLASHES = false;
 
   // Standard deviations for swerve pose estimator
   public static final Matrix<N3, N1> STATE_STDDEVS  = new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.0, 0.0, 0.0); // [x, y, theta]
@@ -76,7 +86,7 @@ public final class Constants {
   }
 
   public static final class PIDGAINS {
-    public static final PIDGains FL_STEER = new PIDGains(1.0);
+    public static final PIDGains FL_STEER = new TuneablePIDGains("FL_STEER", 1.0);
     public static final PIDGains FL_DRIVE = new PIDGains(1.0);
 
     public static final PIDGains FR_STEER = new PIDGains(1.0);
@@ -95,15 +105,29 @@ public final class Constants {
     public static final PIDGains AUTON_STEER = new PIDGains(1.0);
   }
 
+  public static final class FFGAINS {
+    public static final SimpleMotorFeedforward FL_STEER_FF = new SimpleMotorFeedforward(0.0, 0.0);
+    public static final SimpleMotorFeedforward FL_DRIVE_FF = new SimpleMotorFeedforward(0.0, 0.0);
+
+    public static final SimpleMotorFeedforward FR_STEER_FF = new SimpleMotorFeedforward(0.0, 0.0);
+    public static final SimpleMotorFeedforward FR_DRIVE_FF = new SimpleMotorFeedforward(0.0, 0.0);
+
+    public static final SimpleMotorFeedforward BL_STEER_FF = new SimpleMotorFeedforward(0.0, 0.0);
+    public static final SimpleMotorFeedforward BL_DRIVE_FF = new SimpleMotorFeedforward(0.0, 0.0);
+
+    public static final SimpleMotorFeedforward BR_STEER_FF = new SimpleMotorFeedforward(0.0, 0.0);
+    public static final SimpleMotorFeedforward BR_DRIVE_FF = new SimpleMotorFeedforward(0.0, 0.0);
+  }
+
   public static final class SWERVEMODULECONSTANTS {
-    // meters per second
-    public static final double MAX_SPEED = 4.5;
-    public static final double WHEEL_DIAMETER = 0.0;
-    public static final double GEAR_RATIO = 0.0;
+    public static final double MAX_SPEED = 4.5; // m/s
+    public static final double WHEEL_DIAMETER = 0.1; // m
+    public static final double DRIVE_GEAR_RATIO = 8.14;
+    public static final double STEER_GEAR_RATIO = 12.8;
     // degrees
-    public static final double POSITION_CONVERSION_FACTOR = 360 * Math.PI * WHEEL_DIAMETER / GEAR_RATIO;
+    public static final double POSITION_CONVERSION_FACTOR = STEER_GEAR_RATIO / 360;
     // meters per second
-    public static final double VELOCITY_CONVERSION_FACTOR = 60 * Math.PI * WHEEL_DIAMETER;
+    public static final double VELOCITY_CONVERSION_FACTOR = Math.PI * WHEEL_DIAMETER / DRIVE_GEAR_RATIO;
 
     // Some modules are inverted, add 180 offset to artifically invert
     public static final double FL_MAGNET_OFFSET = 0.0 + 180.0;

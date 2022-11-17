@@ -39,18 +39,13 @@ public class Vision extends SubsystemBase {
   }
 
   /** */
-  public double getCameraLatencyInSeconds() {
-    return getCameraLatency() / 1000.0;
-  }
-
-  /** */
-  public double getCameraLatency() {
+  public double getCameraLatencyMs() {
     return camera.getLatestResult().getLatencyMillis();
   }
 
   /**
    * 
-   * Get robot position based on vision results
+   * Get robot 2d position based on vision results
    * @return
    */
   public Pose2d getPose2dFromVision() {
@@ -62,35 +57,42 @@ public class Vision extends SubsystemBase {
    * @return
    */
   public Pose3d getPoseFromVision() {
-    // temporary; will be provided by wpilib later
+    // placeholder; will be provided by wpilib later
     Map<Integer, Pose3d> AprilTagLookup = new HashMap<>();
 
     // Currently Simple filtering strategy
-    // Removes poses with high pose ambiguity
+    // Simply gets the first "best" tag with low enough pose ambiguity
     PhotonPipelineResult latestResult = camera.getLatestResult();
     if(!latestResult.hasTargets()) return null;
 
     List<PhotonTrackedTarget> allTargets = latestResult.getTargets();
 
-    PhotonTrackedTarget bestTarget = null;
+    Pose3d bestPose = null;
 
     for (PhotonTrackedTarget target : allTargets) {
       if (target.getPoseAmbiguity() > 0.2) continue;
 
-      bestTarget = target;
+      // Get Pose3d of apriltag
+      int tagID = target.getFiducialId();
+
+      Pose3d tagPose = AprilTagLookup.get(tagID);
+      Transform3d fiducialTransform = new Transform3d(tagPose.getTranslation(), tagPose.getRotation());;
+      Transform3d targetToCamera = target.getBestCameraToTarget().inverse(); // Take inverse to find "targetToCamera"
+      Transform3d cameraToRobot = VISIONCONSTANTS.CAMERA_POS;
+
+      bestPose = Vision.getPoseFromTransforms(fiducialTransform, targetToCamera, cameraToRobot);
       break;
     }
 
-    if (bestTarget == null) return null;
+    return bestPose;
+  }
 
-    // Get Pose3d from target
-    int tagID = bestTarget.getFiducialId();
-
-    Pose3d tagPose = AprilTagLookup.get(tagID);
-    Transform3d fiducialTransform = new Transform3d(tagPose.getTranslation(), tagPose.getRotation());;
-    Transform3d targetToCamera = bestTarget.getBestCameraToTarget().inverse(); // Take inverse to find "targetToCamera"
-    Transform3d cameraToRobot = VISIONCONSTANTS.CAMERA_POS;
-
+  /** */
+  public static final Pose3d getPoseFromTransforms(
+    Transform3d fiducialTransform,
+    Transform3d targetToCamera,
+    Transform3d cameraToRobot
+  ) {
     Transform3d robotTransform = fiducialTransform.plus(targetToCamera).plus(cameraToRobot);
 
     return new Pose3d(
@@ -104,8 +106,14 @@ public class Vision extends SubsystemBase {
   public void initSendable(SendableBuilder builder) {
     if (Constants.telemetry == false) return;
 
-    builder.setSmartDashboardType("Vision" + cameraName);
+    builder.setSmartDashboardType("Vision " + cameraName);
     builder.addBooleanProperty("hasTarget", this::hasTarget, null);
+    builder.addStringProperty("pose", this::telemetryGetPose, null);
+  }
+
+  public String telemetryGetPose() {
+    Pose2d pose = this.getPose2dFromVision();
+    return pose.toString();
   }
 
   @Override

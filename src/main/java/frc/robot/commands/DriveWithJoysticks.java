@@ -112,7 +112,7 @@ public class DriveWithJoysticks extends CommandBase {
     if (vx == 0 && vy == 0 && omega == 0) {
       driveTrain.setIdleModuleStates();
     } else {
-      driveTrain.driveFieldCentric(vx, vy, omega, robotYaw, true);
+      driveTrain.driveFieldCentricOpenLoop(vx, vy, omega, robotYaw);
     }
   }
 

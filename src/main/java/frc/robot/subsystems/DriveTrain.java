@@ -10,38 +10,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.Constants.DRIVECONSTANTS;
 import frc.robot.Constants.DRIVETRAINCONSTANTS;
 import frc.robot.Constants.SWERVEMODULECONSTANTS;
 import frc.robot.utilities.SwerveModuleFactory;
 
 public class DriveTrain extends SubsystemBase {
-  /**
-   * Better desaturateWheelSpeeds
-   * Credit to 2363
-   * https://www.chiefdelphi.com/t/good-vs-bad-swerve/414439/32
-   * @param moduleStates
-   */
-  public static final void desaturateWheelSpeeds(SwerveModuleState[] moduleStates, ChassisSpeeds speeds) {
-    double translationalK = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond) / DRIVECONSTANTS.MAX_TRANSLATIONAL_SPEED;
-    double rotationalK = Math.abs(speeds.omegaRadiansPerSecond) / DRIVECONSTANTS.MAX_STEER_SPEED;
-    double k = Math.max(translationalK, rotationalK);
-  
-    // Find the how fast the fastest spinning drive motor is spinning                                       
-    double realMaxSpeed = 0.0;
-    for (SwerveModuleState moduleState : moduleStates) {
-      realMaxSpeed = Math.max(realMaxSpeed, Math.abs(moduleState.speedMetersPerSecond));
-    }
-  
-    double scale = Math.min(k * SWERVEMODULECONSTANTS.MAX_SPEED / realMaxSpeed, 1);
-    for (SwerveModuleState moduleState : moduleStates) {
-      moduleState.speedMetersPerSecond *= scale;
-    }
-  }
-
   private final SwerveModule frontLeftModule;
   private final SwerveModule frontRightModule;
   private final SwerveModule backLeftModule;
@@ -125,17 +100,26 @@ public class DriveTrain extends SubsystemBase {
    * @param vy meters per second
    * @param omega degrees per second
    */
-  public void driveRobotCentric(
+  public void driveRobotCentricOpenLoop(
     double vx,
     double vy,
-    double omega,
-    boolean openLoopDrive
+    double omega
   ) {
-    if (openLoopDrive) {
-      setDesiredSpeedsOpenLoop(new ChassisSpeeds(vx, vy, omega));
-    } else {
-      setDesiredSpeeds(new ChassisSpeeds(vx, vy, omega));
-    }
+    setDesiredSpeedsOpenLoop(new ChassisSpeeds(vx, vy, omega));
+  }
+
+  /**
+   * 
+   * @param vx meters per second
+   * @param vy meters per second
+   * @param omega degrees per second
+   */
+  public void driveRobotCentricClosedLoop(
+    double vx,
+    double vy,
+    double omega
+  ) {
+    setDesiredSpeeds(new ChassisSpeeds(vx, vy, omega));
   }
 
   /**
@@ -144,18 +128,28 @@ public class DriveTrain extends SubsystemBase {
    * @param vy
    * @param omega
    */
-  public void driveFieldCentric(
+  public void driveFieldCentricOpenLoop(
     double vx,
     double vy,
     double omega,
-    DoubleSupplier robotYaw,
-    boolean openLoopDrive
+    DoubleSupplier robotYaw
   ) {
-    if (openLoopDrive) {
-      setDesiredSpeedsOpenLoop(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, Rotation2d.fromDegrees(robotYaw.getAsDouble())));
-    } else {
-      setDesiredSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, Rotation2d.fromDegrees(robotYaw.getAsDouble())));
-    }
+    setDesiredSpeedsOpenLoop(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, Rotation2d.fromDegrees(robotYaw.getAsDouble())));
+  }
+
+  /**
+   * 
+   * @param vx
+   * @param vy
+   * @param omega
+   */
+  public void driveFieldCentricClosedLoop(
+    double vx,
+    double vy,
+    double omega,
+    DoubleSupplier robotYaw
+  ) {
+    setDesiredSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, Rotation2d.fromDegrees(robotYaw.getAsDouble())));
   }
 
   /** */
@@ -176,18 +170,30 @@ public class DriveTrain extends SubsystemBase {
   }
 
   @Override
-  public void initSendable(SendableBuilder builder) {
-    if (Constants.telemetry == false) return;
-
-    builder.setSmartDashboardType("DriveTrain");
-    builder.addDoubleArrayProperty("FLM", frontLeftModule::telemetryGetState, null);
-    builder.addDoubleArrayProperty("FRM", frontRightModule::telemetryGetState, null);
-    builder.addDoubleArrayProperty("BLM", backLeftModule::telemetryGetState, null);
-    builder.addDoubleArrayProperty("BRM", backRightModule::telemetryGetState, null);
-  }
-
-  @Override
   public void periodic() {
     // This method will be called once per scheduler run
+  }
+
+  /**
+   * Better desaturateWheelSpeeds
+   * Credit to 2363
+   * https://www.chiefdelphi.com/t/good-vs-bad-swerve/414439/32
+   * @param moduleStates
+   */
+  public static final void desaturateWheelSpeeds(SwerveModuleState[] moduleStates, ChassisSpeeds speeds) {
+    double translationalK = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond) / DRIVECONSTANTS.MAX_TRANSLATIONAL_SPEED;
+    double rotationalK = Math.abs(speeds.omegaRadiansPerSecond) / DRIVECONSTANTS.MAX_STEER_SPEED;
+    double k = Math.max(translationalK, rotationalK);
+  
+    // Find the how fast the fastest spinning drive motor is spinning                                       
+    double realMaxSpeed = 0.0;
+    for (SwerveModuleState moduleState : moduleStates) {
+      realMaxSpeed = Math.max(realMaxSpeed, Math.abs(moduleState.speedMetersPerSecond));
+    }
+  
+    double scale = Math.min(k * SWERVEMODULECONSTANTS.MAX_SPEED / realMaxSpeed, 1);
+    for (SwerveModuleState moduleState : moduleStates) {
+      moduleState.speedMetersPerSecond *= scale;
+    }
   }
 }
