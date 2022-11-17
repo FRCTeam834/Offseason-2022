@@ -154,14 +154,6 @@ public class SwerveModule extends SubsystemBase {
   }
   */
 
-
-  public double[] telemetryGetState() {
-    return new double[] {
-      getCurrentVelocity(),
-      getCurrentAngle()
-    };
-  }
-
   public void setSteerPIDSupplier(Supplier<double[]> supplier) {
     steerPIDSupplier = supplier;
   }
@@ -175,7 +167,8 @@ public class SwerveModule extends SubsystemBase {
     if (Constants.telemetry == false) return;
 
     builder.setSmartDashboardType("Swerve Module " + name);
-    builder.addDoubleArrayProperty("State", this::telemetryGetState, null);
+    builder.addDoubleProperty("Velocity", this::getCurrentVelocity, null);
+    builder.addDoubleProperty("Angle", this::getCurrentAngle, null);
     builder.addDoubleProperty("CANCoder", this::getCanCoderAngle, null);
   }
 
