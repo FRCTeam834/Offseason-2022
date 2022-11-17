@@ -1,17 +1,11 @@
 package frc.robot.libs;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
-import edu.wpi.first.hal.CANData;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.LinearFilter;
-import edu.wpi.first.wpilibj.CAN;
 import edu.wpi.first.wpilibj.Notifier;
 
 /**
@@ -20,82 +14,44 @@ import edu.wpi.first.wpilibj.Notifier;
  * 
  */
 public class SparkMaxController {
-  // https://docs.wpilib.org/en/stable/docs/software/can-devices/can-addressing.html
-  private static final int manufacturerID = 5;
-  private static final int deviceTypeID = 2;
-  private static final int apiIdStatus2 = 98;
-
   private final CANSparkMax sparkMax;
   private final SparkMaxPIDController sparkMaxPIDController; // PID controller on the spark max
   private final RelativeEncoder sparkMaxEncoder; // NEO integrated encoder
 
-  private double lastPosition = 0.0; // Rotations
-  private double lastVelocity = 0.0; // RPM
-  private long lastPacketTime = 0; // ms
-  private DesiredState lastDesiredState = new DesiredState(0.0, ControlType.PERCENT);
-  // private double lastDesiredPosition; // Rotations
-  // private double lastDesiredVelocity; // RPM
-  // private double lastDesiredVoltage; // Volts
-
-  private double velocityConversionFactor;
-  private double positionConversionFactor;
-
-  // Velocity PID
-  private PIDController velocityPIDController = new PIDController(0.0, 0.0, 0.0);
-  private double velocityArbFF;
-
-  // Position PID
-  private PIDController positionPIDController = new PIDController(0.0, 0.0, 0.0);
-  private double positionArbFF;
-
-  // Custom velocity filtering
-  // Inspired by 6328: https://github.com/Mechanical-Advantage/SwerveDevelopment/blob/main/src/main/java/frc/robot/util/SparkMaxDerivedVelocityController.java
-  // Tried coding it myself but alas ended up becoming the exact same as 6328
-  private final CAN deviceInterface; // Read CAN packets directly
-  private final LinearFilter velocityFilter; // Rolling derivative
-  private final Notifier updateNotifier;
+  private SparkMaxPIDState lastDesiredState = new SparkMaxPIDState(0.0, CANSparkMax.ControlType.kDutyCycle);
 
   // Stall detection 
   // !Important: A low k1 frame period is needed for accurate current readings
   private LinearFilter currentFilter;
-  private double lastCurrent; // amps
-
-  /**
-   * 
-   * Creates CANMotorController with 20ms timestep and 5 filter points
-   * @param CANID
-   */
-  public SparkMaxController(int CANID) {
-    this(CANID, 20, 5, 5);
-  }
-
-  /** */
-  public SparkMaxController(int CANID, int updateTimestep, int velocityFilterPoints) {
-    this(CANID, updateTimestep, velocityFilterPoints, 5);
-  }
+  private double lastCurrent = 0.0; // amps
+  
+  private Notifier updateNotifier = null;
 
   /**
    * 
    * @param CANID CAN ID of sparkmax controller
-   * @param updateTimestep milliseconds per update (time delta) !Note: 10ms is the lowest recommended
-   * @param velocityFilterPoints number of points on velocity filter
-   * @param currentFilterPoints number of points on current filter
+   * 
    */
-  public SparkMaxController(int CANID, int updateTimestep, int velocityFilterPoints, int currentFilterPoints) {
+  public SparkMaxController(int CANID) {
+    this(CANID, false);
+  }
+
+  /** */
+  public SparkMaxController(int CANID, boolean enableStallDetection) {
     this.sparkMax = new CANSparkMax(CANID, CANSparkMax.MotorType.kBrushless);
     this.sparkMaxPIDController = this.sparkMax.getPIDController();
     this.sparkMaxEncoder = this.sparkMax.getEncoder();
 
-    this.deviceInterface = new CAN(this.sparkMax.getDeviceId(), SparkMaxController.manufacturerID, SparkMaxController.deviceTypeID);
-    // !Note: backwardFiniteDifference is too noisy to be effective
-    // this.velocityFilter = LinearFilter.backwardFiniteDifference(1, velocityFilterPoints, updateTimestep / 1000.0);
-    this.velocityFilter = LinearFilter.movingAverage(velocityFilterPoints);
-    this.currentFilter = LinearFilter.movingAverage(currentFilterPoints);
-
-    this.updateNotifier = new Notifier(this::update);
-    if (updateTimestep > 0) {
-      this.updateNotifier.startPeriodic(updateTimestep / 1000.0);
+    // 5 taps 20ms period hard coded rn
+    if (enableStallDetection) {
+      this.currentFilter = LinearFilter.movingAverage(5);
+      updateNotifier = new Notifier(this::stallDetectionUpdate);
+      updateNotifier.startPeriodic(20.0 / 1000.0);
     }
+  }
+
+  private void stallDetectionUpdate() {
+    this.lastCurrent = this.currentFilter.calculate(this.sparkMax.getOutputCurrent());
   }
 
   public CANSparkMax getSparkMax() {
@@ -151,26 +107,24 @@ public class SparkMaxController {
     return this;
   }
   public SparkMaxController configPositionConversionFactor(double factor) {
-    this.positionConversionFactor = factor;
     this.sparkMaxEncoder.setPositionConversionFactor(factor);
     return this;
   }
   public SparkMaxController configVelocityConversionFactor(double factor) {
-    this.velocityConversionFactor = factor;
     this.sparkMaxEncoder.setVelocityConversionFactor(factor);
     return this;
   }
 
   public SparkMaxController configPositionControlP(double kP) {
-    this.positionPIDController.setP(kP);
+    this.sparkMaxPIDController.setP(kP, 0);
     return this;
   }
   public SparkMaxController configPositionControlI(double kI) {
-    this.positionPIDController.setI(kI);
+    this.sparkMaxPIDController.setI(kI, 0);
     return this;
   }
   public SparkMaxController configPositionControlD(double kD) {
-    this.positionPIDController.setD(kD);
+    this.sparkMaxPIDController.setD(kD, 0);
     return this;
   }
   public SparkMaxController configPositionControlPID(double[] gains) {
@@ -181,21 +135,25 @@ public class SparkMaxController {
   }
 
   public SparkMaxController configVelocityControlP(double kP) {
-    this.velocityPIDController.setP(kP);
+    this.sparkMaxPIDController.setP(kP, 1);
     return this;
   }
   public SparkMaxController configVelocityControlI(double kI) {
-    this.velocityPIDController.setI(kI);
+    this.sparkMaxPIDController.setI(kI, 1);
     return this;
   }
   public SparkMaxController configVelocityControlD(double kD) {
-    this.velocityPIDController.setD(kD);
+    this.sparkMaxPIDController.setD(kD, 1);
     return this;
   }
   public SparkMaxController configVelocityControlPID(double[] gains) {
     configVelocityControlP(gains[0]);
     configVelocityControlI(gains[1]);
     configVelocityControlD(gains[2]);
+    return this;
+  }
+  public SparkMaxController configVelocityFilter() {
+    // COMING SOON... REV DON'T DISAPPOINT <3
     return this;
   }
 
@@ -207,69 +165,33 @@ public class SparkMaxController {
   //
 
   /** */
-  public double getCurrentVelocity() {
-    return this.getCurrentVelocity(false);
-  }
-
-  /**
-   * 
-   * @param useEncoder if true - get velocity from encoder !Not recommended
-   * @return
-   */
-  public synchronized double getCurrentVelocity(boolean useEncoder) {
-    if (useEncoder) {
-      return this.sparkMaxEncoder.getVelocity();
-    }
-    return this.lastVelocity / this.velocityConversionFactor;
+  public synchronized double getCurrentVelocity() {
+    return this.sparkMaxEncoder.getVelocity();
   }
 
   /** */
-  public double getCurrentPosition() {
-    return this.getCurrentPosition(false);
-  }
-
-  /**
-   * 
-   * @param useEncoder if true - get position from encoder
-   * @return
-   */
-  public synchronized double getCurrentPosition(boolean useEncoder) {
-    if (useEncoder) {
-      return this.sparkMaxEncoder.getPosition();
-    }
-    return this.lastPosition / this.positionConversionFactor;
-  }
-
-  /** */
-  public boolean isAtPosition(double position, double tolerance) {
-    return this.isAtPosition(position, tolerance, false);
+  public synchronized double getCurrentPosition() {
+    return this.sparkMaxEncoder.getPosition();
   }
 
   /**
    * 
    * @param position target position
    * @param tolerance bilateral tolerance (+/-)
-   * @param useEncoder if true - get position from encoder
    * @return
    */
-  public boolean isAtPosition(double position, double tolerance, boolean useEncoder) {
-    return SparkMaxController.inInclusiveRange(this.getCurrentPosition(useEncoder) - position, tolerance);
-  }
-
-  /** */
-  public boolean isAtVelocity(double velocity, double tolerance) {
-    return this.isAtVelocity(velocity, tolerance, false);
+  public boolean isAtPosition(double position, double tolerance) {
+    return SparkMaxController.inInclusiveRange(this.getCurrentPosition() - position, tolerance);
   }
 
   /**
    * 
    * @param velocity target velocity
    * @param tolerance bilateral tolerance (+/-)
-   * @param useEncoder if true - get velocity from encoder !Not recommended
    * @return
    */
-  public boolean isAtVelocity(double velocity, double tolerance, boolean useEncoder) {
-    return SparkMaxController.inInclusiveRange(this.getCurrentVelocity(useEncoder) - velocity, tolerance);
+  public boolean isAtVelocity(double velocity, double tolerance) {
+    return SparkMaxController.inInclusiveRange(this.getCurrentVelocity() - velocity, tolerance);
   }
 
   /**
@@ -284,11 +206,6 @@ public class SparkMaxController {
 
   /** */
   public void set(double percent) {
-    DesiredState desiredState = new DesiredState(percent, ControlType.PERCENT);
-
-    if (lastDesiredState.equals(desiredState)) return;
-    this.lastDesiredState = desiredState;
-
     this.sparkMax.set(percent);
   }
 
@@ -314,8 +231,11 @@ public class SparkMaxController {
    * @param arbFF - feedforward value
    */
   public void setDesiredVelocity(double velocity, double arbFF) {
-    this.lastDesiredState = new DesiredState(velocity, ControlType.VELOCITY);
-    this.velocityArbFF = arbFF;
+    SparkMaxPIDState desiredState = new SparkMaxPIDState(velocity, CANSparkMax.ControlType.kVelocity);
+    if (this.lastDesiredState.equals(desiredState)) return;
+
+    this.lastDesiredState = desiredState;
+    this.sparkMaxPIDController.setReference(velocity, CANSparkMax.ControlType.kVelocity, 1, arbFF);
   }
 
   /** */
@@ -330,70 +250,16 @@ public class SparkMaxController {
    * @return void
    */
   public void setDesiredPosition(double position, double arbFF) {
-    this.lastDesiredState = new DesiredState(position, ControlType.POSITION);
-    this.positionArbFF = arbFF;
+    SparkMaxPIDState desiredState = new SparkMaxPIDState(position, CANSparkMax.ControlType.kPosition);
+    if (this.lastDesiredState.equals(desiredState)) return;
+
+    this.lastDesiredState = desiredState;
+    this.sparkMaxPIDController.setReference(position, CANSparkMax.ControlType.kPosition, 1, arbFF);
   }
-
-  /** */
-  private void updateVelocity() {
-    if (!this.lastDesiredState.controlType.equals(ControlType.VELOCITY)) return;
-
-    double desiredVelocity = this.lastDesiredState.setpoint;
-    this.setVoltage(
-      this.velocityPIDController.calculate(this.getCurrentVelocity(), desiredVelocity)
-      + this.velocityArbFF
-    );
-  }
-
-  /** */
-  private void updatePosition() {
-    if (!this.lastDesiredState.controlType.equals(ControlType.POSITION)) return;
-
-    double desiredPosition = this.lastDesiredState.setpoint;
-    this.setVoltage(
-      this.positionPIDController.calculate(this.getCurrentPosition(), desiredPosition)
-      + this.positionArbFF
-    );
-  }
-
-  private void update() {
-    this.lastCurrent = this.currentFilter.calculate(this.sparkMax.getOutputCurrent());
-
-    // https://andymark-weblinc.netdna-ssl.com/media/W1siZiIsIjIwMjAvMDUvMTkvMTQvMDYvNDMvNDUyNGFkOTMtZjYwZi00ODgyLWFlNzQtNjAxMzU5MzQyMjBiL2FtLTQyNjEgU1BBUksgTUFYIC0gVXNlciBNYW51YWwuaHRtbCJdXQ/am-4261%20SPARK%20MAX%20-%20User%20Manual.html?sha=7c9ea7a1ed73eb42#section-3-3-2-1
-    // Packet contains motor position in rotations
-    // as 32-bit (4 byte) IEEE float
-    CANData buffer = new CANData();
-    this.deviceInterface.readPacketLatest(apiIdStatus2, buffer);
-
-    // Extract position data from bytes
-    double position = ByteBuffer
-      .wrap(buffer.data)
-      .order(ByteOrder.LITTLE_ENDIAN)
-      .getFloat();
-
-    long packetTime = buffer.timestamp;
-
-    double velocity = (position - lastPosition) / (double)(packetTime - lastPacketTime);
-
-    lastPosition = position;
-    lastPacketTime = packetTime;
-
-    // Make sure it's not the first packet
-    if (lastPacketTime != 0) {
-      lastVelocity = velocityFilter.calculate(velocity);
-    }
-
-    this.updateVelocity();
-    this.updatePosition();
-  }
-
-  /** */
 
   /**
    * Stores a SparkMaxPIDController reference state
-   * (Replaced by DesiredState)
    */
-  @Deprecated (forRemoval = true)
   private static final class SparkMaxPIDState {
     public final double setpoint;
     public final CANSparkMax.ControlType controlType;
@@ -404,32 +270,6 @@ public class SparkMaxController {
     }
 
     public boolean equals(SparkMaxPIDState expected) {
-      if (expected == null) return false;
-      return (
-        this.setpoint == expected.setpoint &&
-        this.controlType.equals(expected.controlType)
-      );
-    }
-  }
-
-  /** */
-  private enum ControlType {
-    POSITION, VELOCITY, PERCENT
-  }
-
-  /**
-   * Stores the last desired state
-   */
-  private static final class DesiredState {
-    public final double setpoint;
-    public final ControlType controlType;
-
-    public DesiredState(double setpoint, ControlType controlType) {
-      this.setpoint = setpoint;
-      this.controlType = controlType;
-    }
-
-    public boolean equals(DesiredState expected) {
       if (expected == null) return false;
       return (
         this.setpoint == expected.setpoint &&

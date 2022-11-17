@@ -49,8 +49,8 @@ public class SwerveModule extends SubsystemBase {
   ) {
     this.name = name;
 
-    steerController = new SparkMaxController(steerCANID, 0, 5);
-    driveController = new SparkMaxController(driveCANID, 20, 5);
+    steerController = new SparkMaxController(steerCANID);
+    driveController = new SparkMaxController(driveCANID);
     canCoder = new CANCoder(CANCoderID);
 
     canCoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
