@@ -314,9 +314,6 @@ public class SparkMaxController {
    * @param arbFF - feedforward value
    */
   public void setDesiredVelocity(double velocity, double arbFF) {
-    // Apply conversion factor
-    velocity *= this.velocityConversionFactor;
-
     this.lastDesiredState = new DesiredState(velocity, ControlType.VELOCITY);
     this.velocityArbFF = arbFF;
   }
@@ -333,9 +330,6 @@ public class SparkMaxController {
    * @return void
    */
   public void setDesiredPosition(double position, double arbFF) {
-    // Apply conversion factor
-    position *= this.positionConversionFactor;
-
     this.lastDesiredState = new DesiredState(position, ControlType.POSITION);
     this.positionArbFF = arbFF;
   }
