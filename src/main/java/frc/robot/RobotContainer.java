@@ -7,9 +7,11 @@ package frc.robot;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.DRIVECONSTANTS;
 import frc.robot.Constants.VISIONCONSTANTS;
 import frc.robot.commands.DriveWithJoysticks;
@@ -35,19 +37,14 @@ public class RobotContainer {
   public static final Joystick leftJoystick = new Joystick(DRIVECONSTANTS.LEFT_JOYSTICK_PORT);
   public static final Joystick rightJoystick = new Joystick(DRIVECONSTANTS.RIGHT_JOYSTICK_PORT);
 
+  // temp
+  public static final XboxController xbox = new XboxController(5);
+
   //
   public static final SendableChooser<Command> autonChooser = new SendableChooser<>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // Drive with joysticks by default
-    driveTrain.setDefaultCommand(new DriveWithJoysticksEgocentric(
-      driveTrain,
-      rightJoystick::getX,
-      rightJoystick::getY,
-      leftJoystick::getX
-    ));
-
     autonChooser.setDefaultOption("Placeholder", null);
     autonChooser.setDefaultOption("Placeholder", null);
     SmartDashboard.putData(autonChooser);
@@ -67,7 +64,15 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void configureButtonBindings() {}
+  private void configureButtonBindings() {
+    // temp
+    new JoystickButton(xbox, Button.kA.value).whenPressed(new DriveWithJoysticksEgocentric(
+      driveTrain,
+      xbox::getRightX,
+      xbox::getRightY,
+      xbox::getLeftX
+    ));
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
