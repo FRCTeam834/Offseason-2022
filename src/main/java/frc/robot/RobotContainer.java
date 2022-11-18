@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DRIVECONSTANTS;
 import frc.robot.Constants.VISIONCONSTANTS;
 import frc.robot.commands.DriveWithJoysticks;
+import frc.robot.commands.DriveWithJoysticksEgocentric;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Pigeon;
 import frc.robot.subsystems.Vision;
@@ -40,9 +41,8 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Drive with joysticks by default
-    driveTrain.setDefaultCommand(new DriveWithJoysticks(
+    driveTrain.setDefaultCommand(new DriveWithJoysticksEgocentric(
       driveTrain,
-      gyro::getYaw,
       rightJoystick::getX,
       rightJoystick::getY,
       leftJoystick::getX
