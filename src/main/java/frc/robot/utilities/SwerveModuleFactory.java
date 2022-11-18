@@ -23,7 +23,7 @@ public class SwerveModuleFactory {
 
     public static final int CONTROLFRAMEPERIOD = 10;
     public static final int PERIODICFRAMEk0 = 65535;
-    public static final int PERIODICFRAMEk1 = 65535;
+    public static final int PERIODICFRAMEk1 = 20;
     public static final int PERIODICFRAMEk2 = 20;
     public static final int PERIODICFRAMEk3 = 65535;
   }
@@ -35,7 +35,7 @@ public class SwerveModuleFactory {
 
     public static final int CONTROLFRAMEPERIOD = 10;
     public static final int PERIODICFRAMEk0 = 65535;
-    public static final int PERIODICFRAMEk1 = 65535;
+    public static final int PERIODICFRAMEk1 = 20;
     public static final int PERIODICFRAMEk2 = 20;
     public static final int PERIODICFRAMEk3 = 65535;
   }
@@ -98,6 +98,9 @@ public class SwerveModuleFactory {
     if (Constants.tuningMode) {
       module.setSteerPIDSupplier(PIDGAINS.FL_STEER::getGains);
       module.setDrivePIDSupplier(PIDGAINS.FL_DRIVE::getGains);
+
+      module.setSteerPIDChangedSupplier(PIDGAINS.FL_STEER::hasChanged);
+      module.setDrivePIDChangedSupplier(PIDGAINS.FL_DRIVE::hasChanged);
     }
 
     if (DriverStation.isFMSAttached() || Constants.BURNFLASHES) {
@@ -133,6 +136,9 @@ public class SwerveModuleFactory {
     if (Constants.tuningMode) {
       module.setSteerPIDSupplier(PIDGAINS.FR_STEER::getGains);
       module.setDrivePIDSupplier(PIDGAINS.FR_DRIVE::getGains);
+
+      module.setSteerPIDChangedSupplier(PIDGAINS.FR_STEER::hasChanged);
+      module.setDrivePIDChangedSupplier(PIDGAINS.FR_DRIVE::hasChanged);
     }
 
     if (DriverStation.isFMSAttached() || Constants.BURNFLASHES) {
@@ -168,6 +174,9 @@ public class SwerveModuleFactory {
     if (Constants.tuningMode) {
       module.setSteerPIDSupplier(PIDGAINS.BL_STEER::getGains);
       module.setDrivePIDSupplier(PIDGAINS.BL_DRIVE::getGains);
+
+      module.setSteerPIDChangedSupplier(PIDGAINS.BL_STEER::hasChanged);
+      module.setDrivePIDChangedSupplier(PIDGAINS.BL_DRIVE::hasChanged);
     }
 
     if (DriverStation.isFMSAttached() || Constants.BURNFLASHES) {
@@ -203,6 +212,9 @@ public class SwerveModuleFactory {
     if (Constants.tuningMode) {
       module.setSteerPIDSupplier(PIDGAINS.BR_STEER::getGains);
       module.setDrivePIDSupplier(PIDGAINS.BR_DRIVE::getGains);
+
+      module.setSteerPIDChangedSupplier(PIDGAINS.BR_STEER::hasChanged);
+      module.setDrivePIDChangedSupplier(PIDGAINS.BR_DRIVE::hasChanged);
     }
 
     if (DriverStation.isFMSAttached() || Constants.BURNFLASHES) {

@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
@@ -33,6 +34,9 @@ public class SwerveModule extends SubsystemBase {
   // Tuning
   private Supplier<double[]> steerPIDSupplier;
   private Supplier<double[]> drivePIDSupplier;
+
+  private BooleanSupplier steerPIDChangedSupplier = () -> { return true; };
+  private BooleanSupplier drivePIDChangedSupplier = () -> { return true; };
 
   /**
    * 
@@ -162,6 +166,14 @@ public class SwerveModule extends SubsystemBase {
     drivePIDSupplier = supplier;
   }
 
+  public void setSteerPIDChangedSupplier(BooleanSupplier supplier) {
+    steerPIDChangedSupplier = supplier;
+  }
+
+  public void setDrivePIDChangedSupplier(BooleanSupplier supplier) {
+    drivePIDChangedSupplier = supplier;
+  }
+
   @Override
   public void initSendable(SendableBuilder builder) {
     if (Constants.telemetry == false) return;
@@ -176,8 +188,12 @@ public class SwerveModule extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     if (Constants.tuningMode) {
-      this.steerController.configPositionControlPID(steerPIDSupplier.get());
-      this.driveController.configVelocityControlPID(drivePIDSupplier.get());
+      if (steerPIDChangedSupplier.getAsBoolean()) {
+        this.steerController.configPositionControlPID(steerPIDSupplier.get());
+      }
+      if (drivePIDChangedSupplier.getAsBoolean()) {
+        this.driveController.configVelocityControlPID(drivePIDSupplier.get());
+      }
     }
   }
   

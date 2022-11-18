@@ -64,4 +64,12 @@ public class TuneablePIDGains extends PIDGains {
     return 
       Constants.tuningMode ? (tuneableD == null? kD : tuneableD.get()) : kD;
   }
+
+  public boolean hasChanged() {
+    return (
+      tuneableP == null ? false : tuneableP.hasChanged() ||
+      tuneableI == null ? false : tuneableI.hasChanged() ||
+      tuneableD == null ? false : tuneableD.hasChanged()
+    );
+  }
 }

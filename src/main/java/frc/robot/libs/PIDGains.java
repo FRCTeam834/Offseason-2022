@@ -43,6 +43,8 @@ public class PIDGains {
     return new double[] { getP(), getI(), getD() };
   }
 
+  public boolean hasChanged() { return false; }
+
   public PIDController generateController() {
     return new PIDController(kP, kI, kD);
   }

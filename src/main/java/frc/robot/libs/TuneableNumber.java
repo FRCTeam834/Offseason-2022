@@ -12,12 +12,14 @@ public class TuneableNumber {
     private NetworkTableEntry entry;
     private double defaultValue;
     private boolean tuningMode;
+    private double lastValue;
 
     /** Create a new TunableNumber */
     public TuneableNumber(NetworkTable table, String name, double defaultValue, boolean tuningMode) {
       this.tuningMode = tuningMode;
       this.entry = table.getEntry(name);
       setDefault(defaultValue);
+      lastValue = defaultValue;
     }
 
     /**
@@ -48,6 +50,23 @@ public class TuneableNumber {
      * @return The current value
      */
     public double get() {
-    return tuningMode ? entry.getDouble(defaultValue) : defaultValue;
+      return get(true);
+    }
+
+    private double get(boolean resetLastValue) {
+      double currentValue = tuningMode ? entry.getDouble(defaultValue) : defaultValue;
+      if (resetLastValue) {
+        lastValue = currentValue;
+      }
+      return currentValue;
+    }
+
+    /**
+     * Checks if value has changed
+     * 
+     * @return
+     */
+    public boolean hasChanged() {
+      return lastValue == get(false);
     }
 }
