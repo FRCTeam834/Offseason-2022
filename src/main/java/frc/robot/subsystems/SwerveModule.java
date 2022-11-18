@@ -23,7 +23,7 @@ import frc.robot.libs.SparkMaxController;
 
 public class SwerveModule extends SubsystemBase {
   private final String name;
-  private final CANCoder canCoder;
+  // private final CANCoder canCoder;
 
   private final SparkMaxController steerController;
   private final SparkMaxController driveController;
@@ -55,13 +55,13 @@ public class SwerveModule extends SubsystemBase {
 
     steerController = new SparkMaxController(steerCANID);
     driveController = new SparkMaxController(driveCANID);
-    canCoder = new CANCoder(CANCoderID);
+    // canCoder = new CANCoder(CANCoderID);
 
-    canCoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
-    canCoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
+    // canCoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
+    // canCoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
 
     // seed internal encoder
-    steerController.getSparkMaxEncoder().setPosition(MathPlus.convertAngle0To360(canCoder.getAbsolutePosition() - magnetOffset));
+    // steerController.getSparkMaxEncoder().setPosition(MathPlus.convertAngle0To360(canCoder.getAbsolutePosition() - magnetOffset));
   }
   
   /** */
@@ -76,7 +76,7 @@ public class SwerveModule extends SubsystemBase {
 
   /** */
   public double getCanCoderAngle() {
-    return canCoder.getAbsolutePosition();
+    return 0.0; // canCoder.getAbsolutePosition();
   }
 
   /**
