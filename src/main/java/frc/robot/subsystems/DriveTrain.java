@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DRIVECONSTANTS;
 import frc.robot.Constants.DRIVETRAINCONSTANTS;
@@ -30,6 +31,11 @@ public class DriveTrain extends SubsystemBase {
     frontRightModule = SwerveModuleFactory.getFRModule();
     backLeftModule = SwerveModuleFactory.getBLModule();
     backRightModule = SwerveModuleFactory.getBRModule();
+
+    SmartDashboard.putData("FLM", frontLeftModule);
+    SmartDashboard.putData("FRM", frontRightModule);
+    SmartDashboard.putData("BLM", backLeftModule);
+    SmartDashboard.putData("BRM", backRightModule);
 
     kinematics = new SwerveDriveKinematics(
       DRIVETRAINCONSTANTS.FLM_POS,
