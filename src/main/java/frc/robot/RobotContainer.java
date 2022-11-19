@@ -17,6 +17,7 @@ import frc.robot.Constants.VISIONCONSTANTS;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.commands.DriveWithJoysticksEgocentric;
 import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.NavX;
 import frc.robot.subsystems.Pigeon;
 import frc.robot.subsystems.Vision;
 
@@ -28,7 +29,7 @@ import frc.robot.subsystems.Vision;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  public static final Pigeon gyro = null; // new Pigeon();
+  public static final NavX gyro = new NavX(); // new Pigeon();
   public static final DriveTrain driveTrain = new DriveTrain();
   public static final Vision vision = new Vision(VISIONCONSTANTS.CAMERA_NAME);
   public static final Superstructure superstructure = new Superstructure(driveTrain, gyro, vision);

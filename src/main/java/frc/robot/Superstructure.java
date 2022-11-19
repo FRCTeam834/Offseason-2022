@@ -6,20 +6,21 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.NavX;
 import frc.robot.subsystems.Pigeon;
 import frc.robot.subsystems.Vision;
 
 public class Superstructure extends SubsystemBase {
   
   public final DriveTrain driveTrain;
-  public final Pigeon gyro;
+  public final NavX gyro;
   public final Vision vision;
 
   private SwerveDrivePoseEstimator poseEstimator;
 
   public Superstructure(
     DriveTrain driveTrain,
-    Pigeon gyro,
+    NavX gyro,
     Vision vision
   ) {
     this.driveTrain = driveTrain;
